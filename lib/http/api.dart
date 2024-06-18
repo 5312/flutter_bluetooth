@@ -1,4 +1,4 @@
-import 'package:flutter_template_mini/http/request.dart';
+import 'package:bluetooth_mini/http/request.dart';
 
 class Api {
   // 登录

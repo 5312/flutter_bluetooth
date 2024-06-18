@@ -1,5 +1,5 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_template_mini/db/my_sp.dart';
+import 'package:bluetooth_mini/db/my_sp.dart';
 
 /// 全局初始化数据
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_template_mini/pages/home_page.dart';
-import 'package:flutter_template_mini/pages/me_page.dart';
-import 'package:flutter_template_mini/common/my_color.dart';
+import 'package:bluetooth_mini/pages/home_page.dart';
+import 'package:bluetooth_mini/pages/me_page.dart';
+import 'package:bluetooth_mini/common/my_color.dart';
 
 class NavigatorPage extends StatefulWidget {
   const NavigatorPage({Key? key}) : super(key: key);
@@ -33,20 +33,20 @@ class _NavigatorPageState extends State<NavigatorPage> {
         onWillPop: exitApp,
         child: _pages[_currentIndex],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: _activeColor,
-        items: [
-          _bottomItem('首页', Icons.home_outlined),
-          _bottomItem('我的', Icons.person_outline),
-        ],
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   currentIndex: _currentIndex,
+      //   type: BottomNavigationBarType.fixed,
+      //   selectedItemColor: _activeColor,
+      //   items: [
+      //     _bottomItem('首页', Icons.home_outlined),
+      //     _bottomItem('我的', Icons.person_outline),
+      //   ],
+      //   onTap: (index) {
+      //     setState(() {
+      //       _currentIndex = index;
+      //     });
+      //   },
+      // ),
     );
   }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_template_mini/common/my_color.dart';
-import 'package:flutter_template_mini/db/my_sp.dart';
+import 'package:bluetooth_mini/common/my_color.dart';
+import 'package:bluetooth_mini/db/my_sp.dart';
 
 /// 扩展 ThemeMode
 extension ThemeModeExtension on ThemeMode {
@@ -17,7 +17,7 @@ class ThemeProvider extends ChangeNotifier {
   bool isDark() {
     if (_themeMode == ThemeMode.system) {
       // 获取系统的 Dark Mode
-      return SchedulerBinding.instance?.window.platformBrightness ==
+      return SchedulerBinding.instance.window.platformBrightness ==
           Brightness.dark;
     }
     return _themeMode == ThemeMode.dark;
@@ -57,15 +57,15 @@ class ThemeProvider extends ChangeNotifier {
       // 亮度（深色还是浅色）
       brightness: isDarkMode ? Brightness.dark : Brightness.light,
       // 错误状态颜色（如输入框错误提示文字）
-      errorColor: isDarkMode ? MyColor.dark_red : MyColor.light_red,
+      //errorColor: isDarkMode ? MyColor.dark_red : MyColor.light_red,
       // 文字强调色（前景色，也决定 ListView 的默认阴影颜色）
-      accentColor: isDarkMode ? MyColor.white : MyColor.primary,
+      //accentColor: isDarkMode ? MyColor.white : MyColor.primary,
       // Tab 指示器的颜色
       // indicatorColor: isDarkMode ? MyColor.primary[50] : MyColor.white,
       // 页面背景色
       scaffoldBackgroundColor: isDarkMode ? MyColor.dark_bg : MyColor.white,
       // 用于突出显示切换 Widget（如 Switch，Radio 和 Checkbox）
-      toggleableActiveColor: MyColor.primary,
+      //toggleableActiveColor: MyColor.primary,
     );
     return themeData;
   }

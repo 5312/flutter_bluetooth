@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_template_mini/db/my_sp.dart';
-import 'package:flutter_template_mini/http/api.dart';
-import 'package:flutter_template_mini/widgets/login_input.dart';
+import 'package:bluetooth_mini/db/my_sp.dart';
+import 'package:bluetooth_mini/widgets/login_input.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key? key}) : super(key: key);
@@ -23,23 +21,36 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // ListView 可以自适应键盘，防止键盘弹起后遮挡
-      body: ListView(
-        padding: EdgeInsets.only(
-          top: 70,
-          left: 35,
-          right: 35,
+      body:Container(
+        decoration:BoxDecoration(
+            image:DecorationImage(
+              image: AssetImage(
+                  'assets/images/login/bg-logo.png'),
+              fit: BoxFit.fitHeight,
+            ),
         ),
-        children: [
-          Image.asset(
-            'assets/images/login/logo.png',
-            width: 200,
-            height: 200,
+        child: ListView(
+          padding: EdgeInsets.only(
+            top: 20,
+            left: 35,
+            right: 35,
           ),
-          _form(),
-          _save(),
-          _button(),
-        ],
-      ),
+          children: [
+            Container(
+                width: 100,
+                height: 100,
+            ),
+            // Image.asset(
+            //   'assets/images/login/logo.png',
+            //   width: 100,
+            //   height: 100,
+            // ),
+            _form(),
+            // _save(),
+            _button(),
+          ],
+        ),
+      )
     );
   }
 
@@ -55,6 +66,8 @@ class _LoginPageState extends State<LoginPage> {
           Padding(
             padding: EdgeInsets.only(
               bottom: 20,
+              left:70,
+              right:70
             ),
             child: LoginInput(
               '请输入用户名',
@@ -68,6 +81,8 @@ class _LoginPageState extends State<LoginPage> {
           Padding(
             padding: EdgeInsets.only(
               bottom: 20,
+                left:70,
+                right:70
             ),
             child: LoginInput(
               '请输入密码',
@@ -111,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _button() {
     return FractionallySizedBox(
       // 子元素占父元素的宽度比例
-      widthFactor: 0.6,
+      widthFactor: 0.8,
       child: SizedBox(
         height: 45,
         child: ElevatedButton(
@@ -123,14 +138,14 @@ class _LoginPageState extends State<LoginPage> {
           onPressed: () async {
             if ((_formKey.currentState as FormState).validate()) {
               // 验证通过提交数据
-              EasyLoading.show();
-              var res = await Api.login({
-                'username': _userController.text.trim(),
-                'password': _passwordController.text.trim(),
-              });
-              // 保存登录令牌
-              MySP.setToken(res['data']['accessToken']);
-              EasyLoading.dismiss();
+              // EasyLoading.show();
+              // var res = await Api.login({
+              //   'username': _userController.text.trim(),
+              //   'password': _passwordController.text.trim(),
+              // });
+              // // 保存登录令牌
+              MySP.setToken('adaadaa');//res['data']['accessToken']);
+              // EasyLoading.dismiss();
               Navigator.of(context).pushNamedAndRemoveUntil(
                 'navigator',
                 (route) => false,
@@ -141,4 +156,6 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
+
 }

@@ -7,7 +7,7 @@ class MyColor {
   static const MaterialColor primary = Colors.indigo;
 
   // 纯白色
-  static const MaterialColor white = const MaterialColor(
+  static const MaterialColor white =  MaterialColor(
     0xFFFFFFFF,
     <int, Color>{
       50: Color(0xFFFFFFFF),
@@ -24,7 +24,7 @@ class MyColor {
   );
 
   // Dark Mode 相关
-  static const Color light_red = Color(0xFFFF4759);
-  static const Color dark_red = Color(0xFFE03E4E);
-  static const Color dark_bg = Color(0xFF18191A);
+  static  Color light_red = Color(0xFFFF4759);
+  static  Color dark_red = Color(0xFFE03E4E);
+  static  Color dark_bg = Color(0xFF18191A);
 }

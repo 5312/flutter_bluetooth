@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_template_mini/db/my_sp.dart';
-import 'package:flutter_template_mini/pages/login_page.dart';
-import 'package:flutter_template_mini/pages/navigator_page.dart';
+import 'package:bluetooth_mini/db/my_sp.dart';
+import 'package:bluetooth_mini/pages/login_page.dart';
+import 'package:bluetooth_mini/pages/navigator_page.dart';
+import 'package:bluetooth_mini/pages/detail_page.dart';
+import 'package:bluetooth_mini/blue/init_blue.dart';
 
 class MyNavigator {
   static MyNavigator? _instance;
@@ -29,6 +31,11 @@ class MyNavigator {
           return LoginPage();
         case "navigator":
           return NavigatorPage();
+        case "detail":
+          return DetailPage(id:1);
+        case "blueoothList":
+          return FlutterBlueApp();
+
         default:
           return Scaffold(
             body: Center(
@@ -42,12 +49,14 @@ class MyNavigator {
   // 路由拦截器
   String? routeBeforeHook(RouteSettings settings) {
     final token = MySP.getToken() ?? '';
+    // adaadaa
     if (token != '') {
       if (settings.name == 'login') {
         return 'navigator';
       }
       return settings.name;
     }
+
     return 'login';
   }
 }

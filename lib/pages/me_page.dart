@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_template_mini/db/my_sp.dart';
-import 'package:flutter_template_mini/provider/theme_provider.dart';
+import 'package:bluetooth_mini/db/my_sp.dart';
+import 'package:bluetooth_mini/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 class MePage extends StatefulWidget {
