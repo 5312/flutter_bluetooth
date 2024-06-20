@@ -4,7 +4,7 @@ import 'package:bluetooth_mini/pages/login_page.dart';
 import 'package:bluetooth_mini/pages/navigator_page.dart';
 import 'package:bluetooth_mini/pages/detail_page.dart';
 import 'package:bluetooth_mini/blue/init_blue.dart';
-
+import 'package:bluetooth_mini/pages/setting.dart';
 class MyNavigator {
   static MyNavigator? _instance;
 
@@ -30,11 +30,13 @@ class MyNavigator {
         case "login":
           return LoginPage();
         case "navigator":
-          return NavigatorPage();
+          return const NavigatorPage();
         case "detail":
-          return DetailPage(id:1);
+          return const DetailPage(id:1);
         case "blueoothList":
-          return FlutterBlueApp();
+          return const FlutterBlueApp();
+        case "setting":
+          return const Setting();
 
         default:
           return Scaffold(

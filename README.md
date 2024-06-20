@@ -1,3 +1,5 @@
+Ctrl alt L 格式化代码
+
 ## 简介
 
 一个 APP 项目 mini 模板，提供 HTTP、路由、本地缓存等常用功能的封装
@@ -135,8 +137,10 @@ flutter build apk
 ## ❓ 关于 flutter_template_plus 和 flutter_template_mini 和 flutter-bruno-getx
 
 1. mini 版的路由采用 Navigator 1.0，逻辑简单易懂，而 plus 版则采用更加强大，但难以理解的 Navigator 2.0
-2. mini 版的 HTTP 层直接基于 Dio 进行封装，代码结构清晰简单，而 plus 版则书写一方库 MyNet，通过适配器集成 Dio，更加灵活、可插拔
-3. mini 版的 db 层直接基于 shared_preferences 进行封装，而 plus 版则基于 shared_preferences 书写一方库 MyCache
+2. mini 版的 HTTP 层直接基于 Dio 进行封装，代码结构清晰简单，而 plus 版则书写一方库 MyNet，通过适配器集成
+   Dio，更加灵活、可插拔
+3. mini 版的 db 层直接基于 shared_preferences 进行封装，而 plus 版则基于 shared_preferences 书写一方库
+   MyCache
 4. mini 版的封装方式更贴近现代**前端工程**，而 plus 版则更加**面向对象**
 5. flutter-bruno-getx 则完全基于 mini 版，并采用了最新的 SDK、Bruno UI 框架、GetX 状态管理器
 

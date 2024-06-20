@@ -148,14 +148,14 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
     if (mounted) {
       setState(() {});
     }
-    return Future.delayed(Duration(milliseconds: 500));
+    return Future.delayed(const Duration(milliseconds: 500));
   }
 
 
   // 连接按钮
   void onConnectPressed(BluetoothDevice device) {
     device.connectAndUpdateStream().catchError((e) {
-      Snackbar.show(ABC.c, prettyException("Connect Error:", e), success: false);
+      Snackbar.show(ABC.c, prettyException("连接失败:", e), success: false);
     });
     // MaterialPageRoute route = MaterialPageRoute(
     //     builder: (context) => DeviceScreen(device: device), settings: RouteSettings(name: '/DeviceScreen'));
@@ -187,11 +187,10 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      //key: Snackbar.snackBarKeyB,
       child: Scaffold(
-        // appBar: AppBar(
-        //   title: const Text('查找设备'),
-        // ),
+        appBar: AppBar(
+          title: const Text('蓝牙列表'),
+        ),
         body: RefreshIndicator(
           onRefresh: onRefresh,
           child: ListView(

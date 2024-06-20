@@ -38,7 +38,7 @@ flutter:
   # 静态资源
   assets:
     - assets/images/login/
-
+    - assets/images/home/
   # 自定义字体图标（该脚手架没有用这个，用的是 Flutter 自带的默认 Icons）
   # 使用教程 https://book.flutterchina.club/chapter3/img_and_icon.html#_3-3-2-icon
   fonts:

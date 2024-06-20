@@ -13,7 +13,8 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey _formKey = GlobalKey<FormState>();
   TextEditingController _userController = TextEditingController(text: 'admin');
   TextEditingController _passwordController =
-      TextEditingController(text: '12345678');
+  TextEditingController(text: '12345678');
+
   // '记住密码' 复选框
   bool? _savePassword = false;
 
@@ -21,37 +22,31 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // ListView 可以自适应键盘，防止键盘弹起后遮挡
-      body:Container(
-        decoration:BoxDecoration(
-            image:DecorationImage(
-              image: AssetImage(
-                  'assets/images/login/bg-logo.png'),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/login/bg-logo.png'),
               fit: BoxFit.fitHeight,
             ),
-        ),
-        child: ListView(
-          padding: EdgeInsets.only(
-            top: 20,
-            left: 35,
-            right: 35,
           ),
-          children: [
-            Container(
+          child: ListView(
+            padding: EdgeInsets.only(
+              top: 60,
+              left: 35,
+              right: 35,
+            ),
+            children: [
+              Container(
                 width: 100,
                 height: 100,
-            ),
-            // Image.asset(
-            //   'assets/images/login/logo.png',
-            //   width: 100,
-            //   height: 100,
-            // ),
-            _form(),
-            // _save(),
-            _button(),
-          ],
-        ),
-      )
-    );
+              ),
+
+              _form(),
+              // _save(),
+              _button(),
+            ],
+          ),
+        ));
   }
 
   // 表单
@@ -64,11 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.only(
-              bottom: 20,
-              left:70,
-              right:70
-            ),
+            padding: EdgeInsets.only(bottom: 20, left: 200, right: 200),
             child: LoginInput(
               '请输入用户名',
               Icon(Icons.perm_identity),
@@ -79,11 +70,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(
-              bottom: 20,
-                left:70,
-                right:70
-            ),
+            padding: EdgeInsets.only(bottom: 20, left: 200, right: 200),
             child: LoginInput(
               '请输入密码',
               Icon(Icons.lock_outline),
@@ -124,38 +111,38 @@ class _LoginPageState extends State<LoginPage> {
 
   // 登录按钮
   Widget _button() {
-    return FractionallySizedBox(
-      // 子元素占父元素的宽度比例
-      widthFactor: 0.8,
-      child: SizedBox(
-        height: 45,
-        child: ElevatedButton(
-          child: Text("登录"),
-          style: ElevatedButton.styleFrom(
-            // 圆角
-            shape: StadiumBorder(),
+    return Padding(
+      padding: EdgeInsets.only(bottom: 20, left: 200, right: 200),
+      child: FractionallySizedBox(
+        // 子元素占父元素的宽度比例
+        child: SizedBox(
+          height: 45,
+          child: ElevatedButton(
+            child: Text("登录"),
+            style: ElevatedButton.styleFrom(
+              // 圆角
+              shape: StadiumBorder(),
+            ),
+            onPressed: () async {
+              if ((_formKey.currentState as FormState).validate()) {
+                // 验证通过提交数据
+                // EasyLoading.show();
+                // var res = await Api.login({
+                //   'username': _userController.text.trim(),
+                //   'password': _passwordController.text.trim(),
+                // });
+                // // 保存登录令牌
+                MySP.setToken('adaadaa'); //res['data']['accessToken']);
+                // EasyLoading.dismiss();
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  'navigator',
+                      (route) => false,
+                );
+              }
+            },
           ),
-          onPressed: () async {
-            if ((_formKey.currentState as FormState).validate()) {
-              // 验证通过提交数据
-              // EasyLoading.show();
-              // var res = await Api.login({
-              //   'username': _userController.text.trim(),
-              //   'password': _passwordController.text.trim(),
-              // });
-              // // 保存登录令牌
-              MySP.setToken('adaadaa');//res['data']['accessToken']);
-              // EasyLoading.dismiss();
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                'navigator',
-                (route) => false,
-              );
-            }
-          },
         ),
       ),
     );
   }
-
-
 }

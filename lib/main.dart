@@ -12,17 +12,16 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized(); // 不加这个强制横竖屏会报错
   // 横屏
   SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeRight,
+    DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
-
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive, overlays: []);
   // 网格线
   // debugPaintSizeEnabled = true;
   // Flutter 版本 (1.12.13+hotfix.5) 后，初始化插件必须加 ensureInitialized
 
   // 应用入口
   runApp(MyApp());
-
 }
 
 class MyApp extends StatefulWidget {
@@ -56,14 +55,14 @@ class _MyAppState extends State<MyApp> {
                   theme: themeProvider.getTheme(),
                   darkTheme: themeProvider.getTheme(isDarkMode: true),
                   themeMode: themeProvider.getThemeMode(),
-                  localizationsDelegates: [
+                  localizationsDelegates: const [
                     // 本地化的代理类
                     GlobalMaterialLocalizations.delegate,
                     GlobalWidgetsLocalizations.delegate,
                   ],
-                  supportedLocales: [
-                    const Locale('en', 'US'), // 美国英语
-                    const Locale('zh', 'CH'), // 中文简体
+                  supportedLocales: const [
+                    Locale('en', 'US'), // 美国英语
+                    Locale('zh', 'CH'), // 中文简体
                   ],
                   builder: EasyLoading.init(),
                   initialRoute: 'navigator',
