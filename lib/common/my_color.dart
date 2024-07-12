@@ -24,7 +24,7 @@ class MyColor {
   );
 
   // Dark Mode 相关
-  static  Color light_red = Color(0xFFFF4759);
-  static  Color dark_red = Color(0xFFE03E4E);
-  static  Color dark_bg = Color(0xFF18191A);
+  static  Color light_red =const Color(0xFFFF4759);
+  static  Color dark_red =const Color(0xFFE03E4E);
+  static  Color dark_bg =const Color(0xFF18191A);
 }

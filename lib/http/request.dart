@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 class Request {
-  static BaseOptions _options = BaseOptions(
+  static final BaseOptions _options = BaseOptions(
     baseUrl:
         'https://vue-typescript-admin-mock-server-armour.vercel.app/mock-api/v1/',
     connectTimeout: 5000,
@@ -21,7 +21,7 @@ class Request {
     // restful请求处理
     if (params != null) {
       params.forEach((key, value) {
-        if (path.indexOf(key) != -1) {
+        if (path.contains(key)) {
           path = path.replaceAll(":$key", value.toString());
         }
       });

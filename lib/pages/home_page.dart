@@ -1,9 +1,8 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:bluetooth_mini/db/my_sp.dart';
-
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:bluetooth_mini/widgets/home_card.dart';
+import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,7 +15,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('钻孔轨迹仪'), centerTitle: true),
+        appBar: CustomAppBar('钻孔轨迹仪'),
         body: Padding(
           padding:
               const EdgeInsets.only(left: 33, right: 33, top: 33, bottom: 33),
@@ -38,7 +37,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(5.0),
+                            padding: const EdgeInsets.all(10.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               // 水平方向（垂直对齐）向左对齐
@@ -58,7 +57,7 @@ class _HomePageState extends State<HomePage> {
                                 const Padding(
                                   padding: EdgeInsets.all(5.0), // 可选：添加一些内边距
                                   child: Text(
-                                    "设备信息：",
+                                    "设备信息：TV410u-E3E",
                                     textAlign: TextAlign.left, // 文本向左对齐
                                     style: TextStyle(
                                       color: Colors.black54,
@@ -71,13 +70,16 @@ class _HomePageState extends State<HomePage> {
                                       top: 5, left: 5, bottom: 0),
                                   // 可选：添加一些内边距
                                   child: Text(
-                                    "当前状态：",
+                                    "当前状态：断开",
                                     textAlign: TextAlign.left, // 文本向左对齐
                                     style: TextStyle(
                                       color: Colors.black54,
                                       fontSize: 12,
                                     ),
                                   ),
+                                ),
+                                const SizedBox(
+                                  height: 10,
                                 ),
                                 Padding(
                                     padding: const EdgeInsets.only(
@@ -91,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                                             foregroundColor: Colors.white),
                                         onPressed: () {
                                           Navigator.of(context)
-                                              .pushNamed('blueoothList');
+                                              .pushNamed('bluetoothList');
                                         },
                                         child: const Text(
                                           "连接蓝牙",
@@ -181,39 +183,11 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center, //垂直方向居中对齐
                   children: <Widget>[
-                    Expanded(
-                        flex: 1,
-                        child: Material(
-                            child: InkWell(
-                          onTap: () {
-                            Navigator.of(context)
-                                .pushNamed('setting');
-                          },
-                          child: Container(
-                            width: 170,
-                            decoration: const BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage(
-                                    'assets/images/home/setting.png'),
-                                fit: BoxFit
-                                    .fill, // 可以根据需要调整 BoxFit 的属性，如 BoxFit.cover, BoxFit.fill, 等
-                              ),
-                            ),
-                          ),
-                        ))),
+                    Expanded(flex: 1, child: HomeCard('setting')),
                     const SizedBox(height: 13),
                     Expanded(
                       flex: 1,
-                      child: Container(
-                        width: 170,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/home/data.png'),
-                            fit: BoxFit
-                                .fill, // 可以根据需要调整 BoxFit 的属性，如 BoxFit.cover, BoxFit.fill, 等
-                          ),
-                        ),
-                      ),
+                      child: HomeCard('data'),
                     ),
                   ],
                 ),
@@ -225,30 +199,12 @@ class _HomePageState extends State<HomePage> {
                   children: <Widget>[
                     Expanded(
                       flex: 1,
-                      child: Container(
-                        width: 170,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/home/scan.png'),
-                            fit: BoxFit
-                                .fill, // 可以根据需要调整 BoxFit 的属性，如 BoxFit.cover, BoxFit.fill, 等
-                          ),
-                        ),
-                      ),
+                      child: HomeCard('scan'),
                     ),
                     const SizedBox(height: 13),
                     Expanded(
                       flex: 1,
-                      child: Container(
-                        width: 170,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/home/repo.png'),
-                            fit: BoxFit
-                                .fill, // 可以根据需要调整 BoxFit 的属性，如 BoxFit.cover, BoxFit.fill, 等
-                          ),
-                        ),
-                      ),
+                      child: HomeCard('repo'),
                     ),
                   ],
                 ),
@@ -260,33 +216,12 @@ class _HomePageState extends State<HomePage> {
                   children: <Widget>[
                     Expanded(
                       flex: 1,
-                      child: Container(
-                        width: 170,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/home/timout.png'),
-                            fit: BoxFit
-                                .fill, // 可以根据需要调整 BoxFit 的属性，如 BoxFit.cover, BoxFit.fill, 等
-                          ),
-                        ),
-                      ),
+                      child: HomeCard('timeout'),
                     ),
                     const SizedBox(
                       height: 13,
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Container(
-                        width: 170,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/home/cloud.png'),
-                            fit: BoxFit
-                                .fill, // 可以根据需要调整 BoxFit 的属性，如 BoxFit.cover, BoxFit.fill, 等
-                          ),
-                        ),
-                      ),
-                    ),
+                    Expanded(flex: 1, child: HomeCard('cloud')),
                   ],
                 ),
               )

@@ -11,8 +11,8 @@ class DemoModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['mail'] = this.mail;
+    data['name'] = name;
+    data['mail'] = mail;
     return data;
   }
 }

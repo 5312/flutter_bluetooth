@@ -21,7 +21,7 @@ void main() {
   // Flutter 版本 (1.12.13+hotfix.5) 后，初始化插件必须加 ensureInitialized
 
   // 应用入口
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
           );
         } else {
           // 初始化未完成时，显示 loading 动画
-          return MaterialApp(
+          return const MaterialApp(
             home: Scaffold(
               body: Center(
                 child: CircularProgressIndicator(),

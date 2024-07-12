@@ -5,6 +5,12 @@ import 'package:bluetooth_mini/pages/navigator_page.dart';
 import 'package:bluetooth_mini/pages/detail_page.dart';
 import 'package:bluetooth_mini/blue/init_blue.dart';
 import 'package:bluetooth_mini/pages/setting.dart';
+import 'package:bluetooth_mini/pages/probe_monitoring.dart';
+import 'package:bluetooth_mini/pages/time_out.dart';
+import 'package:bluetooth_mini/pages/data.dart';
+import 'package:bluetooth_mini/pages/repo.dart';
+import 'package:bluetooth_mini/pages/cloud.dart';
+
 class MyNavigator {
   static MyNavigator? _instance;
 
@@ -12,9 +18,7 @@ class MyNavigator {
 
   // 单例模式
   static MyNavigator getInstance() {
-    if (_instance == null) {
-      _instance = MyNavigator._();
-    }
+    _instance ??= MyNavigator._();
     return _instance!;
   }
 
@@ -32,12 +36,21 @@ class MyNavigator {
         case "navigator":
           return const NavigatorPage();
         case "detail":
-          return const DetailPage(id:1);
-        case "blueoothList":
+          return const DetailPage(id: 1);
+        case "bluetoothList":
           return const FlutterBlueApp();
         case "setting":
           return const Setting();
-
+        case "scan":
+          return const Probe();
+        case 'timeout':
+          return const TimeOut();
+        case 'data':
+          return const DataTransmission();
+        case 'repo':
+          return const Repo();
+        case 'cloud':
+          return const Cloud();
         default:
           return Scaffold(
             body: Center(
