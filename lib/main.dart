@@ -62,7 +62,7 @@ class _MyAppState extends State<MyApp> {
                   ],
                   supportedLocales: const [
                     Locale('en', 'US'), // 美国英语
-                    Locale('zh', 'CH'), // 中文简体
+                    Locale('cn', 'ZH'), // 中文简体
                   ],
                   builder: EasyLoading.init(),
                   initialRoute: 'navigator',

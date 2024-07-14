@@ -11,12 +11,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     return PreferredSize(
-      preferredSize: const Size.fromHeight(40.0), // 设置 AppBar 的高度
+      preferredSize: const Size.fromHeight(20.0), // 设置 AppBar 的高度
       child: AppBar(
           title:  Padding(
             padding: EdgeInsets.only(
-              top: 20,
-              bottom:20
+              top: 10,
+              bottom:10
             ),
             child: Text(
               this.title,
