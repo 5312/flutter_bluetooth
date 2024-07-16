@@ -8,6 +8,9 @@ import '../widgets/system_device_tile.dart';
 import '../widgets/scan_result_tile.dart';
 import '../utils/extra.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
+import 'package:bluetooth_mini/provider/BluetoothManager.dart';
+import 'package:bluetooth_mini/provider/BluetoothManager.dart';
+import 'package:provider/provider.dart';
 
 class FlutterBlueApp extends StatefulWidget {
   const FlutterBlueApp({Key? key}) : super(key: key);
@@ -17,11 +20,7 @@ class FlutterBlueApp extends StatefulWidget {
 }
 
 class _FlutterBlueAppState extends State<FlutterBlueApp> {
-  // 设备列表
-  List<BluetoothDevice> _systemDevices = [];
-
-  // 连接结果
-  List<ScanResult> _scanResults = [];
+  late BluetoothManager bluetooth;
 
   //  监听扫描结果
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
@@ -32,46 +31,15 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
   // 蓝牙适配器状态
   late StreamSubscription<BluetoothAdapterState> _adapterStateSubscription;
 
-  // 是否扫描
-  bool _isScanning = false;
-
   // 适配器
   BluetoothAdapterState _adapterState = BluetoothAdapterState.unknown;
 
   @override
   void initState() {
     super.initState();
-
-    // 监听蓝牙适配器状态变化
-    _adapterStateSubscription = FlutterBluePlus.adapterState.listen((state) {
-      setState(() {
-        _adapterState = state;
-      });
-
-      // 如果蓝牙关闭，清空设备列表和扫描结果
-      if (state == BluetoothAdapterState.off) {
-        setState(() {
-          _systemDevices = [];
-          _scanResults = [];
-        });
-      }
-    });
-
-    // 监听扫描结果
-    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
-      setState(() {
-        _scanResults = results;
-
-      });
-    }, onError: (e) {
-      Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
-    });
-
-    // 监听扫描状态
-    _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
-      setState(() {
-        _isScanning = state;
-      });
+    bluetooth = Provider.of<BluetoothManager>(context, listen: false);
+    setState(() {
+      _adapterState = bluetooth.adapterState;
     });
   }
 
@@ -84,49 +52,18 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
     super.dispose();
   }
 
-  // 开始扫描
-  Future<void> onScanPressed() async {
-    try {
-      _systemDevices = await FlutterBluePlus.systemDevices;
-    } catch (e) {
-      Snackbar.show(ABC.b, prettyException("System Devices Error:", e),
-          success: false);
-    }
-    try {
-      await FlutterBluePlus.startScan(
-          timeout: const Duration(seconds: 15),
-          withServices: [Guid('0000FFE0-0000-1000-8000-00805F9B34FB')]);
-    } catch (e) {
-      Snackbar.show(ABC.b, prettyException("Start Scan Error:", e),
-          success: false);
-    }
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  // 停止扫描
-  Future<void> onStopPressed() async {
-    try {
-      await FlutterBluePlus.stopScan();
-    } catch (e) {
-      Snackbar.show(ABC.b, prettyException("Stop Scan Error:", e),
-          success: false);
-    }
-  }
-
   // 构建扫描按钮
   Widget buildScanButton(BuildContext context) {
     if (_adapterState == BluetoothAdapterState.on) {
-      if (_isScanning) {
+      if (bluetooth.isScanning) {
         return FloatingActionButton(
-          onPressed: onStopPressed,
+          onPressed: bluetooth.onStopPressed,
           backgroundColor: Colors.red,
           child: const Icon(Icons.stop),
         );
       } else {
         return FloatingActionButton(
-          onPressed: onScanPressed,
+          onPressed: bluetooth.onScanPressed,
           child: const Text("搜索"),
         );
       }
@@ -158,33 +95,47 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
     return Future.delayed(const Duration(milliseconds: 500));
   }
 
-  // 连接设备
-  void onConnectPressed(BluetoothDevice device) {
-    device.connectAndUpdateStream().catchError((e) {
-      Snackbar.show(ABC.c, prettyException("连接失败:", e), success: false);
-    });
-  }
+  // 构建扫描结果列表
+  List<Widget> _buildScanResultTiles(BuildContext context) {
+    List<ScanResult> _scanResults = [];
+    List<BluetoothDevice> list = bluetooth.connectedDevices;
 
-  // 构建系统设备列表
-  List<Widget> _buildSystemDeviceTiles(BuildContext context) {
-    return _systemDevices
+    _scanResults = bluetooth.scanResults.where((d) {
+      // return true;
+      return !list.any((de) => d.device.remoteId == de.remoteId);
+    }).toList();
+
+    return _scanResults
         .map(
-          (d) => SystemDeviceTile(
-            device: d,
-            onOpen: () => {},
-            onConnect: () => onConnectPressed(d),
+          (r) => ScanResultTile(
+            result: r,
+            // onTap: () => onConnectPressed(r.device),
+            onOpen:() {
+              print(r.device);
+              bluetooth.onConnectPressed(r.device);
+              setState(() {});
+            },
           ),
         )
         .toList();
   }
 
-  // 构建扫描结果列表
-  List<Widget> _buildScanResultTiles(BuildContext context) {
-    return _scanResults
+  // 设备列表
+  List<Widget> _buildSystemDeviceTiles(BuildContext context) {
+    return bluetooth.connectedDevices
         .map(
-          (r) => ScanResultTile(
-            result: r,
-            onTap: () => onConnectPressed(r.device),
+          (d) => SystemDeviceTile(
+            device: d,
+            onOpen: () {
+              d.disconnect().then((_) {
+                bluetooth.SetnotifyListeners();
+              });
+            },
+            onConnect: () {
+              d.connectAndUpdateStream().then((_) {
+                bluetooth.SetnotifyListeners();
+              });
+            },
           ),
         )
         .toList();
@@ -193,20 +144,25 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
   // 构建主界面
   @override
   Widget build(BuildContext context) {
-    return ScaffoldMessenger(
-      child: Scaffold(
-        appBar: const CustomAppBar('蓝牙列表'),
-        body: RefreshIndicator(
-          onRefresh: onRefresh,
-          child: ListView(
-            children: <Widget>[
-              ..._buildSystemDeviceTiles(context),
-              ..._buildScanResultTiles(context),
-            ],
+    return Consumer<BluetoothManager>(
+      builder: (BuildContext context, BluetoothManager bluetoothManager,
+          Widget? child) {
+        return ScaffoldMessenger(
+          child: Scaffold(
+            appBar: const CustomAppBar('蓝牙列表'),
+            body: RefreshIndicator(
+              onRefresh: onRefresh,
+              child: ListView(
+                children: <Widget>[
+                  ..._buildScanResultTiles(context),
+                  ..._buildSystemDeviceTiles(context)
+                ],
+              ),
+            ),
+            floatingActionButton: buildScanButton(context),
           ),
-        ),
-        floatingActionButton: buildScanButton(context),
-      ),
+        );
+      },
     );
   }
 }

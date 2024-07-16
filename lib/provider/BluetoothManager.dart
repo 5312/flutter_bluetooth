@@ -12,7 +12,7 @@ class BluetoothManager with ChangeNotifier {
   List<BluetoothDevice> get connectedDevices => _connectedDevices;
 
   // 当前连接设备
-  late BluetoothDevice device;
+  BluetoothDevice? onConnectdevice;
 
   // 连接结果
   List<ScanResult> _scanResults = [];
@@ -41,7 +41,8 @@ class BluetoothManager with ChangeNotifier {
   // 特征值
   BluetoothCharacteristic? targetCharacteristic;
   late int power = 0;
-  bool isPower  = false;
+  bool isPower = false;
+
   BluetoothManager() {
     // 监听蓝牙适配器状态变化
     _adapterStateSubscription = FlutterBluePlus.adapterState.listen((state) {
@@ -57,11 +58,9 @@ class BluetoothManager with ChangeNotifier {
     // 监听扫描结果
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       _scanResults = results;
-      print(results);
-      print('扫描列表');
-      if (_scanResults.isNotEmpty) {
-        onConnectPressed(_scanResults.first.device);
-      }
+
+      notifyListeners();
+
     }, onError: (e) {
       Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
     });
@@ -69,21 +68,20 @@ class BluetoothManager with ChangeNotifier {
     // 监听扫描状态
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
       _isScanning = state;
+      notifyListeners();
+
     });
   }
 
   // 设置当前连接设备
-  void SetDevice(BluetoothDevice devices) {
-    device = devices;
+  void setDevice(BluetoothDevice devices) {
+    onConnectdevice = devices;
   }
 
   // 开始扫描
   Future<void> onScanPressed() async {
     await onConnectedDevices();
-    // 有连接设备不在扫描
-    if (_connectedDevices.isNotEmpty) {
-      return;
-    }
+
     try {
       await FlutterBluePlus.startScan(
           timeout: const Duration(seconds: 15),
@@ -129,8 +127,7 @@ class BluetoothManager with ChangeNotifier {
     }
   }
 
-  /*
-    @override
+  @override
   void dispose() {
     // 取消订阅以释放资源
     _adapterStateSubscription.cancel();
@@ -138,26 +135,24 @@ class BluetoothManager with ChangeNotifier {
     _isScanningSubscription.cancel();
     super.dispose();
   }
-  * */
+
   // 连接设备
   void onConnectPressed(BluetoothDevice device) {
     device.connectAndUpdateStream().then((onValue) {
       _connectedDevices.add(device);
-
       notifyListeners();
+      print('连接成功');
     }).catchError((e) {
       Snackbar.show(ABC.c, prettyException("连接失败:", e), success: false);
     });
   }
-
+  // 读取指定服务及特征值
   void discoverServices() async {
-    print('订阅');
-
-    if (device == null) {
+    if (onConnectdevice == null) {
       return;
     }
     // print(device);
-    List<BluetoothService> services = await device!.discoverServices();
+    List<BluetoothService> services = await onConnectdevice!.discoverServices();
 
     services.forEach((service) {
       if (service.uuid.toString() == 'ffe0') {
@@ -170,7 +165,6 @@ class BluetoothManager with ChangeNotifier {
             readCharacteristicValue();
             writeAndListen();
           }
-
         }
       }
     });
@@ -181,29 +175,34 @@ class BluetoothManager with ChangeNotifier {
     if (targetCharacteristic == null) {
       return;
     }
-
     List<int> value = await targetCharacteristic!.read();
     print('Characteristic value: $value');
   }
-
+  // 读取电量
   void writeAndListen() async {
     if (targetCharacteristic == null) {
       return;
     }
+    print('发送查询');
 
-    // 写入数据到特征码
+    // 写入数据到特征码 查询电量命令
     await targetCharacteristic!
         .write([0x68, 0x05, 0x00, 0x74, 0x00, 0x79], withoutResponse: false);
     isPower = true;
     // 监听特征码的通知
     targetCharacteristic!.setNotifyValue(true);
-    targetCharacteristic!.value.listen((value) {
+    targetCharacteristic!.onValueReceived.listen((value) {
       if (value != null) {
         // 在这里处理接收到的数据
-        int hexString = value[5];
-        power = hexString; // int.parse(hexString, radix: 16);
+        int hex = value[5];
+        power = int.parse(hex.toString(), radix: 16);
         notifyListeners();
       }
     });
   }
+  // 全局响应
+  void SetnotifyListeners(){
+    notifyListeners();
+  }
+
 }

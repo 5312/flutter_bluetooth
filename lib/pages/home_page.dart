@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
       if (bluetooth.adapterState == BluetoothAdapterState.on) {
         bluetooth.onScanPressed();
       } else {
-        bluetooth.turnOnBlue().then((onValue) {
+        bluetooth.turnOnBlue().then((_) {
           bluetooth.onScanPressed();
         });
       }
@@ -38,15 +38,17 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     bluetooth.onStopPressed();
+    print('homedispose');
     super.dispose();
   }
 
   // 连接状态
   Widget useDeviceIsConnect(BluetoothManager bluetoothManager) {
-    if (!bluetoothManager.device.isConnected) {
+    if (bluetoothManager.connectedDevices.isEmpty ||
+        !bluetoothManager.connectedDevices.first.isConnected) {
       return const Text(
         "当前状态：未连接",
-        textAlign: TextAlign.left, // 文本向左对齐
+        textAlign: TextAlign.left,
         style: TextStyle(
           color: Colors.black54,
           fontSize: 12,
@@ -55,7 +57,7 @@ class _HomePageState extends State<HomePage> {
     }
     return const Text(
       "当前状态：已连接",
-      textAlign: TextAlign.left, // 文本向左对齐
+      textAlign: TextAlign.left,
       style: TextStyle(
         color: Colors.black54,
         fontSize: 12,
@@ -64,52 +66,53 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget useDevices(BuildContext context) {
-    return Consumer<BluetoothManager>(builder: (
-      BuildContext context,
-      BluetoothManager bluetoothManager,
-      Widget? child,
-    ) {
-      var name = '';
-      late int powers = 0;
-      // 是否有已连接设备
-      if (bluetoothManager.connectedDevices.isEmpty) {
-        name = '--';
-      } else {
-        bluetoothManager.SetDevice(bluetoothManager.connectedDevices.first);
-        name = bluetoothManager.device.platformName;
-        if (bluetoothManager.isScanning) {
-          // 关闭蓝牙扫描
-          bluetoothManager.onStopPressed();
+    return Consumer<BluetoothManager>(
+      builder: (BuildContext context, BluetoothManager bluetoothManager,
+          Widget? child) {
+        String name = '--';
+        int powers = 0;
+        print('homepage');
+        // 有已连接的进行下一步
+        if (bluetoothManager.connectedDevices.isNotEmpty) {
+          bluetoothManager.setDevice(bluetoothManager.connectedDevices.first);
+          name = bluetoothManager.onConnectdevice?.platformName ?? '--';
+
+          // if (bluetoothManager.isScanning) {
+          //   bluetoothManager.onStopPressed();
+          // }
+
+          if (!bluetoothManager.isPower) {
+            bluetoothManager.discoverServices();
+          }
+          powers = bluetoothManager.power;
+        } else {
+          // 没有已连接的，有查找到设备，自动连接
+          if (bluetoothManager.scanResults.isNotEmpty) {
+            bluetoothManager
+                .onConnectPressed(bluetoothManager.scanResults.first.device);
+          }
         }
-        // 查询电量
-        if (!bluetoothManager.isPower) {
-          bluetoothManager.discoverServices();
-        }
-        powers = bluetoothManager.power;
-      }
-      return Expanded(
-        flex: 2,
-        child: Container(
+
+        return Expanded(
+          flex: 2,
+          child: Container(
             width: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/home/device.png'),
-                fit: BoxFit
-                    .fill, // 可以根据需要调整 BoxFit 的属性，如 BoxFit.cover, BoxFit.fill, 等
+                fit: BoxFit.fill,
               ),
             ),
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                // 水平方向（垂直对齐）向左对齐
                 children: <Widget>[
                   const Padding(
                     padding: EdgeInsets.all(2.0),
-                    // 可选：添加一些内边距
                     child: Text(
                       "当前设备",
-                      textAlign: TextAlign.left, // 文本向左对齐
+                      textAlign: TextAlign.left,
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 15,
@@ -119,10 +122,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(2.0),
-                    // 可选：添加一些内边距
                     child: Text(
-                      "设备信息：" + name,
-                      textAlign: TextAlign.left, // 文本向左对齐
+                      "设备信息：$name",
+                      textAlign: TextAlign.left,
                       style: const TextStyle(
                         color: Colors.black54,
                         fontSize: 12,
@@ -131,10 +133,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(2.0),
-                    // 可选：添加一些内边距
                     child: Text(
-                      "当前电量：" + powers.toString() + '%',
-                      textAlign: TextAlign.left, // 文本向左对齐
+                      "当前电量：$powers%",
+                      textAlign: TextAlign.left,
                       style: const TextStyle(
                         color: Colors.black54,
                         fontSize: 12,
@@ -142,101 +143,99 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   Padding(
-                      padding:
-                          const EdgeInsets.only(top: 2, left: 2, bottom: 0),
-                      // 可选：添加一些内边距
-                      child: useDeviceIsConnect(bluetoothManager)),
+                    padding: const EdgeInsets.only(top: 2, left: 2, bottom: 0),
+                    child: useDeviceIsConnect(bluetoothManager),
+                  ),
                   const SizedBox(
                     height: 5,
                   ),
                   Padding(
-                      padding:
-                          const EdgeInsets.only(top: 2, left: 2, bottom: 0),
-                      // 可选：添加一些内边距
-                      child: SizedBox(
-                        height: 25,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white),
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('bluetoothList');
-                          },
-                          child: const Text(
-                            "连接蓝牙",
-                            style: TextStyle(
-                              fontSize: 12,
-                            ),
+                    padding: const EdgeInsets.only(top: 2, left: 2, bottom: 0),
+                    child: SizedBox(
+                      height: 25,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('bluetoothList');
+                        },
+                        child: const Text(
+                          "连接蓝牙",
+                          style: TextStyle(
+                            fontSize: 12,
                           ),
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            )),
-      );
-    });
+            ),
+          ),
+        );
+      },
+    );
   }
 
   // 当前用户名及注销登录按钮
-  Widget Layout(BuildContext context) {
+  Widget layout(BuildContext context) {
     return Expanded(
       flex: 1,
       child: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/home/bottomlogin.png'),
-            fit: BoxFit
-                .fill, // 可以根据需要调整 BoxFit 的属性，如 BoxFit.cover, BoxFit.fill, 等
+            fit: BoxFit.fill,
           ),
         ),
         child: Column(
           children: <Widget>[
             Expanded(
-                flex: 1,
-                child: Center(
-                  child: Text(
-                    '当前用户：admin',
-                    style: TextStyle(color: Colors.blueAccent),
-                  ),
-                )),
+              flex: 1,
+              child: Center(
+                child: Text(
+                  '当前用户：admin',
+                  style: TextStyle(color: Colors.blueAccent),
+                ),
+              ),
+            ),
             Expanded(
-                flex: 1,
-                child: Material(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(9),
-                    // 左下角圆角半径
-                    bottomRight: Radius.circular(9), // 右下角圆角半径
+              flex: 1,
+              child: Material(
+                color: Colors.blue,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(9),
+                  bottomRight: Radius.circular(9),
+                ),
+                child: InkWell(
+                  splashColor: Colors.white.withOpacity(0.5),
+                  highlightColor: Colors.white.withOpacity(0.3),
+                  onTap: () {
+                    MySP.removeToken();
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      'login',
+                      (route) => false,
+                    );
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    child: const Center(
+                      child: Text(
+                        '注销',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
-                  // 如果您不希望显示Material本身的背景颜色
-                  child: InkWell(
-                    splashColor: Colors.white.withOpacity(0.5),
-                    // 设置水波纹颜色
-                    highlightColor: Colors.white.withOpacity(0.3),
-                    // 设置高亮颜色
-                    onTap: () {
-                      MySP.removeToken();
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        'login',
-                        (route) => false,
-                      );
-                    },
-                    child: Container(
-                        width: double.infinity,
-                        child: const Center(
-                          child: Text(
-                            '注销',
-                            textAlign: TextAlign.center,
-                            // 文本向左对齐
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )),
-                  ),
-                ))
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -246,70 +245,69 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: const CustomAppBar('钻孔轨迹仪'),
-        body: Padding(
-          padding:
-              const EdgeInsets.only(left: 33, right: 33, top: 20, bottom: 33),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Column(
-                  children: <Widget>[
-                    useDevices(context),
-                    const SizedBox(height: 13),
-                    Layout(context)
-                  ],
-                ),
+      appBar: const CustomAppBar('钻孔轨迹仪'),
+      body: Padding(
+        padding:
+            const EdgeInsets.only(left: 33, right: 33, top: 20, bottom: 33),
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                children: <Widget>[
+                  useDevices(context),
+                  const SizedBox(height: 13),
+                  layout(context),
+                ],
               ),
-              SizedBox(width: 13),
-              Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center, //垂直方向居中对齐
-                  children: <Widget>[
-                    Expanded(flex: 1, child: HomeCard('setting')),
-                    const SizedBox(height: 13),
-                    Expanded(
-                      flex: 1,
-                      child: HomeCard('data'),
-                    ),
-                  ],
-                ),
+            ),
+            const SizedBox(width: 13),
+            Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(flex: 1, child: HomeCard('setting')),
+                  const SizedBox(height: 13),
+                  Expanded(
+                    flex: 1,
+                    child: HomeCard('data'),
+                  ),
+                ],
               ),
-              SizedBox(width: 13),
-              Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center, //垂直方向居中对齐
-                  children: <Widget>[
-                    Expanded(
-                      flex: 1,
-                      child: HomeCard('scan'),
-                    ),
-                    const SizedBox(height: 13),
-                    Expanded(
-                      flex: 1,
-                      child: HomeCard('repo'),
-                    ),
-                  ],
-                ),
+            ),
+            const SizedBox(width: 13),
+            Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: HomeCard('scan'),
+                  ),
+                  const SizedBox(height: 13),
+                  Expanded(
+                    flex: 1,
+                    child: HomeCard('repo'),
+                  ),
+                ],
               ),
-              SizedBox(width: 13),
-              Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center, //垂直方向居中对齐
-                  children: <Widget>[
-                    Expanded(
-                      flex: 1,
-                      child: HomeCard('timeout'),
-                    ),
-                    const SizedBox(
-                      height: 13,
-                    ),
-                    Expanded(flex: 1, child: HomeCard('cloud')),
-                  ],
-                ),
-              )
-            ],
-          ),
-        ));
+            ),
+            const SizedBox(width: 13),
+            Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: HomeCard('timeout'),
+                  ),
+                  const SizedBox(height: 13),
+                  Expanded(flex: 1, child: HomeCard('cloud')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
