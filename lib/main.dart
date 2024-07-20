@@ -7,6 +7,7 @@ import 'package:bluetooth_mini/navigator/my_navigator.dart';
 import 'package:bluetooth_mini/provider/my_provider.dart';
 import 'package:bluetooth_mini/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); // 不加这个强制横竖屏会报错
@@ -32,6 +33,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final easy = EasyLoading.init();
+  final smartDialog = FlutterSmartDialog.init();
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -64,9 +68,14 @@ class _MyAppState extends State<MyApp> {
                     Locale('en', 'US'), // 美国英语
                     Locale('cn', 'ZH'), // 中文简体
                   ],
-                  builder: EasyLoading.init(),
+                  builder: (context, child) {
+                    child = easy(context, child);
+                    child = smartDialog(context, child);
+                    return child;
+                  },
                   initialRoute: 'navigator',
                   onGenerateRoute: MyNavigator.getInstance().onGenerateRoute,
+                  navigatorObservers: [FlutterSmartDialog.observer],
                 );
               },
             ),

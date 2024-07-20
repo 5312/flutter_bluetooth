@@ -26,6 +26,7 @@ dependencies:
   flutter_blue_plus: ^1.32.7
   syncfusion_flutter_datagrid: ^26.1.39
   intl: any
+  flutter_smart_dialog: any
 dev_dependencies:
   flutter_lints: ^4.0.0
   flutter_test:

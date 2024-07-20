@@ -192,7 +192,7 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Column(
           children: <Widget>[
-            Expanded(
+            const Expanded(
               flex: 1,
               child: Center(
                 child: Text(
@@ -205,7 +205,7 @@ class _HomePageState extends State<HomePage> {
               flex: 1,
               child: Material(
                 color: Colors.blue,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(9),
                   bottomRight: Radius.circular(9),
                 ),
@@ -216,20 +216,17 @@ class _HomePageState extends State<HomePage> {
                     MySP.removeToken();
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       'login',
-                      (route) => false,
+                          (route) => false,
                     );
                   },
-                  child: Container(
-                    width: double.infinity,
-                    child: const Center(
-                      child: Text(
-                        '注销',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  child: const Center(
+                    child: Text(
+                      '注销',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -248,7 +245,7 @@ class _HomePageState extends State<HomePage> {
       appBar: const CustomAppBar('钻孔轨迹仪'),
       body: Padding(
         padding:
-            const EdgeInsets.only(left: 33, right: 33, top: 20, bottom: 33),
+        const EdgeInsets.only(left: 33, right: 33, top: 20, bottom: 33),
         child: Row(
           children: <Widget>[
             Expanded(
@@ -261,49 +258,43 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(width: 13),
-            Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(flex: 1, child: HomeCard('setting')),
-                  const SizedBox(height: 13),
-                  Expanded(
-                    flex: 1,
-                    child: HomeCard('data'),
-                  ),
-                ],
-              ),
+            const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Expanded(flex: 1, child: HomeCard('setting')),
+                SizedBox(height: 13),
+                Expanded(
+                  flex: 1,
+                  child: HomeCard('data'),
+                ),
+              ],
             ),
             const SizedBox(width: 13),
-            Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    flex: 1,
-                    child: HomeCard('scan'),
-                  ),
-                  const SizedBox(height: 13),
-                  Expanded(
-                    flex: 1,
-                    child: HomeCard('repo'),
-                  ),
-                ],
-              ),
+            const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  flex: 1,
+                  child: HomeCard('scan'),
+                ),
+                SizedBox(height: 13),
+                Expanded(
+                  flex: 1,
+                  child: HomeCard('repo'),
+                ),
+              ],
             ),
             const SizedBox(width: 13),
-            Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    flex: 1,
-                    child: HomeCard('timeout'),
-                  ),
-                  const SizedBox(height: 13),
-                  Expanded(flex: 1, child: HomeCard('cloud')),
-                ],
-              ),
+            const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  flex: 1,
+                  child: HomeCard('timeout'),
+                ),
+                const SizedBox(height: 13),
+                Expanded(flex: 1, child: HomeCard('cloud')),
+              ],
             ),
           ],
         ),

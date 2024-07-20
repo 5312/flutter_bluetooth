@@ -9,7 +9,6 @@ import '../widgets/scan_result_tile.dart';
 import '../utils/extra.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/provider/BluetoothManager.dart';
-import 'package:bluetooth_mini/provider/BluetoothManager.dart';
 import 'package:provider/provider.dart';
 
 class FlutterBlueApp extends StatefulWidget {

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:bluetooth_mini/provider/BluetoothManager.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class HomeCard extends StatelessWidget {
   final String nameAndType;
@@ -7,10 +11,18 @@ class HomeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BluetoothManager bluetooth =
+        Provider.of<BluetoothManager>(context, listen: false);
+
     return Material(
         child: InkWell(
       onTap: () {
-        Navigator.of(context).pushNamed(nameAndType);
+        if (bluetooth.adapterState == BluetoothAdapterState.off) {
+          SmartDialog.showToast('请连接设备后再试！');
+          return;
+        } else {
+          Navigator.of(context).pushNamed(nameAndType);
+        }
       },
       child: Container(
         width: 170,
