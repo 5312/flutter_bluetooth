@@ -10,15 +10,24 @@ class MySP {
     return true;
   }
 
-  // token
+  //获取 token
   static String? getToken() {
     return prefs?.getString('token');
   }
-
+  // 设置token
   static Future<bool?> setToken(string) async {
     return await prefs?.setString('token', string);
   }
 
+  //获取 name
+  static String? getName() {
+    return prefs?.getString('name');
+  }
+  // 设置name
+  static Future<bool?> setName(string) async {
+    return await prefs?.setString('name', string);
+  }
+  // 删除token
   static Future<bool?> removeToken() async {
     return await prefs?.remove('token');
   }

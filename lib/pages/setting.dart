@@ -6,14 +6,14 @@ class Setting extends StatefulWidget {
   const Setting({Key? key}) : super(key: key);
 
   @override
-  _SettingState createState() => _SettingState();
+  State<Setting> createState() => _SettingState();
 }
 
 class _SettingState extends State<Setting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar('钻孔基础信息设置'),
+      appBar: const CustomAppBar('钻孔基础信息设置'),
       body: Container(
           color: const Color.fromRGBO(238, 239, 241, 0.8),
           child: const Padding(

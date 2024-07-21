@@ -17,11 +17,11 @@ class HomeCard extends StatelessWidget {
     return Material(
         child: InkWell(
       onTap: () {
-        if (bluetooth.adapterState == BluetoothAdapterState.off) {
-          SmartDialog.showToast('请连接设备后再试！');
-          return;
+
+        if (FlutterBluePlus.adapterStateNow == BluetoothAdapterState.off) {
+          bluetooth.turnOnBlue();
         } else {
-          Navigator.of(context).pushNamed(nameAndType);
+          Navigator.of(context).popAndPushNamed(nameAndType);
         }
       },
       child: Container(

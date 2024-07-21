@@ -5,6 +5,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 final Map<DeviceIdentifier, StreamControllerReemit<bool>> _cglobal = {};
 final Map<DeviceIdentifier, StreamControllerReemit<bool>> _dglobal = {};
 
+//拓展设备方法
 /// connect & disconnect + update stream
 extension Extra on BluetoothDevice {
   // convenience
@@ -29,16 +30,19 @@ extension Extra on BluetoothDevice {
     return _dstream.stream;
   }
 
+  // 连接
   // connect & update stream
   Future<void> connectAndUpdateStream() async {
     _cstream.add(true);
     try {
       await connect(mtu: null);
-    } finally {
+    } catch (e) {
       _cstream.add(false);
+      rethrow;
     }
   }
 
+  // 断开
   // disconnect & update stream
   Future<void> disconnectAndUpdateStream({bool queue = true}) async {
     _dstream.add(true);

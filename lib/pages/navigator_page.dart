@@ -8,7 +8,7 @@ class NavigatorPage extends StatefulWidget {
   const NavigatorPage({Key? key}) : super(key: key);
 
   @override
-  _NavigatorPageState createState() => _NavigatorPageState();
+  State<NavigatorPage> createState() => _NavigatorPageState();
 }
 
 class _NavigatorPageState extends State<NavigatorPage> {

@@ -7,7 +7,7 @@ class DataTransmission extends StatefulWidget {
   const DataTransmission({Key? key}) : super(key: key);
 
   @override
-  _DataTransmissionState createState() => _DataTransmissionState();
+  State<DataTransmission> createState() => _DataTransmissionState();
 }
 
 class _DataTransmissionState extends State<DataTransmission> {

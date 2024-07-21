@@ -7,7 +7,7 @@ class TimeOut extends StatefulWidget {
   const TimeOut({Key? key}) : super(key: key);
 
   @override
-  _TimeOutState createState() => _TimeOutState();
+  State<TimeOut> createState() => _TimeOutState();
 }
 
 class _TimeOutState extends State<TimeOut> {

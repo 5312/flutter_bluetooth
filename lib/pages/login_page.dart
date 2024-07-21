@@ -3,17 +3,17 @@ import 'package:bluetooth_mini/db/my_sp.dart';
 import 'package:bluetooth_mini/widgets/login_input.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key? key}) : super(key: key);
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey _formKey = GlobalKey<FormState>();
   TextEditingController _userController = TextEditingController(text: 'admin');
   TextEditingController _passwordController =
-  TextEditingController(text: '12345678');
+      TextEditingController(text: '12345678');
 
   // '记住密码' 复选框
   bool? _savePassword = false;
@@ -21,32 +21,32 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ListView 可以自适应键盘，防止键盘弹起后遮挡
+        // ListView 可以自适应键盘，防止键盘弹起后遮挡
         body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/login/bg-logo.png'),
-              fit: BoxFit.fitHeight,
-            ),
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/login/bg-logo.png'),
+          fit: BoxFit.fitHeight,
+        ),
+      ),
+      child: ListView(
+        padding: EdgeInsets.only(
+          top: 60,
+          left: 35,
+          right: 35,
+        ),
+        children: [
+          Container(
+            width: 100,
+            height: 100,
           ),
-          child: ListView(
-            padding: EdgeInsets.only(
-              top: 60,
-              left: 35,
-              right: 35,
-            ),
-            children: [
-              Container(
-                width: 100,
-                height: 100,
-              ),
 
-              _form(),
-              // _save(),
-              _button(),
-            ],
-          ),
-        ));
+          _form(),
+          // _save(),
+          _button(),
+        ],
+      ),
+    ));
   }
 
   // 表单
@@ -118,10 +118,9 @@ class _LoginPageState extends State<LoginPage> {
         child: SizedBox(
           height: 45,
           child: ElevatedButton(
-            child: Text("登录"),
             style: ElevatedButton.styleFrom(
               // 圆角
-              shape: StadiumBorder(),
+              shape: const StadiumBorder(),
             ),
             onPressed: () async {
               if ((_formKey.currentState as FormState).validate()) {
@@ -133,13 +132,15 @@ class _LoginPageState extends State<LoginPage> {
                 // });
                 // // 保存登录令牌
                 MySP.setToken('adaadaa'); //res['data']['accessToken']);
+                MySP.setName(_userController.text.trim());
                 // EasyLoading.dismiss();
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   'navigator',
-                      (route) => false,
+                  (route) => false,
                 );
               }
             },
+            child: Text("登录"),
           ),
         ),
       ),

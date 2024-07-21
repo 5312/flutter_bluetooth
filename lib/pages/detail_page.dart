@@ -6,7 +6,7 @@ class DetailPage extends StatefulWidget {
   const DetailPage({Key? key, required this.id}) : super(key: key);
 
   @override
-  _DetailPageState createState() => _DetailPageState();
+  State<DetailPage> createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {

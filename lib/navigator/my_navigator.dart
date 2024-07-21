@@ -3,7 +3,7 @@ import 'package:bluetooth_mini/db/my_sp.dart';
 import 'package:bluetooth_mini/pages/login_page.dart';
 import 'package:bluetooth_mini/pages/navigator_page.dart';
 import 'package:bluetooth_mini/pages/detail_page.dart';
-import 'package:bluetooth_mini/blue/init_blue.dart';
+import 'package:bluetooth_mini/blue/bluetooth_list.dart';
 import 'package:bluetooth_mini/pages/setting.dart';
 import 'package:bluetooth_mini/pages/probe_monitoring.dart';
 import 'package:bluetooth_mini/pages/time_out.dart';

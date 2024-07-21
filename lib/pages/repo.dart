@@ -7,7 +7,7 @@ class Repo extends StatefulWidget {
   const Repo({Key? key}) : super(key: key);
 
   @override
-  _RepoState createState() => _RepoState();
+  State<Repo> createState() => _RepoState();
 }
 
 class _RepoState extends State<Repo> {

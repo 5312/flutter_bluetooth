@@ -10,17 +10,57 @@ class Probe extends StatefulWidget {
   const Probe({Key? key}) : super(key: key);
 
   @override
-  _ProbeState createState() => _ProbeState();
+  State<Probe> createState() => _ProbeState();
 }
 
 class _ProbeState extends State<Probe> {
   List<Employee> employees = <Employee>[];
   late EmployeeDataSource employeeDataSource;
   late BluetoothManager bluetooth;
+  bool received = false;
+  // 选中特征码
+  BluetoothCharacteristic? targetCharacteristic;
+
+  @override
+  void initState() {
+    super.initState();
+    employeeDataSource = EmployeeDataSource(employeeData: employees);
+
+    bluetooth = Provider.of<BluetoothManager>(context, listen: false);
+  }
+
+  // 读取指定服务及特征值
+  void discoverServices(BluetoothDevice? onConnectdevice) async {
+    if (onConnectdevice == null) {
+      return;
+    }
+    List<BluetoothService> services = await onConnectdevice!.discoverServices();
+    services.forEach((service) {
+      if (service.uuid.toString() == 'ffe0') {
+        // Reads all characteristics
+        var characteristics = service.characteristics;
+        for (BluetoothCharacteristic c in characteristics) {
+          if (c.uuid.toString() == 'ffe1') {
+            // 例如读取特征码的值
+            if (mounted) {
+              setState(() {
+                targetCharacteristic = c;
+              });
+            }
+
+            // readCharacteristicValue();
+            // writeAndListen();
+          }
+        }
+      }
+    });
+  }
 
   // 启动采集
   Future<void> sendCollection(targetCharacteristic) async {
-    bool received = false;
+    if(received){
+      return;
+    }
     // 写入数据到特征码 查询电量命令
     await targetCharacteristic!
         .write([0x68, 0x05, 0x00, 0x71, 0x02, 0x78], withoutResponse: false);
@@ -30,17 +70,16 @@ class _ProbeState extends State<Probe> {
       if (value != null) {
         received = true;
         // 在这里处理接收到的数据
-        print('启动采集');
+        print('启动采集返回值');
         print(value);
         // 将十六进制整数列表转换为十进制整数列表
         List<dynamic> decimalList =
             value.map((hex) => '0x' + hex.toRadixString(16)).toList();
-        if(decimalList[5] == 0xf6){
+        if (decimalList[5] == 0xf6) {
           print('启动成功');
         }
       }
     });
-
     // 等待3秒，如果没有接收到数据，则重新执行函数
     await Future.delayed(Duration(seconds: 3));
 
@@ -50,18 +89,15 @@ class _ProbeState extends State<Probe> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    employees = getEmployeeData();
-    employeeDataSource = EmployeeDataSource(employeeData: employees);
+  void deactivate() {
+    super.deactivate();
+    print('probe:--deactiveate');
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      bluetooth = Provider.of<BluetoothManager>(context, listen: false);
-      // if (bluetooth.targetCharacteristic != null) {
-      //   sendCollection(bluetooth.targetCharacteristic);
-      // }
-    });
+  @override
+  void dispose() {
+    super.dispose();
+    print('probe:---dispose');
   }
 
   // 添加和保存按钮
@@ -94,6 +130,13 @@ class _ProbeState extends State<Probe> {
 
   @override
   Widget build(BuildContext context) {
+    if (targetCharacteristic == null) {
+      discoverServices(bluetooth.nowConnectDevice);
+    } else {
+      // 启动采集
+      sendCollection(targetCharacteristic);
+    }
+
     return Scaffold(
       appBar: const CustomAppBar('探管检测'),
       body: Column(
