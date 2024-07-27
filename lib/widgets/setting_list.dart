@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class ListCard extends StatefulWidget {
   final String buttonText;
@@ -11,13 +12,74 @@ class ListCard extends StatefulWidget {
 
 class _ListCardState extends State<ListCard> {
   // 假设的列表数据
-  List<String> items = ['Item 1', 'Item 2', 'Item 3'];
+  List<String> items = [];
+
+  final TextEditingController _controller = TextEditingController();
 
   // 假设的添加新项的方法
   void addItem() {
-    setState(() {
-      items.add('Item ${items.length + 1}');
-    });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Container(
+            child: ListView(
+              children: [
+                AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  title: Text(
+                    '添加矿区',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  content: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: 500, // 设置最大宽度
+                    ),
+                    child: Row(
+                      children: [
+                        Text('矿区名称:'),
+                        Expanded(
+                          child: TextField(
+                            controller: _controller,
+                            decoration: InputDecoration(
+                                // labelText: 'Input',
+                                ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('取消'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: Text('保存'),
+                      onPressed: () {
+                        // print(_controller.text);
+                       setState(() {
+                         items.add(_controller.text);
+                       });
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    // setState(() {
+    //   items.add('Item ${items.length + 1}');
+    // });
   }
 
   // final text = widget.buttonText
