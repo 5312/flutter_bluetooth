@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/time_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:bluetooth_mini/widgets/time_form.dart';
+import 'package:bluetooth_mini/widgets/time_drop.dart';
 
 class TimeOut extends StatefulWidget {
   const TimeOut({Key? key}) : super(key: key);
@@ -14,11 +17,70 @@ class _TimeOutState extends State<TimeOut> {
   List<TimeModel> employees = <TimeModel>[];
   late EmployeeDataSource employeeDataSource;
 
+  final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
     employees = getEmployeeData();
     employeeDataSource = EmployeeDataSource(employeeData: employees);
+    // 先弹窗
+    //target widget
+    SmartDialog.show(
+      useSystem: true,
+      clickMaskDismiss: false, // 设置为false，点击遮罩时不关闭
+      builder: (_) {
+        return Container(
+          height: 380,
+          width: 500,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+          ),
+          alignment: Alignment.center,
+          child: Builder(builder: (context) {
+            return Form(
+              key: _formKey,
+              child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TimeDrop('矿区'),
+                      TimeDrop('工作面'),
+                      TimeDrop('钻厂'),
+                      TimeDrop('钻孔'),
+                      MyForm('钻杆长度','m'),
+                      MyForm('检测名称',''),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 10, left: 350, bottom: 0),
+                        child: SizedBox(
+                          height: 30,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () {
+                              //
+                            },
+                            child: const Text(
+                              "下一步",
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+            );
+          }),
+        );
+      },
+    );
   }
 
   // 定时同步按钮

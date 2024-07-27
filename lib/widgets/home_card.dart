@@ -21,7 +21,7 @@ class HomeCard extends StatelessWidget {
         if (FlutterBluePlus.adapterStateNow == BluetoothAdapterState.off) {
           bluetooth.turnOnBlue();
         } else {
-          Navigator.of(context).popAndPushNamed(nameAndType);
+          Navigator.of(context).pushNamed(nameAndType);
         }
       },
       child: Container(

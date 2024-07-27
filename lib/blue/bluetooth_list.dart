@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -63,12 +62,18 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
   // 开始连接
   Future<void> connectTheDevice(BluetoothDevice onDevice) async {
     EasyLoading.show();
-    await onDevice.disconnectAndUpdateStream();
-    await onDevice.connectAndUpdateStream().catchError((e) {
-      Snackbar.show(ABC.c, prettyException("Connect Error:", e),
-          success: false);
-    });
-    bluetoothManagerInstant?.updateNowDevice(onDevice);
+    print('连接 状态：');
+    print(onDevice.isConnected);
+    if (!onDevice.isConnected) {
+      //await onDevice.disconnectAndUpdateStream();
+      await onDevice.connectAndUpdateStream().catchError((e) {
+        Snackbar.show(ABC.c, prettyException("Connect Error:", e),
+            success: false);
+      });
+    }
+    if (!onDevice.isConnected) {
+      bluetoothManagerInstant?.updateNowDevice(onDevice);
+    }
     EasyLoading.dismiss();
   }
 
@@ -82,9 +87,16 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
 
   // 从扫描列表中排除 已连接设备
   void filterOnconnected() {
-    _scanResult = _scanResult
-        .where((element) => !_connectedResult.contains(element))
-        .toList();
+    print(_scanResult);
+    print(_connectedResult);
+
+    setState(() {
+      // _scanResult = _scanResult
+      //     .where((element) => !_connectedResult.contains(element.device))
+      _connectedResult = _connectedResult
+          .where((element) => !_scanResult.contains(element))
+          .toList();
+    });
   }
 
   // 构建主界面
@@ -93,10 +105,10 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
     return Consumer<BluetoothManager>(
       builder: (BuildContext context, BluetoothManager bluetoothManager,
           Widget? child) {
-        _scanResult = bluetoothManager?.scanResults ?? [];
-        _connectedResult = bluetoothManager?.connectedDevices ?? [];
-        // 过滤已连接设备
-        filterOnconnected();
+        print('bl-list');
+        _scanResult = bluetoothManager.scanResults ?? [];
+        _connectedResult = bluetoothManager.connectedDevices ?? [];
+
         return ScaffoldMessenger(
           child: Scaffold(
             appBar: const CustomAppBar('蓝牙列表'),

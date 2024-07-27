@@ -39,16 +39,21 @@ class BluetoothManager with ChangeNotifier {
       if (state == BluetoothAdapterState.off) {
         connectedDevices = [];
         scanResults = [];
-        notifyListeners();
+        if (this.hasListeners) {
+          notifyListeners();
+        }
       }
     });
 
     // 监听扫描结果
     scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       scanResults = results;
+      print(results);
       if (scanResults.isNotEmpty) {
         // 扫描结果实时刷新
-        notifyListeners();
+        if (this.hasListeners) {
+          notifyListeners();
+        }
       }
     }, onError: (e) {
       Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
@@ -58,7 +63,9 @@ class BluetoothManager with ChangeNotifier {
     isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
       isScanning = state;
       print('扫描');
-      notifyListeners();
+      if (this.hasListeners) {
+        notifyListeners();
+      }
     });
   }
 
@@ -96,11 +103,11 @@ class BluetoothManager with ChangeNotifier {
   // 开始扫描
   Future<void> onScanPressed() async {
     try {
+      // startScan在 Android 上，每 30 秒只能调用5 次。这是平台限制。
       // 15秒后停止扫描
       await FlutterBluePlus.startScan(
           timeout: const Duration(seconds: 15),
           withServices: [Guid('0000FFE0-0000-1000-8000-00805F9B34FB')]);
-
     } catch (e) {
       Snackbar.show(ABC.b, prettyException("Start Scan Error:", e),
           success: false);
@@ -130,6 +137,8 @@ class BluetoothManager with ChangeNotifier {
   // 更新已连接设备
   void updateNowDevice(BluetoothDevice? d) {
     nowConnectDevice = d;
-    notifyListeners();
+    if (this.hasListeners) {
+      notifyListeners();
+    }
   }
 }

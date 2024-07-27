@@ -48,9 +48,9 @@ class _DevicesStateState extends State<DevicesState> {
     // 退出登录会执行
     if (bluetoothManagerInstant != null) {
       // 更改navicat 模式后不需要取消订阅了
-     // bluetoothManagerInstant?.adapterStateSubscription.cancel();
+      // bluetoothManagerInstant?.adapterStateSubscription.cancel();
       //bluetoothManagerInstant?.scanResultsSubscription.cancel();
-     // bluetoothManagerInstant?.isScanningSubscription.cancel();
+      // bluetoothManagerInstant?.isScanningSubscription.cancel();
     }
   }
 
@@ -138,7 +138,7 @@ class _DevicesStateState extends State<DevicesState> {
     // 监听特征码的通知
     await targetCharacteristic!.setNotifyValue(true);
     _lastValueSubscription =
-        targetCharacteristic!.lastValueStream.listen((value) {
+        targetCharacteristic!.onValueReceived.listen((value) {
       // 在这里处理接收到的数据
       int hex = value[5];
       print(value);
@@ -147,9 +147,12 @@ class _DevicesStateState extends State<DevicesState> {
         setState(() {
           _isPower = true;
           _power = hex; // int.parse(hex.toString(), radix: 16);
-          _lastValueSubscription.cancel();
         });
       }
+      _lastValueSubscription?.cancel();
+      targetCharacteristic!.setNotifyValue(false);
+      //print('取消订阅');
+      //print(_lastValueSubscription);
     });
   }
 
@@ -157,8 +160,6 @@ class _DevicesStateState extends State<DevicesState> {
     super.deactivate();
     print('deactiveate');
   }
-
-
 
   @override
   Widget build(BuildContext context) {
