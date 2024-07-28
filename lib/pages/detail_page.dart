@@ -14,7 +14,7 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('详情'),
+        title:const Text('详情'),
       ),
       body: Center(
         child: Text('传递过来的id数据: ${widget.id}'),

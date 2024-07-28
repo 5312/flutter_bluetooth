@@ -4,32 +4,31 @@ class MyForm extends StatefulWidget {
   // 提示文字
   final String label;
   final String suffixIcon;
-  const MyForm(this.label,this.suffixIcon);
+
+  const MyForm({Key? key,required this.label,required this.suffixIcon}) : super(key: key);
 
   @override
-  _MyFormState createState() => _MyFormState();
+  State<MyForm> createState() => _MyFormState();
 }
 
 class _MyFormState extends State<MyForm> {
-  final _formKey = GlobalKey<FormState>();
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Container(
+        SizedBox(
           height: 40,
           child: Row(
             children: <Widget>[
-              Container(
+              SizedBox(
                 width: 100,
                 child: Text(
                   '${widget.label} :',
                   textAlign: TextAlign.right,
-                  style: TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               Expanded(
@@ -39,10 +38,11 @@ class _MyFormState extends State<MyForm> {
                     suffixIcon: Padding(
                       padding: const EdgeInsets.only(top: 5),
                       // 为后缀文本添加右侧内边距
-                      child: Text('${widget.suffixIcon}', style: TextStyle(fontSize: 15)),
+                      child: Text(widget.suffixIcon,
+                          style: const TextStyle(fontSize: 15)),
                     ), // 后缀文本
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.only(
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.only(
                       top: 0,
                       left: 10,
                       right: 10,
@@ -60,7 +60,7 @@ class _MyFormState extends State<MyForm> {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         )
       ],

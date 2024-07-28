@@ -44,7 +44,7 @@ class LoginInput extends StatelessWidget {
         prefixIcon: prefixIcon,
         // 填充背景色
         filled: true,
-        border: OutlineInputBorder(
+        border: const OutlineInputBorder(
           // 圆角形
           borderRadius: BorderRadius.all(
             Radius.circular(32),
@@ -53,7 +53,7 @@ class LoginInput extends StatelessWidget {
           borderSide: BorderSide.none,
         ),
         // 内容内边距
-        contentPadding: EdgeInsets.only(
+        contentPadding:const  EdgeInsets.only(
           top: 0,
           bottom: 0,
         ),

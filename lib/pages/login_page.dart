@@ -11,32 +11,32 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey _formKey = GlobalKey<FormState>();
-  TextEditingController _userController = TextEditingController(text: 'admin');
-  TextEditingController _passwordController =
+  final TextEditingController _userController = TextEditingController(text: 'admin');
+  final TextEditingController _passwordController =
       TextEditingController(text: '12345678');
 
   // '记住密码' 复选框
-  bool? _savePassword = false;
+  //bool? _savePassword = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         // ListView 可以自适应键盘，防止键盘弹起后遮挡
         body: Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/images/login/bg-logo.png'),
           fit: BoxFit.fitHeight,
         ),
       ),
       child: ListView(
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           top: 60,
           left: 35,
           right: 35,
         ),
         children: [
-          Container(
+          const SizedBox(
             width: 100,
             height: 100,
           ),
@@ -59,21 +59,21 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.only(bottom: 20, left: 200, right: 200),
+            padding: const EdgeInsets.only(bottom: 20, left: 200, right: 200),
             child: LoginInput(
               '请输入用户名',
-              Icon(Icons.perm_identity),
+             const Icon(Icons.perm_identity),
               _userController,
               validator: (value) {
-                return value!.trim().length > 0 ? null : "用户名不能为空";
+                return value!.trim().isNotEmpty ? null : "用户名不能为空";
               },
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(bottom: 20, left: 200, right: 200),
+            padding: const EdgeInsets.only(bottom: 20, left: 200, right: 200),
             child: LoginInput(
               '请输入密码',
-              Icon(Icons.lock_outline),
+              const  Icon(Icons.lock_outline),
               _passwordController,
               obscureText: true,
               validator: (value) {
@@ -87,32 +87,32 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // 记住密码
-  _save() {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: 50,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Checkbox(
-            value: _savePassword,
-            onChanged: (value) {
-              setState(() {
-                _savePassword = value;
-              });
-            },
-          ),
-          Text("记住密码"),
-        ],
-      ),
-    );
-  }
+  // _save() {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(
+  //       bottom: 50,
+  //     ),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.end,
+  //       children: [
+  //         Checkbox(
+  //           value: _savePassword,
+  //           onChanged: (value) {
+  //             setState(() {
+  //               _savePassword = value;
+  //             });
+  //           },
+  //         ),
+  //         const Text("记住密码"),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // 登录按钮
   Widget _button() {
     return Padding(
-      padding: EdgeInsets.only(bottom: 20, left: 200, right: 200),
+      padding: const EdgeInsets.only(bottom: 20, left: 200, right: 200),
       child: FractionallySizedBox(
         // 子元素占父元素的宽度比例
         child: SizedBox(
@@ -140,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                 );
               }
             },
-            child: Text("登录"),
+            child: const Text("登录"),
           ),
         ),
       ),

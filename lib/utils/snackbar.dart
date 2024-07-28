@@ -7,7 +7,7 @@ enum ABC {
   b,
   c,
 }
-
+// 错误处理
 class Snackbar {
   static final snackBarKeyA = GlobalKey<ScaffoldMessengerState>();
   static final snackBarKeyB = GlobalKey<ScaffoldMessengerState>();

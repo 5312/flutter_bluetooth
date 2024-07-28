@@ -84,10 +84,10 @@ class _DataTransmissionState extends State<DataTransmission> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar('数据传输'),
+      appBar: const CustomAppBar('数据传输'),
       body: Column(
         children: [
-          Padding(
+          const  Padding(
             padding: EdgeInsets.only(top: 10, bottom: 10, left: 30, right: 30),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,7 +101,7 @@ class _DataTransmissionState extends State<DataTransmission> {
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
           Expanded(
@@ -109,8 +109,8 @@ class _DataTransmissionState extends State<DataTransmission> {
               child: Row(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(5.0),
-                    child: Container(
+                    padding: const EdgeInsets.all(5.0),
+                    child: SizedBox(
                       width: 200,
                       child: Column(
                         children: [
@@ -119,11 +119,8 @@ class _DataTransmissionState extends State<DataTransmission> {
                           orificeButton,
                           dataSaveButton,
                           const Padding(
-                            padding: EdgeInsets.only(
-                              top:10,
-                              left:10,
-                              right:10
-                            ),
+                            padding:
+                                EdgeInsets.only(top: 10, left: 10, right: 10),
                             child: Text(
                               '数据传输总数： 7',
                               style: TextStyle(
@@ -144,10 +141,10 @@ class _DataTransmissionState extends State<DataTransmission> {
                           GridColumn(
                               columnName: 'id',
                               label: Container(
-                                padding: EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.all(16.0),
                                 alignment: Alignment.center,
-                                color: Color.fromRGBO(234, 236, 255, 1),
-                                child: Text(
+                                color: const Color.fromRGBO(234, 236, 255, 1),
+                                child: const Text(
                                   '序号',
                                   style: TextStyle(color: Colors.black),
                                 ),
@@ -155,37 +152,37 @@ class _DataTransmissionState extends State<DataTransmission> {
                           GridColumn(
                               columnName: 'timeData',
                               label: Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
-                                  color: Color.fromRGBO(234, 236, 255, 1),
-                                  child: Text(
+                                  color: const Color.fromRGBO(234, 236, 255, 1),
+                                  child: const Text(
                                     '时间',
                                     overflow: TextOverflow.ellipsis,
                                   ))),
                           GridColumn(
                               columnName: 'deep',
                               label: Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
-                                  color: Color.fromRGBO(234, 236, 255, 1),
-                                  child: Text('深度/m'))),
+                                  color: const Color.fromRGBO(234, 236, 255, 1),
+                                  child: const Text('深度/m'))),
                           GridColumn(
                               columnName: 'inclination',
                               label: Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
-                                  color: Color.fromRGBO(234, 236, 255, 1),
-                                  child: Text(
+                                  color: const Color.fromRGBO(234, 236, 255, 1),
+                                  child: const Text(
                                     '倾角/°',
                                     overflow: TextOverflow.ellipsis,
                                   ))),
                           GridColumn(
                               columnName: 'azimuth',
                               label: Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
-                                  color: Color.fromRGBO(234, 236, 255, 1),
-                                  child: Text(
+                                  color: const Color.fromRGBO(234, 236, 255, 1),
+                                  child: const Text(
                                     '方位角/°',
                                     overflow: TextOverflow.ellipsis,
                                   ))),

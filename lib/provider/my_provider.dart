@@ -1,7 +1,7 @@
 import 'package:bluetooth_mini/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-import 'package:bluetooth_mini/provider/BluetoothManager.dart';
+import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
 
 
 

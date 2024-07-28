@@ -32,7 +32,7 @@ class MyNavigator {
       /// 所以，这里的路由命名最好避免使用 '/xxx' 形式
       switch (routeName) {
         case "login":
-          return LoginPage();
+          return const LoginPage();
         case "navigator":
           return const NavigatorPage();
         case "detail":
@@ -52,7 +52,7 @@ class MyNavigator {
         case 'cloud':
           return const Cloud();
         default:
-          return Scaffold(
+          return const Scaffold(
             body: Center(
               child: Text("页面不存在"),
             ),

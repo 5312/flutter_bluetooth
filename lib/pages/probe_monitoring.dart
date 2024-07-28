@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/employee_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
-import 'package:bluetooth_mini/provider/BluetoothManager.dart';
+import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:async';
@@ -18,7 +17,7 @@ class Probe extends StatefulWidget {
 }
 
 class _ProbeState extends State<Probe> {
-  List<Employee> _employees = <Employee>[];
+  final List<Employee> _employees = <Employee>[];
   late EmployeeDataSource _employeeDataSource;
   late BluetoothManager bluetooth;
   bool received = false;
@@ -41,6 +40,28 @@ class _ProbeState extends State<Probe> {
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
   }
 
+  // foreach 读取特征值
+  void readServiceFunction(service) {
+    // 具名函数的内容
+    if (service.uuid.toString() == 'ffe0') {
+      // Reads all characteristics
+      var characteristics = service.characteristics;
+      for (BluetoothCharacteristic c in characteristics) {
+        if (c.uuid.toString() == 'ffe1') {
+          // 例如读取特征码的值
+          if (mounted) {
+            setState(() {
+              targetCharacteristic = c;
+            });
+          }
+
+          // readCharacteristicValue();
+          // writeAndListen();
+        }
+      }
+    }
+  }
+
   // 读取指定服务及特征值
   void discoverServices(BluetoothDevice? onConnectdevice) async {
     if (onConnectdevice == null) {
@@ -50,26 +71,8 @@ class _ProbeState extends State<Probe> {
       SmartDialog.showToast('请连接设备后再试！');
       return;
     }
-    List<BluetoothService> services = await onConnectdevice!.discoverServices();
-    services.forEach((service) {
-      if (service.uuid.toString() == 'ffe0') {
-        // Reads all characteristics
-        var characteristics = service.characteristics;
-        for (BluetoothCharacteristic c in characteristics) {
-          if (c.uuid.toString() == 'ffe1') {
-            // 例如读取特征码的值
-            if (mounted) {
-              setState(() {
-                targetCharacteristic = c;
-              });
-            }
-
-            // readCharacteristicValue();
-            // writeAndListen();
-          }
-        }
-      }
-    });
+    List<BluetoothService> services = await onConnectdevice.discoverServices();
+    services.forEach(readServiceFunction);
   }
 
   // 启动采集
@@ -82,35 +85,31 @@ class _ProbeState extends State<Probe> {
     await targetCharacteristic!
         .write([0x68, 0x05, 0x00, 0x71, 0x02, 0x78], withoutResponse: false);
     // 监听特征码的通知
-    targetCharacteristic!.setNotifyValue(true);
+    targetCharacteristic.setNotifyValue(true);
     _lastValueSubscription =
-        targetCharacteristic!.onValueReceived.listen((value) {
+        targetCharacteristic.onValueReceived.listen((value) {
       // 返回值为10进制数据不用转换
-      if (value != null) {
-        received = true;
-        // 转为16进制数据用来查看文档对照
-        print(value);
-        List<String> hexArray = bytesToHexArray(value);
-        print(hexArray);
-        if (hexArray[3] == 'f0') {
-          // 在这里处理接收到的数据
-          print('启动采集返回值');
-          // 【3】-fo-对应和 HCM600 命令字 0x84
-          // 【5】【6】【7】之和为第几条数据
-          // 【8】【9】【10】picth仰角
-          // 【11】【12】【13】roll倾斜角
-          // 【14】【15】【16】heading 方位角
-          String roll = readAngle(hexArray[11], hexArray[12], hexArray[13]);
-          String heading = readAngle(hexArray[14], hexArray[15], hexArray[16]);
-          setState(() {
-            _roll = roll;
-            _heading = heading;
-          });
-        }
+      received = true;
+      // 转为16进制数据用来查看文档对照
+      List<String> hexArray = bytesToHexArray(value);
+      if (hexArray[3] == 'f0') {
+        // 在这里处理接收到的数据
+        print('启动采集返回值');
+        // 【3】-fo-对应和 HCM600 命令字 0x84
+        // 【5】【6】【7】之和为第几条数据
+        // 【8】【9】【10】picth仰角
+        // 【11】【12】【13】roll倾斜角
+        // 【14】【15】【16】heading 方位角
+        String roll = readAngle(hexArray[11], hexArray[12], hexArray[13]);
+        String heading = readAngle(hexArray[14], hexArray[15], hexArray[16]);
+        setState(() {
+          _roll = roll;
+          _heading = heading;
+        });
       }
     });
     // 等待3秒，如果没有接收到数据，则重新执行函数
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 3));
 
     if (!received) {
       print('没有收到数据，重新执行...');
@@ -133,6 +132,7 @@ class _ProbeState extends State<Probe> {
     return data;
   }
 
+  @override
   void deactivate() {
     super.deactivate();
     //print('probe:--deactiveate');
@@ -141,16 +141,16 @@ class _ProbeState extends State<Probe> {
   @override
   void dispose() {
     super.dispose();
-    if (_lastValueSubscription != null) {
-      _lastValueSubscription?.cancel();
-      targetCharacteristic!.setNotifyValue(false);
-      // 停止采集
-      targetCharacteristic!
-          .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
-    }
+    // if (_lastValueSubscription != null) {
+    _lastValueSubscription.cancel();
+    targetCharacteristic!.setNotifyValue(false);
+    // 停止采集
+    targetCharacteristic!
+        .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
+    // }
   }
 
-  Widget RollText() {
+  Widget rollText() {
     return Text(
       "倾角：$_roll",
       textAlign: TextAlign.left,
@@ -161,7 +161,7 @@ class _ProbeState extends State<Probe> {
     );
   }
 
-  Widget HeadingText() {
+  Widget headingText() {
     return Text(
       "方位角：$_heading",
       textAlign: TextAlign.left,
@@ -219,14 +219,14 @@ class _ProbeState extends State<Probe> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       // 可选：根据需要调整按钮间的间距
                       children: [
-                        RollText(),
+                        rollText(),
                         const SizedBox(width: 10),
-                        HeadingText()
+                        headingText()
                       ],
                     ),
                   ),
@@ -245,10 +245,10 @@ class _ProbeState extends State<Probe> {
                                 Radius.circular(10)), // 设置圆角为10
                           ),
                         ),
+                        onPressed: _addEmployee,
                         child: const Text('保存',
                             style:
                                 TextStyle(fontSize: 16, color: Colors.white)),
-                        onPressed: _addEmployee,
                       ),
                     ],
                   ),

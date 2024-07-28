@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:bluetooth_mini/provider/BluetoothManager.dart';
+import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class HomeCard extends StatelessWidget {
   final String nameAndType;

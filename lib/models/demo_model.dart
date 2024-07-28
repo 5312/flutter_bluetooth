@@ -10,9 +10,11 @@ class DemoModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = name;
-    data['mail'] = mail;
+    final Map<String, dynamic> data = {
+      'name': name,
+      'mail': mail,
+    };
+
     return data;
   }
 }

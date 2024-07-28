@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter/material.dart';
 import '../utils/snackbar.dart';
-import '../utils/extra.dart';
 
 class BluetoothManager with ChangeNotifier {
   // 连接到当前应用的设备列表
@@ -39,7 +38,7 @@ class BluetoothManager with ChangeNotifier {
       if (state == BluetoothAdapterState.off) {
         connectedDevices = [];
         scanResults = [];
-        if (this.hasListeners) {
+        if (hasListeners) {
           notifyListeners();
         }
       }
@@ -48,10 +47,9 @@ class BluetoothManager with ChangeNotifier {
     // 监听扫描结果
     scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       scanResults = results;
-      print(results);
       if (scanResults.isNotEmpty) {
         // 扫描结果实时刷新
-        if (this.hasListeners) {
+        if (hasListeners) {
           notifyListeners();
         }
       }
@@ -63,7 +61,7 @@ class BluetoothManager with ChangeNotifier {
     isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
       isScanning = state;
       print('扫描');
-      if (this.hasListeners) {
+      if (hasListeners) {
         notifyListeners();
       }
     });
@@ -127,7 +125,7 @@ class BluetoothManager with ChangeNotifier {
   // 获取当前连接到应用的设备列表
   Future<void> onConnectedDevices() async {
     try {
-      connectedDevices = await FlutterBluePlus.connectedDevices;
+      connectedDevices = FlutterBluePlus.connectedDevices;
     } catch (e) {
       Snackbar.show(ABC.b, prettyException("System Devices Error:", e),
           success: false);
@@ -137,7 +135,7 @@ class BluetoothManager with ChangeNotifier {
   // 更新已连接设备
   void updateNowDevice(BluetoothDevice? d) {
     nowConnectDevice = d;
-    if (this.hasListeners) {
+    if (hasListeners) {
       notifyListeners();
     }
   }

@@ -52,7 +52,7 @@ class _RepoState extends State<Repo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar('数据报表'),
+      appBar: const CustomAppBar('数据报表'),
       // AppBar(
       //   title: const Text('数据报表'),
       //   backgroundColor: Colors.white,
@@ -69,26 +69,26 @@ class _RepoState extends State<Repo> {
                   GridColumn(
                       columnName: 'id',
                       label: Container(
-                          padding: EdgeInsets.all(16.0),
-                          color: Color.fromRGBO(234, 236, 255, 1),
+                          padding: const EdgeInsets.all(16.0),
+                          color:const  Color.fromRGBO(234, 236, 255, 1),
                           alignment: Alignment.center,
-                          child: Text(
+                          child:const  Text(
                             '序号',
                           ))),
                   GridColumn(
                       columnName: 'name',
-                      label: Container(
-                          padding: EdgeInsets.all(8.0),
-                          color: Color.fromRGBO(234, 236, 255, 1),
+                      label:  Container(
+                          padding:  const EdgeInsets.all(8.0),
+                          color:  const Color.fromRGBO(234, 236, 255, 1),
                           alignment: Alignment.center,
-                          child: Text('名称'))),
+                          child: const Text('名称'))),
                   GridColumn(
                       columnName: 'mnTime',
                       label: Container(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,
-                          color: Color.fromRGBO(234, 236, 255, 1),
-                          child: Text(
+                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          child: const Text(
                             '时间',
                             overflow: TextOverflow.ellipsis,
                           ))),
@@ -96,10 +96,10 @@ class _RepoState extends State<Repo> {
                     columnName: 'actions',
                     width:300 ,
                     label: Container(
-                      padding: EdgeInsets.all(0),
-                      color: Color.fromRGBO(234, 236, 255, 1),
+                      padding: const EdgeInsets.all(0),
+                      color: const Color.fromRGBO(234, 236, 255, 1),
                       alignment: Alignment.center,
-                      child: Text('操作'),
+                      child: const Text('操作'),
                     ),
                   ),
                 ],

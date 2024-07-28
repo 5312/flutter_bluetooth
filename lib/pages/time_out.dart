@@ -42,16 +42,18 @@ class _TimeOutState extends State<TimeOut> {
             return Form(
               key: _formKey,
               child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      TimeDrop('矿区'),
-                      TimeDrop('工作面'),
-                      TimeDrop('钻厂'),
-                      TimeDrop('钻孔'),
-                      MyForm('钻杆长度','m'),
-                      MyForm('检测名称',''),
+                      const TimeDrop(
+                        label: '矿区',
+                      ),
+                      const TimeDrop(label: '工作面'),
+                      const TimeDrop(label: '钻厂'),
+                      const TimeDrop(label: '钻孔'),
+                      const MyForm(label: '钻杆长度', suffixIcon: 'm'),
+                      const MyForm(label: '检测名称', suffixIcon: ''),
                       Padding(
                         padding: const EdgeInsets.only(
                             top: 10, left: 350, bottom: 0),
@@ -157,13 +159,13 @@ class _TimeOutState extends State<TimeOut> {
               child: Row(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(5.0),
-                    child: Container(
+                    padding: const EdgeInsets.all(5.0),
+                    child: SizedBox(
                       width: 200,
                       child: Column(
                         children: [
-                          Text('深度信息：0'),
-                          Text('累计时间：00:00:00'),
+                          const Text('深度信息：0'),
+                          const Text('累计时间：00:00:00'),
                           timeButton,
                           fixedPointButton,
                           deletePopButton
@@ -181,10 +183,10 @@ class _TimeOutState extends State<TimeOut> {
                           GridColumn(
                               columnName: 'id',
                               label: Container(
-                                padding: EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.all(16.0),
                                 alignment: Alignment.center,
-                                color: Color.fromRGBO(234, 236, 255, 1),
-                                child: Text(
+                                color: const Color.fromRGBO(234, 236, 255, 1),
+                                child: const Text(
                                   '序号',
                                   style: TextStyle(color: Colors.black),
                                 ),
@@ -192,17 +194,17 @@ class _TimeOutState extends State<TimeOut> {
                           GridColumn(
                               columnName: 'inclination',
                               label: Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
-                                  color: Color.fromRGBO(234, 236, 255, 1),
-                                  child: Text('深度/m'))),
+                                  color: const Color.fromRGBO(234, 236, 255, 1),
+                                  child: const Text('深度/m'))),
                           GridColumn(
                               columnName: 'azimuth',
                               label: Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
-                                  color: Color.fromRGBO(234, 236, 255, 1),
-                                  child: Text(
+                                  color: const Color.fromRGBO(234, 236, 255, 1),
+                                  child: const Text(
                                     '时间',
                                     overflow: TextOverflow.ellipsis,
                                   ))),

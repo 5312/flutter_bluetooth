@@ -1,85 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:bluetooth_mini/widgets/cus_dialog.dart';
 
 class ListCard extends StatefulWidget {
   final String buttonText;
+  final List<String> items;
+  final Widget? contentBody;
+  final Widget? title;
+  final List<Widget>? actions;
 
-  const ListCard({Key? key, required this.buttonText}) : super(key: key);
+  const ListCard({
+    Key? key,
+    required this.buttonText,
+    required this.items,
+    this.contentBody,
+    this.title,
+    this.actions,
+  }) : super(key: key);
 
   @override
-  _ListCardState createState() => _ListCardState();
+  State<ListCard> createState() => _ListCardState();
 }
 
 class _ListCardState extends State<ListCard> {
-  // 假设的列表数据
-  List<String> items = [];
-
-  final TextEditingController _controller = TextEditingController();
-
   // 假设的添加新项的方法
   void addItem() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Container(
-            child: ListView(
-              children: [
-                AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  title: Text(
-                    '添加矿区',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  content: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: 500, // 设置最大宽度
-                    ),
-                    child: Row(
-                      children: [
-                        Text('矿区名称:'),
-                        Expanded(
-                          child: TextField(
-                            controller: _controller,
-                            decoration: InputDecoration(
-                                // labelText: 'Input',
-                                ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      child: Text('取消'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    TextButton(
-                      child: Text('保存'),
-                      onPressed: () {
-                        // print(_controller.text);
-                       setState(() {
-                         items.add(_controller.text);
-                       });
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+        return DialogKeyboard(
+          contentBody: widget.contentBody,
+          title: widget.title,
+          actions: widget.actions,
         );
       },
     );
-    // setState(() {
-    //   items.add('Item ${items.length + 1}');
-    // });
+  }
+
+  // 删除
+  void _deleteItem(int index) {
+    setState(() {
+      widget.items.removeAt(index);
+    });
   }
 
   // final text = widget.buttonText
@@ -119,10 +80,14 @@ class _ListCardState extends State<ListCard> {
             // 动态列表
             Expanded(
               child: ListView.builder(
-                itemCount: items.length,
+                itemCount: widget.items.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(items[index]),
+                    title: Text(widget.items[index]),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _deleteItem(index),
+                    ),
                   );
                 },
               ),

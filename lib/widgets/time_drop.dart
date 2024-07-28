@@ -4,15 +4,13 @@ class TimeDrop extends StatefulWidget {
   // 提示文字
   final String label;
 
-  const TimeDrop(this.label);
+  const TimeDrop({Key? key, required this.label}) : super(key: key);
 
   @override
-  _TimeDropState createState() => _TimeDropState();
+  State<TimeDrop> createState() => _TimeDropState();
 }
 
 class _TimeDropState extends State<TimeDrop> {
-  final _formKey = GlobalKey<FormState>();
-
   String? _selectedOption;
   final List<String> _options = ['1', '2', '3'];
 
@@ -20,23 +18,23 @@ class _TimeDropState extends State<TimeDrop> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Container(
+        SizedBox(
           height: 40,
           child: Row(
             children: <Widget>[
-              Container(
+              SizedBox(
                 width: 100,
                 child: Text(
                   '${widget.label}:',
                   textAlign: TextAlign.right,
-                  style: TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: _selectedOption,
-                  hint: Text('请选择一个选项'),
+                  hint: const Text('请选择一个选项'),
                   items: _options.map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -54,7 +52,7 @@ class _TimeDropState extends State<TimeDrop> {
                     }
                     return null;
                   },
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.only(
                       top: 0,
@@ -67,7 +65,7 @@ class _TimeDropState extends State<TimeDrop> {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         )
       ],

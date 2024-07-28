@@ -55,8 +55,8 @@ class _SystemDeviceTileState extends State<SystemDeviceTile> {
       title: Text(widget.device.platformName),
       subtitle: Text(widget.device.remoteId.str),
       trailing: ElevatedButton(
-        child: isConnected ? const Text('已连接') : const Text('未连接'),
         onPressed: isConnected ? widget.disConnect : widget.onConnect,
+        child: isConnected ? const Text('已连接') : const Text('未连接'),
       ),
     );
   }

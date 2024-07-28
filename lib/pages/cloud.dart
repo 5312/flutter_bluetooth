@@ -67,11 +67,11 @@ class _CloudState extends State<Cloud> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar('同步云端'),
+      appBar:const CustomAppBar('同步云端'),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.only(top: 5, bottom: 5, right: 10, left: 10),
+            padding:const EdgeInsets.only(top: 5, bottom: 5, right: 10, left: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               // 可选：根据需要调整按钮间的间距
@@ -79,7 +79,7 @@ class _CloudState extends State<Cloud> {
                 Row(
                   children: [
                     allButton,
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     batchButton,
@@ -89,7 +89,7 @@ class _CloudState extends State<Cloud> {
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
           Expanded(
@@ -101,32 +101,32 @@ class _CloudState extends State<Cloud> {
                   GridColumn(
                       columnName: 'id',
                       label: Container(
-                          padding: EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(16.0),
                           alignment: Alignment.center,
-                          child: Text(
+                          child: const Text(
                             '序号',
                           ))),
                   GridColumn(
                       columnName: 'name',
                       label: Container(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,
-                          child: Text('名称'))),
+                          child: const Text('名称'))),
                   GridColumn(
                       columnName: 'mnTime',
                       label: Container(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,
-                          child: Text(
+                          child: const Text(
                             '时间',
                             overflow: TextOverflow.ellipsis,
                           ))),
                   GridColumn(
                       columnName: 'state',
                       label: Container(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,
-                          child: Text(
+                          child: const Text(
                             '状态',
                             overflow: TextOverflow.ellipsis,
                           ))),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:bluetooth_mini/provider/BluetoothManager.dart';
+import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
 import 'package:bluetooth_mini/utils/extra.dart';
 import 'package:bluetooth_mini/utils/snackbar.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -43,7 +43,6 @@ class _DevicesStateState extends State<DevicesState> {
   @override
   void dispose() {
     super.dispose();
-    print('dispose');
     // 跳转 homecard 不会执行这里
     // 退出登录会执行
     if (bluetoothManagerInstant != null) {
@@ -68,7 +67,6 @@ class _DevicesStateState extends State<DevicesState> {
 
   // 开始连接
   Future<void> connectTheDevice(BluetoothDevice onDevice) async {
-    print('开始连接');
     EasyLoading.show();
     await onDevice.connectAndUpdateStream().catchError((e) {
       Snackbar.show(ABC.c, prettyException("Connect Error:", e),
@@ -85,31 +83,34 @@ class _DevicesStateState extends State<DevicesState> {
     }
   }
 
+  // 读取特征值
+  void yourFunction(service) {
+    // 具名函数的内容
+    if (service.uuid.toString() == 'ffe0') {
+      // Reads all characteristics
+      var characteristics = service.characteristics;
+      for (BluetoothCharacteristic c in characteristics) {
+        if (c.uuid.toString() == 'ffe1') {
+          // 例如读取特征码的值
+          if (mounted) {
+            setState(() {
+              targetCharacteristic = c;
+            });
+          }
+          // readCharacteristicValue();
+          // writeAndListen();
+        }
+      }
+    }
+  }
+
   // 读取指定服务及特征值
   void discoverServices(BluetoothDevice? onConnectdevice) async {
     if (onConnectdevice == null) {
       return;
     }
-    List<BluetoothService> services = await onConnectdevice!.discoverServices();
-    services.forEach((service) {
-      if (service.uuid.toString() == 'ffe0') {
-        // Reads all characteristics
-        var characteristics = service.characteristics;
-        for (BluetoothCharacteristic c in characteristics) {
-          if (c.uuid.toString() == 'ffe1') {
-            // 例如读取特征码的值
-            if (mounted) {
-              setState(() {
-                targetCharacteristic = c;
-              });
-            }
-
-            // readCharacteristicValue();
-            // writeAndListen();
-          }
-        }
-      }
-    });
+    List<BluetoothService> services = await onConnectdevice.discoverServices();
+    services.forEach(yourFunction);
   }
 
   void readCharacteristicValue() async {
@@ -149,16 +150,15 @@ class _DevicesStateState extends State<DevicesState> {
           _power = hex; // int.parse(hex.toString(), radix: 16);
         });
       }
-      _lastValueSubscription?.cancel();
+      _lastValueSubscription.cancel();
       targetCharacteristic!.setNotifyValue(false);
       //print('取消订阅');
       //print(_lastValueSubscription);
     });
   }
-
+  @override
   void deactivate() {
     super.deactivate();
-    print('deactiveate');
   }
 
   @override

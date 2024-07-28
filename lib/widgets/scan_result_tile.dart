@@ -42,10 +42,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
   }
 
   String getNiceManufacturerData(List<List<int>> data) {
-    return data
-        .map((val) => '${getNiceHexArray(val)}')
-        .join(', ')
-        .toUpperCase();
+    return data.map((val) => getNiceHexArray(val)).join(', ').toUpperCase();
   }
 
   String getNiceServiceData(Map<Guid, List<int>> data) {
@@ -86,21 +83,19 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
   Widget _buildConnectButton(BuildContext context) {
     return ElevatedButton(
-      child: isConnected ? const Text('已连接') : const Text('未连接'),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
       onPressed: () {
-        print('123');
-        print(isConnected);
         if (isConnected) {
           widget.result.device.disconnect();
         } else {
-          widget?.onOpen();
+          widget.onOpen();
         }
         setState(() {});
       },
+      child: isConnected ? const Text('已连接') : const Text('未连接'),
     );
   }
 
