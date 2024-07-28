@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bluetooth_mini/widgets/setting_list.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
+import 'package:bluetooth_mini/db/my_setting.dart';
 
 class Setting extends StatefulWidget {
   const Setting({Key? key}) : super(key: key);
@@ -11,12 +12,27 @@ class Setting extends StatefulWidget {
 
 class _SettingState extends State<Setting> {
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller_work = TextEditingController();
+  final TextEditingController _controller_factory = TextEditingController();
+  final TextEditingController _controller_drilling = TextEditingController();
 
-  final List<String> _miningArea = [];
-  final List<String> _work = [];
-  final List<String> _factory = [];
-  final List<String> _drilling = [];
-  final List<String> data = ['语文', '数学', '英语', '物理', '化学', '生物', '地理'];
+  String? _selectedMine;
+  String? _selectedWork;
+  String? _selectedFactory;
+
+  List<String> _miningArea = [];
+  List<String> _work = [];
+  List<String> _factory = [];
+  List<String> _drilling = [];
+
+  @override
+  void initState() {
+    _miningArea = MySetting.getMine();
+    _work = MySetting.getWork();
+    _factory = MySetting.getFactory();
+    _drilling = MySetting.getDrilling();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -24,15 +40,142 @@ class _SettingState extends State<Setting> {
     super.dispose();
   }
 
-  void _onSelect(String? value) {
-    setState(() {
-    });
+  /// 工作面组件模块
+  Widget _buildRowWorkSelect() {
+    return Row(
+      children: [
+        const SizedBox(
+          width: 100,
+          child: Text(
+            '矿区名称:',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: _selectedMine,
+            hint: const Text('请选择一个选项'),
+            items: _miningArea.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedMine = newValue;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '请选择一个选项';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.only(
+                top: 0,
+                left: 10,
+                bottom: 0,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
   }
 
-  List<DropdownMenuEntry<String>> _buildMenuList(List<String> data) {
-    return data.map((String value) {
-      return DropdownMenuEntry<String>(value: value, label: value);
-    }).toList();
+  /// 钻厂组件模块
+  Widget _buildRowFactorySelect() {
+    return Row(
+      children: [
+        const SizedBox(
+          width: 100,
+          child: Text(
+            '矿区名称:',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: _selectedWork,
+            hint: const Text('请选择一个选项'),
+            items: _work.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedWork = newValue;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '请选择一个选项';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.only(
+                top: 0,
+                left: 10,
+                bottom: 0,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  /// 钻厂组件模块
+  Widget _buildRowDrillSelect() {
+    return Row(
+      children: [
+        const SizedBox(
+          width: 100,
+          child: Text(
+            '矿区名称:',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: _selectedFactory,
+            hint: const Text('请选择一个选项'),
+            items: _factory.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedFactory = newValue;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '请选择一个选项';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.only(
+                top: 0,
+                left: 10,
+                bottom: 0,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
   }
 
   @override
@@ -87,6 +230,7 @@ class _SettingState extends State<Setting> {
                         onPressed: () {
                           setState(() {
                             _miningArea.add(_controller.text);
+                            MySetting.setMine(_miningArea);
                           });
                           Navigator.of(context).pop();
                         },
@@ -96,6 +240,9 @@ class _SettingState extends State<Setting> {
                         ),
                       ),
                     ],
+                    onDele: () {
+                      MySetting.setMine(_miningArea);
+                    },
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -109,21 +256,19 @@ class _SettingState extends State<Setting> {
                       ),
                       child: Column(
                         children: [
-                          DropdownMenu<String>(
-                            menuHeight: 200,
-                            initialSelection: data.first,
-                            onSelected: _onSelect,
-                            dropdownMenuEntries: _buildMenuList(data),
-                          ),
+                          _buildRowWorkSelect(),
                           Row(
                             children: [
-                              const Text(
-                                '矿区名称:',
-                                style: TextStyle(fontSize: 12),
+                              const SizedBox(
+                                width: 100,
+                                child: Text(
+                                  '工作面名称:',
+                                  style: TextStyle(fontSize: 12),
+                                ),
                               ),
                               Expanded(
                                 child: TextField(
-                                  controller: _controller,
+                                  controller: _controller_work,
                                 ),
                               )
                             ],
@@ -150,7 +295,8 @@ class _SettingState extends State<Setting> {
                             TextButton.styleFrom(backgroundColor: Colors.blue),
                         onPressed: () {
                           setState(() {
-                            _work.add(_controller.text);
+                            _work.add(_controller_work.text);
+                            MySetting.setWork(_work);
                           });
                           Navigator.of(context).pop();
                         },
@@ -160,6 +306,9 @@ class _SettingState extends State<Setting> {
                         ),
                       ),
                     ],
+                    onDele: () {
+                      MySetting.setWork(_work);
+                    },
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -171,22 +320,28 @@ class _SettingState extends State<Setting> {
                       constraints: const BoxConstraints(
                         minWidth: 500, // 设置最大宽度
                       ),
-                      child: Row(
-                        children: [
-                          const Text(
-                            '矿区名称:',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              controller: _controller,
-                            ),
+                      child: Column(
+                        children: <Widget>[
+                          _buildRowWorkSelect(),
+                          _buildRowFactorySelect(),
+                          Row(
+                            children: [
+                              const Text(
+                                '钻厂名称:',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _controller_factory,
+                                ),
+                              )
+                            ],
                           )
                         ],
                       ),
                     ),
                     title: const Text(
-                      '添加矿区',
+                      '添加钻厂',
                       style: TextStyle(fontSize: 14),
                     ),
                     actions: <Widget>[
@@ -204,7 +359,8 @@ class _SettingState extends State<Setting> {
                             TextButton.styleFrom(backgroundColor: Colors.blue),
                         onPressed: () {
                           setState(() {
-                            _factory.add(_controller.text);
+                            _factory.add(_controller_factory.text);
+                            MySetting.setFactory(_factory);
                           });
                           Navigator.of(context).pop();
                         },
@@ -214,6 +370,9 @@ class _SettingState extends State<Setting> {
                         ),
                       ),
                     ],
+                    onDele: () {
+                      MySetting.setFactory(_factory);
+                    },
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -225,22 +384,29 @@ class _SettingState extends State<Setting> {
                       constraints: const BoxConstraints(
                         minWidth: 500, // 设置最大宽度
                       ),
-                      child: Row(
-                        children: [
-                          const Text(
-                            '矿区名称:',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              controller: _controller,
-                            ),
+                      child: Column(
+                        children: <Widget>[
+                          _buildRowWorkSelect(),
+                          _buildRowFactorySelect(),
+                          _buildRowDrillSelect(),
+                          Row(
+                            children: [
+                              const Text(
+                                '矿区名称:',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _controller_drilling,
+                                ),
+                              )
+                            ],
                           )
                         ],
                       ),
                     ),
                     title: const Text(
-                      '添加矿区',
+                      '添加钻孔',
                       style: TextStyle(fontSize: 14),
                     ),
                     actions: <Widget>[
@@ -258,7 +424,8 @@ class _SettingState extends State<Setting> {
                             TextButton.styleFrom(backgroundColor: Colors.blue),
                         onPressed: () {
                           setState(() {
-                            _drilling.add(_controller.text);
+                            _drilling.add(_controller_drilling.text);
+                            MySetting.setDrilling(_drilling);
                           });
                           Navigator.of(context).pop();
                         },
@@ -268,6 +435,9 @@ class _SettingState extends State<Setting> {
                         ),
                       ),
                     ],
+                    onDele: () {
+                      MySetting.setDrilling(_drilling);
+                    },
                   ),
                 ),
               ]))),

@@ -26,7 +26,7 @@ class _ProbeState extends State<Probe> {
   BluetoothCharacteristic? targetCharacteristic;
 
   // 监听订阅
-  late StreamSubscription<List<int>> _lastValueSubscription;
+  StreamSubscription<List<int>>? _lastValueSubscription;
 
   // 倾角
   String _roll = '0';
@@ -140,14 +140,14 @@ class _ProbeState extends State<Probe> {
 
   @override
   void dispose() {
+    _lastValueSubscription?.cancel();
+    if (targetCharacteristic != null) {
+      targetCharacteristic!.setNotifyValue(false);
+      // 停止采集
+      targetCharacteristic!
+          .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
+    }
     super.dispose();
-    // if (_lastValueSubscription != null) {
-    _lastValueSubscription.cancel();
-    targetCharacteristic!.setNotifyValue(false);
-    // 停止采集
-    targetCharacteristic!
-        .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
-    // }
   }
 
   Widget rollText() {

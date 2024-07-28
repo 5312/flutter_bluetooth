@@ -7,15 +7,17 @@ class ListCard extends StatefulWidget {
   final Widget? contentBody;
   final Widget? title;
   final List<Widget>? actions;
+  final void Function() onDele;
 
-  const ListCard({
-    Key? key,
-    required this.buttonText,
-    required this.items,
-    this.contentBody,
-    this.title,
-    this.actions,
-  }) : super(key: key);
+  const ListCard(
+      {Key? key,
+      required this.buttonText,
+      required this.items,
+      this.contentBody,
+      this.title,
+      this.actions,
+      required this.onDele})
+      : super(key: key);
 
   @override
   State<ListCard> createState() => _ListCardState();
@@ -40,6 +42,7 @@ class _ListCardState extends State<ListCard> {
   void _deleteItem(int index) {
     setState(() {
       widget.items.removeAt(index);
+      widget.onDele();
     });
   }
 
@@ -85,7 +88,10 @@ class _ListCardState extends State<ListCard> {
                   return ListTile(
                     title: Text(widget.items[index]),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete),
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
                       onPressed: () => _deleteItem(index),
                     ),
                   );

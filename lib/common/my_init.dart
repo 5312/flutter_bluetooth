@@ -1,3 +1,4 @@
+import 'package:bluetooth_mini/db/my_setting.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:bluetooth_mini/db/my_sp.dart';
 
@@ -7,7 +8,7 @@ class MyInit {
   static Future<dynamic> init() async {
     // 初始化 SharedPreferences
     await MySP.init();
-
+    await MySetting.init();
     // 配置 EasyLoading 单例
     EasyLoading.instance
       ..displayDuration = const Duration(milliseconds: 2000)
