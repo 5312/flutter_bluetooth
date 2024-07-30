@@ -4,7 +4,16 @@ import 'package:bluetooth_mini/models/time_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:bluetooth_mini/widgets/time_form.dart';
-import 'package:bluetooth_mini/widgets/time_drop.dart';
+
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'dart:async';
+import 'package:bluetooth_mini/utils/hex.dart';
+import 'package:provider/provider.dart';
+import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:bluetooth_mini/widgets/cus_dialog.dart';
+import 'package:bluetooth_mini/db/my_setting.dart';
+import 'package:bluetooth_mini/db/my_time.dart';
 
 class TimeOut extends StatefulWidget {
   const TimeOut({Key? key}) : super(key: key);
@@ -16,120 +25,476 @@ class TimeOut extends StatefulWidget {
 class _TimeOutState extends State<TimeOut> {
   List<TimeModel> employees = <TimeModel>[];
   late EmployeeDataSource employeeDataSource;
+  final TextEditingController _controllerLen = TextEditingController();
+  final TextEditingController _controllerName = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
+  bool isSync = false;
+  bool isFixed = false;
+  bool isPop = false;
+  late BluetoothManager bluetooth;
+
+  // 选中特征码
+  BluetoothCharacteristic? targetCharacteristic;
+
+  // 监听订阅
+  StreamSubscription<List<int>>? _lastValueSubscription;
+
+  late Timer _timer;
+  int _currentTime = 0;
+
+  String? _selectedMine;
+  String? _selectedWork;
+  String? _selectedFactory;
+  String? _selectedDrilling;
+
+  List<String> _miningArea = [];
+  List<String> _work = [];
+  List<String> _factory = [];
+  List<String> _drilling = [];
+
+  String _mineString = '';
+  String _workString = '';
+  String _factoryString = '';
+  String _drillingString = '';
+
+  String _nString = '';
+
   @override
   void initState() {
-    super.initState();
+    _miningArea = MySetting.getMine();
+    _work = MySetting.getWork();
+    _factory = MySetting.getFactory();
+    _drilling = MySetting.getDrilling();
+
+    isSync = false;
+    isFixed = false;
+    isPop = false;
+
     employees = getEmployeeData();
     employeeDataSource = EmployeeDataSource(employeeData: employees);
     // 先弹窗
-    //target widget
-    SmartDialog.show(
-      useSystem: true,
-      clickMaskDismiss: false, // 设置为false，点击遮罩时不关闭
-      builder: (_) {
-        return Container(
-          height: 380,
-          width: 500,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.white,
+    bluetooth = Provider.of<BluetoothManager>(context, listen: false);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('--------------页面buildOver-------------------');
+
+      if (bluetooth.nowConnectDevice == null) {
+        Navigator.of(context).pop();
+        SmartDialog.showToast('请连接蓝牙');
+      } else {
+        open();
+      }
+    });
+    super.initState();
+
+    // target widget
+    // SmartDialog.show(
+    //   useSystem: true,
+    //   clickMaskDismiss: false, // 设置为false，点击遮罩时不关闭
+    //   builder: (_) {
+    //     return Container(
+    //       height: 380,
+    //       width: 500,
+    //       decoration: BoxDecoration(
+    //         borderRadius: BorderRadius.circular(20),
+    //         color: Colors.white,
+    //       ),
+    //       alignment: Alignment.center,
+    //       child: Builder(builder: (context) {
+    //         return Form(
+    //           key: _formKey,
+    //           child: Padding(
+    //               padding: const EdgeInsets.all(20),
+    //               child: Column(
+    //                 crossAxisAlignment: CrossAxisAlignment.start,
+    //                 children: <Widget>[
+    //                   const TimeDrop(
+    //                     label: '矿区',
+    //                   ),
+    //                   const TimeDrop(label: '工作面'),
+    //                   const TimeDrop(label: '钻厂'),
+    //                   const TimeDrop(label: '钻孔'),
+    //                   const MyForm(label: '钻杆长度', suffixIcon: 'm'),
+    //                   const MyForm(label: '检测名称', suffixIcon: ''),
+    //                   Padding(
+    //                     padding: const EdgeInsets.only(
+    //                         top: 10, left: 350, bottom: 0),
+    //                     child: SizedBox(
+    //                       height: 30,
+    //                       child: ElevatedButton(
+    //                         style: ElevatedButton.styleFrom(
+    //                           backgroundColor: Colors.blue,
+    //                           foregroundColor: Colors.white,
+    //                         ),
+    //                         onPressed: () {
+    //                           //
+    //                           setState(() {
+    //                             isSync = true;
+    //                           });
+    //                           Navigator.of(context).pop();
+    //                         },
+    //                         child: const Text(
+    //                           "下一步",
+    //                           style: TextStyle(
+    //                             fontSize: 18,
+    //                           ),
+    //                         ),
+    //                       ),
+    //                     ),
+    //                   ),
+    //                 ],
+    //               )),
+    //         );
+    //       }),
+    //     );
+    //   },
+    // );
+  }
+
+  /// 矿区
+  Widget _buildRowMineSelect() {
+    return Row(
+      children: [
+        const SizedBox(
+          width: 100,
+          child: Text(
+            '矿区名称:',
+            style: TextStyle(fontSize: 12),
           ),
-          alignment: Alignment.center,
-          child: Builder(builder: (context) {
-            return Form(
-              key: _formKey,
-              child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const TimeDrop(
-                        label: '矿区',
-                      ),
-                      const TimeDrop(label: '工作面'),
-                      const TimeDrop(label: '钻厂'),
-                      const TimeDrop(label: '钻孔'),
-                      const MyForm(label: '钻杆长度', suffixIcon: 'm'),
-                      const MyForm(label: '检测名称', suffixIcon: ''),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            top: 10, left: 350, bottom: 0),
-                        child: SizedBox(
-                          height: 30,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () {
-                              //
-                            },
-                            child: const Text(
-                              "下一步",
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )),
-            );
-          }),
+        ),
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: _selectedMine,
+            hint: const Text('请选择一个选项'),
+            items: _miningArea.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedMine = newValue;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '请选择一个选项';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.only(
+                top: 0,
+                left: 10,
+                bottom: 0,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  /// 工作面
+  Widget _buildRowWorkSelect() {
+    return Row(
+      children: [
+        const SizedBox(
+          width: 100,
+          child: Text(
+            '工作面:',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: _selectedWork,
+            hint: const Text('请选择一个选项'),
+            items: _work.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedWork = newValue;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '请选择一个选项';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.only(
+                top: 0,
+                left: 10,
+                bottom: 0,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  /// 钻厂
+  Widget _buildRowFactorySelect() {
+    return Row(
+      children: [
+        const SizedBox(
+          width: 100,
+          child: Text(
+            '钻厂:',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: _selectedFactory,
+            hint: const Text('请选择一个选项'),
+            items: _factory.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedFactory = newValue;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '请选择一个选项';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.only(
+                top: 0,
+                left: 10,
+                bottom: 0,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  /// 钻孔
+  Widget _buildRowDrillSelect() {
+    return Row(
+      children: [
+        const SizedBox(
+          width: 100,
+          child: Text(
+            '钻厂:',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: _selectedDrilling,
+            hint: const Text('请选择一个选项'),
+            items: _drilling.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedDrilling = newValue;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '请选择一个选项';
+              }
+              return null;
+            },
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              contentPadding: EdgeInsets.only(
+                top: 0,
+                left: 10,
+                bottom: 0,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  void open() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DialogKeyboard(
+          contentBody: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minWidth: 500, // 设置最大宽度
+              ),
+              child: Column(
+                children: <Widget>[
+                  _buildRowMineSelect(),
+                  _buildRowWorkSelect(),
+                  _buildRowFactorySelect(),
+                  _buildRowDrillSelect(),
+                  MyForm(
+                    label: '钻杆长度',
+                    suffixIcon: 'm',
+                    controller: _controllerLen,
+                  ),
+                  MyForm(
+                    label: '检测名称',
+                    suffixIcon: '',
+                    controller: _controllerName,
+                  ),
+                ],
+              )),
+          title: const Text(
+            '添加矿区',
+            style: TextStyle(fontSize: 14),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(backgroundColor: Colors.blue),
+              onPressed: () {
+                if (_controllerName.text != '') {
+                  setState(() {
+                    isSync = true;
+                    _mineString = _selectedMine ?? '';
+                    MyTime.setMine(_mineString);
+                    _workString = _selectedWork ?? '';
+                    MyTime.setWork(_workString);
+
+                    _factoryString = _selectedFactory ?? '';
+                    MyTime.setFactory(_factoryString);
+
+                    _drillingString = _selectedDrilling ?? '';
+                    MyTime.setDirlling(_drillingString);
+                    _nString = _controllerName.text;
+                    MyTime.setMonName(_nString);
+                  });
+                  Navigator.of(context).pop();
+                } else {
+                  SmartDialog.showToast('请填写信息');
+                }
+              },
+              child: const Text(
+                '下一步',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
-  // 定时同步按钮
-  Widget timeButton = ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: const Color.fromRGBO(242, 243, 247, 1),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10)), // 设置圆角为10
-      ),
-    ),
-    child: const Text('定时同步',
-        style:
-            TextStyle(fontSize: 16, color: Color.fromRGBO(147, 153, 177, 1))),
-    onPressed: () {
-      // 保存操作的逻辑
-    },
-  );
+  // foreach 读取特征值
+  void readServiceFunction(service) {
+    // 具名函数的内容
+    if (service.uuid.toString() == 'ffe0') {
+      // Reads all characteristics
+      var characteristics = service.characteristics;
+      for (BluetoothCharacteristic c in characteristics) {
+        if (c.uuid.toString() == 'ffe1') {
+          // 例如读取特征码的值
+          if (mounted) {
+            setState(() {
+              targetCharacteristic = c;
+              handleSync(targetCharacteristic);
+            });
+          }
 
-  // 定点测量
-  Widget fixedPointButton = ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.blueAccent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10)), // 设置圆角为10
-      ),
-    ),
-    child:
-        const Text('定点测量', style: TextStyle(fontSize: 16, color: Colors.white)),
-    onPressed: () {
-      // 保存操作的逻辑
-    },
-  );
+          // readCharacteristicValue();
+          // writeAndListen();
+        }
+      }
+    }
+  }
 
-  // 删除末尾数据
-  Widget deletePopButton = ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.blueAccent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10)), // 设置圆角为10
-      ),
-    ),
-    child: const Text('删除末尾数据',
-        style: TextStyle(fontSize: 16, color: Colors.white)),
-    onPressed: () {
-      // 保存操作的逻辑
-    },
-  );
+  // 读取指定服务及特征值
+  void discoverServices(BluetoothDevice? onConnectdevice) async {
+    if (onConnectdevice == null) {
+      return;
+    }
+    if (!onConnectdevice.isConnected) {
+      SmartDialog.showToast('请连接设备后再试！');
+      return;
+    }
+    List<BluetoothService> services = await onConnectdevice.discoverServices();
+    services.forEach(readServiceFunction);
+  }
+
+  // 启动连接
+  Future<void> handleSync(BluetoothCharacteristic? targetCharacteristic) async {
+    if (targetCharacteristic == null) {
+      return;
+    }
+    // 写入数据到特征码 启动采集
+    await targetCharacteristic!
+        .write([0x68, 0x05, 0x00, 0x71, 0x01, 0x77], withoutResponse: false);
+    print('启动采集');
+    EasyLoading.show(status: '正在同步中...');
+    backTime();
+    // 监听特征码的通知
+    targetCharacteristic.setNotifyValue(true);
+    _lastValueSubscription =
+        targetCharacteristic.onValueReceived.listen((value) {
+      // 转为16进制数据用来查看文档对照
+      List<String> hexArray = bytesToHexArray(value);
+      EasyLoading.dismiss();
+      print('定时同步');
+
+      // [68, 05, 00, f1, 00, f6]
+      // [68, 14, 00, f0, 01(*5), 00, 00, 49, 00, 04, 02, 00, 01, 34, 02, 13, 84, 03, 00, 00, 25]
+      print(hexArray);
+    });
+  }
+
+  // 启动成功后倒计时
+  void backTime() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _currentTime += 1;
+      });
+    });
+  }
+
+  String _formatTime(int seconds) {
+    int hours = seconds ~/ 3600;
+    int minutes = (seconds % 3600) ~/ 60;
+    int secs = seconds % 60;
+    return '${_twoDigits(hours)}:${_twoDigits(minutes)}:${_twoDigits(secs)}';
+  }
+
+  String _twoDigits(int n) => n.toString().padLeft(2, '0');
+
+  @override
+  void dispose() {
+    _lastValueSubscription?.cancel();
+    if (targetCharacteristic != null) {
+      targetCharacteristic!.setNotifyValue(false);
+// 停止采集
+      targetCharacteristic!
+          .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,17 +502,17 @@ class _TimeOutState extends State<TimeOut> {
       appBar: const CustomAppBar('定时同步'),
       body: Column(
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 10, bottom: 10, left: 30, right: 30),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               // 可选：根据需要调整按钮间的间距
               children: [
-                Text('矿区：1'),
-                Text('工作圈：1'),
-                Text('钻厂：1'),
-                Text('钻孔：1'),
-                Text('检测名称：66'),
+                Text('矿区：${_mineString}'),
+                Text('工作圈:${_workString}'),
+                Text('钻厂：${_factoryString}'),
+                Text('钻孔：${_drillingString}'),
+                Text('检测名称：${_nString}'),
               ],
             ),
           ),
@@ -165,10 +530,70 @@ class _TimeOutState extends State<TimeOut> {
                       child: Column(
                         children: [
                           const Text('深度信息：0'),
-                          const Text('累计时间：00:00:00'),
-                          timeButton,
-                          fixedPointButton,
-                          deletePopButton
+                          Text('累计时间：${_formatTime(_currentTime)}'),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isSync
+                                  ? Colors.blueAccent
+                                  : const Color.fromRGBO(242, 243, 247, 1),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)), // 设置圆角为10
+                              ),
+                            ),
+                            child: Text('定时同步',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: isSync
+                                        ? Colors.white
+                                        : Color.fromRGBO(147, 153, 177, 1))),
+                            onPressed: () async {
+                              if (isSync) {
+                                // handleSync(bluetooth?.targetCharacteristic);
+                                discoverServices(bluetooth.nowConnectDevice);
+                              }
+                            },
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isFixed
+                                  ? Colors.blueAccent
+                                  : const Color.fromRGBO(242, 243, 247, 1),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)), // 设置圆角为10
+                              ),
+                            ),
+                            child: Text('定点测量',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: isFixed
+                                        ? Colors.white
+                                        : Color.fromRGBO(147, 153, 177, 1))),
+                            onPressed: () {
+                              // 保存操作的逻辑
+                            },
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isPop
+                                  ? Colors.blueAccent
+                                  : const Color.fromRGBO(242, 243, 247, 1),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)), // 设置圆角为10
+                              ),
+                            ),
+                            child: Text('删除末尾数据',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: isPop
+                                        ? Colors.white
+                                        : Color.fromRGBO(147, 153, 177, 1))),
+                            onPressed: () {
+                              // 保存操作的逻辑
+                            },
+                          )
                         ],
                       ),
                     ),
@@ -219,8 +644,8 @@ class _TimeOutState extends State<TimeOut> {
 
   List<TimeModel> getEmployeeData() {
     return [
-      TimeModel(10001, 0.2, '00:04:02'),
-      TimeModel(10002, 0.2, '00:04:02'),
+      //TimeModel(10001, 0.2, '00:04:02'),
+      //TimeModel(10002, 0.2, '00:04:02'),
       // TimeModel(10002, 0.2, '00:04:02'),
       // TimeModel(10002, 0.2, '00:04:02'),
     ];

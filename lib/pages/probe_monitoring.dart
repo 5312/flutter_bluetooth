@@ -38,6 +38,11 @@ class _ProbeState extends State<Probe> {
     _employeeDataSource = EmployeeDataSource(employeeData: _employees);
 
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
+    if (bluetooth.nowConnectDevice == null) {
+      Navigator.of(context).pop();
+      SmartDialog.showToast('请连接蓝牙');
+    }
+
   }
 
   // foreach 读取特征值
@@ -180,12 +185,6 @@ class _ProbeState extends State<Probe> {
     _employeeDataSource = EmployeeDataSource(employeeData: _employees);
   }
 
-  // List<DataModel> getEmployeeData() {
-  //   return [
-  //     DataModel(10001, '00:04:02', 3.0, 0.2, 4.11),
-  //     DataModel(10002, '00:04:02', 3.0, 0.2, 4.11),
-  //   ];
-  // }
   // 添加和保存按钮
   Widget addButton = ElevatedButton(
     style: ElevatedButton.styleFrom(

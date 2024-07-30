@@ -40,7 +40,7 @@ class _SettingState extends State<Setting> {
     super.dispose();
   }
 
-  /// 工作面组件模块
+  /// 矿区
   Widget _buildRowWorkSelect() {
     return Row(
       children: [
@@ -86,14 +86,14 @@ class _SettingState extends State<Setting> {
     );
   }
 
-  /// 钻厂组件模块
+  /// 工作面模块
   Widget _buildRowFactorySelect() {
     return Row(
       children: [
         const SizedBox(
           width: 100,
           child: Text(
-            '矿区名称:',
+            '工作面:',
             style: TextStyle(fontSize: 12),
           ),
         ),
@@ -139,7 +139,7 @@ class _SettingState extends State<Setting> {
         const SizedBox(
           width: 100,
           child: Text(
-            '矿区名称:',
+            '钻厂:',
             style: TextStyle(fontSize: 12),
           ),
         ),
@@ -392,7 +392,7 @@ class _SettingState extends State<Setting> {
                           Row(
                             children: [
                               const Text(
-                                '矿区名称:',
+                                '钻孔名称:',
                                 style: TextStyle(fontSize: 12),
                               ),
                               Expanded(

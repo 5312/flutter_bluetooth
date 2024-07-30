@@ -4,8 +4,14 @@ class MyForm extends StatefulWidget {
   // 提示文字
   final String label;
   final String suffixIcon;
+  final TextEditingController controller;
 
-  const MyForm({Key? key,required this.label,required this.suffixIcon}) : super(key: key);
+  const MyForm(
+      {Key? key,
+      required this.label,
+      required this.suffixIcon,
+      required this.controller})
+      : super(key: key);
 
   @override
   State<MyForm> createState() => _MyFormState();
@@ -21,10 +27,9 @@ class _MyFormState extends State<MyForm> {
           child: Row(
             children: <Widget>[
               SizedBox(
-                width: 100,
+                width: 90,
                 child: Text(
                   '${widget.label} :',
-                  textAlign: TextAlign.right,
                   style: const TextStyle(fontSize: 12),
                 ),
               ),
@@ -33,15 +38,16 @@ class _MyFormState extends State<MyForm> {
               ),
               Expanded(
                 child: TextFormField(
+                  controller: widget.controller,
                   decoration: InputDecoration(
-                    hintText: '请输入',
+                    hintText: '请输入${widget.label}',
                     suffixIcon: Padding(
                       padding: const EdgeInsets.only(top: 5),
                       // 为后缀文本添加右侧内边距
                       child: Text(widget.suffixIcon,
                           style: const TextStyle(fontSize: 15)),
                     ), // 后缀文本
-                    border: const OutlineInputBorder(),
+                    //border: const OutlineInputBorder(),
                     contentPadding: const EdgeInsets.only(
                       top: 0,
                       left: 10,

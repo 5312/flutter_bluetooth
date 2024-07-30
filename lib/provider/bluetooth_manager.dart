@@ -23,6 +23,11 @@ class BluetoothManager with ChangeNotifier {
   // 适配器状态
   BluetoothAdapterState adapterState = BluetoothAdapterState.unknown;
 
+  late StreamSubscription<BluetoothConnectionState>
+      _connectionStateSubscription;
+  BluetoothConnectionState _connectionState =
+      BluetoothConnectionState.disconnected;
+
   // 扫描结果list
   List<ScanResult> scanResults = [];
 
@@ -67,6 +72,19 @@ class BluetoothManager with ChangeNotifier {
     });
   }
 
+  // 监听设备状态
+  void onDevice() {
+    if (nowConnectDevice != null) {
+      _connectionStateSubscription =
+          nowConnectDevice!.connectionState.listen((state) {
+        _connectionState = state;
+        if (state != BluetoothConnectionState.connected) {
+          nowConnectDevice = null;
+        }
+      });
+    }
+  }
+
   // 初始化连接逻辑
   Future<void> initHomeConnect() async {
     // 不管如何都调用一次 启动蓝牙
@@ -80,6 +98,7 @@ class BluetoothManager with ChangeNotifier {
       } else {
         nowConnectDevice = connectedDevices.first;
         notifyListeners();
+        onDevice();
       }
     } else {
       await turnOnBlue();
@@ -135,6 +154,7 @@ class BluetoothManager with ChangeNotifier {
   // 更新已连接设备
   void updateNowDevice(BluetoothDevice? d) {
     nowConnectDevice = d;
+    onDevice();
     if (hasListeners) {
       notifyListeners();
     }

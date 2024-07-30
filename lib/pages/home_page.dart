@@ -3,6 +3,7 @@ import 'package:bluetooth_mini/widgets/home_card.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/widgets/layout_btn.dart';
 import 'package:bluetooth_mini/widgets/bluetooth_devices.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -14,6 +15,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   void initState() {
+    EasyLoading.dismiss();
+
     super.initState();
   }
 
