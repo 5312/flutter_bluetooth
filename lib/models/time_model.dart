@@ -3,16 +3,37 @@ import 'package:flutter/material.dart';
 
 class TimeModel {
   /// Creates the employee class with required details.
-  TimeModel(this.id, this.inclination, this.timeData);
 
   /// Id of an employee.
   final int id;
 
-  /// Name of an employee.
-  final double inclination;
+  /// Name of an employee.深度
+  final String inclination;
 
   /// Designation of an employee.
   final String timeData;
+
+  TimeModel(
+      {required this.id, required this.inclination, required this.timeData});
+
+  /// Create an Employee object from a JSON map.
+  factory TimeModel.fromJson(Map<String, dynamic> json) {
+    return TimeModel(
+      id: json['id'],
+      inclination: json['inclination'],
+      timeData: json['timeData'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'id': id,
+      'inclination': inclination,
+      'timeData': timeData
+    };
+
+    return data;
+  }
 }
 
 /// An object to set the employee collection data source to the datagrid. This
@@ -23,7 +44,7 @@ class EmployeeDataSource extends DataGridSource {
     _employeeData = employeeData
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<double>(columnName: 'name', value: e.inclination),
+              DataGridCell<String>(columnName: 'name', value: e.inclination),
               DataGridCell<String>(
                   columnName: 'designation', value: e.timeData),
             ]))

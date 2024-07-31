@@ -8,6 +8,12 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:async';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:bluetooth_mini/utils/hex.dart';
+import 'package:bluetooth_mini/widgets/cus_dialog.dart';
+import 'package:bluetooth_mini/widgets/time_form.dart';
+import 'package:bluetooth_mini/db/database_helper.dart';
+
+import 'package:bluetooth_mini/models/repo_model.dart';
+import 'dart:math';
 
 class Probe extends StatefulWidget {
   const Probe({Key? key}) : super(key: key);
@@ -17,10 +23,11 @@ class Probe extends StatefulWidget {
 }
 
 class _ProbeState extends State<Probe> {
-  final List<Employee> _employees = <Employee>[];
+  List<Employee> _employees = <Employee>[];
   late EmployeeDataSource _employeeDataSource;
   late BluetoothManager bluetooth;
   bool received = false;
+  final TextEditingController _controller = TextEditingController();
 
   // 选中特征码
   BluetoothCharacteristic? targetCharacteristic;
@@ -38,11 +45,11 @@ class _ProbeState extends State<Probe> {
     _employeeDataSource = EmployeeDataSource(employeeData: _employees);
 
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
+    // TODO~
     if (bluetooth.nowConnectDevice == null) {
       Navigator.of(context).pop();
       SmartDialog.showToast('请连接蓝牙');
     }
-
   }
 
   // foreach 读取特征值
@@ -152,6 +159,8 @@ class _ProbeState extends State<Probe> {
       targetCharacteristic!
           .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
     }
+    _roll = '';
+    _heading = '';
     super.dispose();
   }
 
@@ -177,27 +186,86 @@ class _ProbeState extends State<Probe> {
     );
   }
 
+  int generateRandomId({int min = 1, int max = 1000000}) {
+    final Random random = Random();
+    return random.nextInt(max - min + 1) + min;
+  }
+
+  // 储存
+  Future<void> _onStore() async {
+    if (_controller.text != '') {
+      print(_controller.text);
+      DateTime time = DateTime.now();
+      print(time);
+      int randomId = generateRandomId();
+      await DatabaseHelper().insertRepo(
+        RepoModel(
+            id: randomId, name: _controller.text, mnTime: time.toString()),
+      );
+      int randomId2 = generateRandomId();
+      List<Employee> _e = _employees.map((e) {
+        return Employee(
+          id: e.id,
+          inclination: e.inclination,
+          azimuth: e.azimuth,
+          repoId: randomId,
+        );
+      }).toList();
+      await DatabaseHelper().insertEmployees(_e);
+      Navigator.of(context).pop();
+    } else {
+      SmartDialog.showToast('请填写信息');
+    }
+  }
+
+  void open() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DialogKeyboard(
+          contentBody: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minWidth: 500, // 设置最大宽度
+              ),
+              child: Column(
+                children: <Widget>[
+                  MyForm(
+                    label: '检测名称',
+                    suffixIcon: '',
+                    controller: _controller,
+                  ),
+                ],
+              )),
+          title: const Text(
+            '添加矿区',
+            style: TextStyle(fontSize: 14),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(backgroundColor: Colors.blue),
+              onPressed: _onStore,
+              child: const Text(
+                '下一步',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _addEmployee() {
     int id = _employeeDataSource.rows.length + 1;
-    Employee rows = Employee(id, double.parse(_roll), double.parse(_heading));
+    Employee rows = Employee(
+        id: id,
+        inclination: double.parse(_roll),
+        azimuth: double.parse(_heading),
+        repoId: null);
     _employees.add(rows);
     // 保存操作的逻辑
     _employeeDataSource = EmployeeDataSource(employeeData: _employees);
   }
-
-  // 添加和保存按钮
-  Widget addButton = ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10)), // 设置圆角为10
-      ),
-    ),
-    child: const Text('储存', style: TextStyle(fontSize: 16, color: Colors.blue)),
-    onPressed: () {
-      // 添加操作的逻辑
-    },
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -232,7 +300,21 @@ class _ProbeState extends State<Probe> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end, // 可选：根据需要调整按钮间的间距
                     children: [
-                      addButton,
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(10)), // 设置圆角为10
+                          ),
+                        ),
+                        child: const Text('储存',
+                            style: TextStyle(fontSize: 16, color: Colors.blue)),
+                        onPressed: () {
+                          // 添加操作的逻辑
+                          open();
+                        },
+                      ),
                       const SizedBox(
                         width: 10,
                       ),

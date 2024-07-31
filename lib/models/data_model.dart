@@ -2,38 +2,34 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:flutter/material.dart';
 
 class DataModel {
-  /// Creates the employee class with required details.
-  DataModel(this.id, this.timeData, this.deep, this.inclination, this.azimuth);
-
-  /// Id of an employee.
+  /// Creates the data model class with required details.
   final int id;
-
-  /// Designation of an employee.
   final String timeData;
-
-  ///  深度
   final double deep;
+  final double? inclination;
+  final double? azimuth;
 
-  /// Name of an employee. 倾角
-  final double inclination;
-
-  /// 方位角
-  final double azimuth;
+  DataModel({
+    required this.id,
+    required this.timeData,
+    required this.deep,
+    this.inclination,
+    this.azimuth,
+  });
 }
 
-/// An object to set the employee collection data source to the datagrid. This
-/// is used to map the employee data to the datagrid widget.
-class EmployeeDataSource extends DataGridSource {
-  /// Creates the employee data source class with required details.
-  EmployeeDataSource({required List<DataModel> employeeData}) {
-    _employeeData = employeeData
+class EmployeeDataSourceData extends DataGridSource {
+  /// Creates the data source class with required details.
+  EmployeeDataSourceData({required List<DataModel> dataModels}) {
+    _employeeData = dataModels
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
               DataGridCell<String>(columnName: 'timeData', value: e.timeData),
               DataGridCell<double>(columnName: 'deep', value: e.deep),
               DataGridCell<double>(
-                  columnName: 'inclination', value: e.inclination),
-              DataGridCell<double>(columnName: 'azimuth', value: e.azimuth),
+                  columnName: 'inclination', value: e.inclination ?? 0.0),
+              DataGridCell<double>(
+                  columnName: 'azimuth', value: e.azimuth ?? 0.0),
             ]))
         .toList();
   }

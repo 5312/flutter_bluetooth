@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/cloud_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
+import 'package:bluetooth_mini/models/repo_model.dart';
+import 'package:bluetooth_mini/db/database_helper.dart';
 
 class Cloud extends StatefulWidget {
   const Cloud({Key? key}) : super(key: key);
@@ -16,9 +18,30 @@ class _CloudState extends State<Cloud> {
 
   @override
   void initState() {
+    GetList();
     super.initState();
-    employees = getEmployeeData();
-    employeeDataSource = EmployeeDataSource(employeeData: employees);
+  }
+
+  Future<void> GetList() async {
+    List<RepoModel> list = await DatabaseHelper().getRepos();
+
+    setState(() {
+      employees = transfromCloud(list);
+      employeeDataSource = EmployeeDataSource(employeeData: employees);
+    });
+  }
+
+  List<CloudModel> transfromCloud(List<RepoModel> repoModels) {
+    // 将 List<RepoModel> 转换为 List<CloudModel>
+    List<CloudModel> cloudModels = repoModels.map((repo) {
+      return CloudModel(
+        repo.id,
+        repo.name,
+        repo.mnTime,
+        'unknown', // 提供默认值或从其他来源获取实际值
+      );
+    }).toList();
+    return cloudModels;
   }
 
   // 添加和保存按钮
@@ -67,11 +90,12 @@ class _CloudState extends State<Cloud> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:const CustomAppBar('同步云端'),
+      appBar: const CustomAppBar('同步云端'),
       body: Column(
         children: [
           Padding(
-            padding:const EdgeInsets.only(top: 5, bottom: 5, right: 10, left: 10),
+            padding:
+                const EdgeInsets.only(top: 5, bottom: 5, right: 10, left: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               // 可选：根据需要调整按钮间的间距

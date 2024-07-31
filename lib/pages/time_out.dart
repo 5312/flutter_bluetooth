@@ -60,6 +60,8 @@ class _TimeOutState extends State<TimeOut> {
   String _drillingString = '';
 
   String _nString = '';
+  String _ptcth = '';
+  String _time = '';
 
   @override
   void initState() {
@@ -79,7 +81,7 @@ class _TimeOutState extends State<TimeOut> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print('--------------页面buildOver-------------------');
-
+      // TODO
       if (bluetooth.nowConnectDevice == null) {
         Navigator.of(context).pop();
         SmartDialog.showToast('请连接蓝牙');
@@ -88,69 +90,6 @@ class _TimeOutState extends State<TimeOut> {
       }
     });
     super.initState();
-
-    // target widget
-    // SmartDialog.show(
-    //   useSystem: true,
-    //   clickMaskDismiss: false, // 设置为false，点击遮罩时不关闭
-    //   builder: (_) {
-    //     return Container(
-    //       height: 380,
-    //       width: 500,
-    //       decoration: BoxDecoration(
-    //         borderRadius: BorderRadius.circular(20),
-    //         color: Colors.white,
-    //       ),
-    //       alignment: Alignment.center,
-    //       child: Builder(builder: (context) {
-    //         return Form(
-    //           key: _formKey,
-    //           child: Padding(
-    //               padding: const EdgeInsets.all(20),
-    //               child: Column(
-    //                 crossAxisAlignment: CrossAxisAlignment.start,
-    //                 children: <Widget>[
-    //                   const TimeDrop(
-    //                     label: '矿区',
-    //                   ),
-    //                   const TimeDrop(label: '工作面'),
-    //                   const TimeDrop(label: '钻厂'),
-    //                   const TimeDrop(label: '钻孔'),
-    //                   const MyForm(label: '钻杆长度', suffixIcon: 'm'),
-    //                   const MyForm(label: '检测名称', suffixIcon: ''),
-    //                   Padding(
-    //                     padding: const EdgeInsets.only(
-    //                         top: 10, left: 350, bottom: 0),
-    //                     child: SizedBox(
-    //                       height: 30,
-    //                       child: ElevatedButton(
-    //                         style: ElevatedButton.styleFrom(
-    //                           backgroundColor: Colors.blue,
-    //                           foregroundColor: Colors.white,
-    //                         ),
-    //                         onPressed: () {
-    //                           //
-    //                           setState(() {
-    //                             isSync = true;
-    //                           });
-    //                           Navigator.of(context).pop();
-    //                         },
-    //                         child: const Text(
-    //                           "下一步",
-    //                           style: TextStyle(
-    //                             fontSize: 18,
-    //                           ),
-    //                         ),
-    //                       ),
-    //                     ),
-    //                   ),
-    //                 ],
-    //               )),
-    //         );
-    //       }),
-    //     );
-    //   },
-    // );
   }
 
   /// 矿区
@@ -455,15 +394,65 @@ class _TimeOutState extends State<TimeOut> {
     targetCharacteristic.setNotifyValue(true);
     _lastValueSubscription =
         targetCharacteristic.onValueReceived.listen((value) {
+      isSync = false;
+      isFixed = true;
+      isPop = true;
       // 转为16进制数据用来查看文档对照
       List<String> hexArray = bytesToHexArray(value);
       EasyLoading.dismiss();
       print('定时同步');
-
-      // [68, 05, 00, f1, 00, f6]
-      // [68, 14, 00, f0, 01(*5), 00, 00, 49, 00, 04, 02, 00, 01, 34, 02, 13, 84, 03, 00, 00, 25]
-      print(hexArray);
+      if (hexArray[3] == 'f0') {
+        List<int> numbers = [value[5], value[6], value[7]];
+        // 将每个整数转换为两位补零的字符串
+        List<String> formattedNumbers =
+            numbers.map((num) => num.toString().padLeft(2, '0')).toList();
+        _time = formattedNumbers.join(':');
+        //   // 【3】-fo-对应和 HCM600 命令字 0x84
+        //   // 【5】【6】【7】之和为第几条数据
+        //   // 【8】【9】【10】picth仰角
+        //   // 【11】【12】【13】roll倾斜角
+        //   // 【14】【15】【16】heading 方位角
+        // _time = value[5] + value[6] + value[7];
+        String ptcth = readAngle(hexArray[8], hexArray[9], hexArray[10]);
+        setState(() {
+          _ptcth = ptcth;
+        });
+      }
     });
+  }
+
+  String readAngle(String roll1, String roll2, String roll3) {
+    // 从第一个元素中取出第一个字符
+    String firstChar = roll1[0];
+    String data = '';
+    if (firstChar == '0') {
+      data += '+';
+    } else {
+      data += '-';
+    }
+    // 使用字符串插值来拼接结果
+    data += '${roll1[1]}$roll2.$roll3';
+    return data;
+  }
+
+  //顶点测量
+  void savePicth() {
+    int id = employeeDataSource.rows.length + 1;
+    TimeModel rows = TimeModel(
+      id: id,
+      inclination: _ptcth,
+      timeData: _time,
+    );
+
+    employees.add(rows);
+    MyTime.setTimeData(employees);
+    employeeDataSource = EmployeeDataSource(employeeData: employees);
+  }
+
+  //删除末尾数据
+  void delePop() {
+    employees.removeLast();
+    employeeDataSource = EmployeeDataSource(employeeData: employees);
   }
 
   // 启动成功后倒计时
@@ -571,6 +560,9 @@ class _TimeOutState extends State<TimeOut> {
                                         ? Colors.white
                                         : Color.fromRGBO(147, 153, 177, 1))),
                             onPressed: () {
+                              if (isFixed) {
+                                savePicth();
+                              }
                               // 保存操作的逻辑
                             },
                           ),
@@ -592,6 +584,9 @@ class _TimeOutState extends State<TimeOut> {
                                         : Color.fromRGBO(147, 153, 177, 1))),
                             onPressed: () {
                               // 保存操作的逻辑
+                              if (isPop) {
+                                delePop();
+                              }
                             },
                           )
                         ],

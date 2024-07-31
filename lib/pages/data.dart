@@ -9,6 +9,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:bluetooth_mini/utils/hex.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:bluetooth_mini/models/time_model.dart';
 
 import 'dart:async';
 
@@ -23,7 +24,7 @@ class _DataTransmissionState extends State<DataTransmission> {
   late BluetoothManager bluetooth;
 
   List<DataModel> employees = <DataModel>[];
-  late EmployeeDataSource employeeDataSource;
+  late EmployeeDataSourceData employeeDataSource;
 
   String _mineString = '';
   String _workString = '';
@@ -44,8 +45,10 @@ class _DataTransmissionState extends State<DataTransmission> {
     _factoryString = MyTime.getFactory() ?? '';
     _drillingString = MyTime.getDirlling() ?? '';
     _name = MyTime.getMonName() ?? '';
-    employees = getEmployeeData();
-    employeeDataSource = EmployeeDataSource(employeeData: employees);
+
+    employees = convertToDataModelList(MyTime.getTimeData(), null, null);
+
+    employeeDataSource = EmployeeDataSourceData(dataModels: employees);
 
     // 先弹窗
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
@@ -59,6 +62,22 @@ class _DataTransmissionState extends State<DataTransmission> {
       }
     });
     super.initState();
+  }
+
+  List<DataModel> convertToDataModelList(List<TimeModel> timeModels,
+      double? defaultInclina, double? defaultAzimuth) {
+    return timeModels.map((timeModel) {
+      // 假设你需要将 `inclination` 和 `timeData` 转换为 double 类型
+      double inclinationValue = double.tryParse(timeModel.inclination) ?? 0.0;
+
+      return DataModel(
+        id: timeModel.id,
+        timeData: timeModel.timeData,
+        deep: inclinationValue,
+        inclination: defaultInclina,
+        azimuth: defaultAzimuth,
+      );
+    }).toList();
   }
 
   // foreach 读取特征值
@@ -103,20 +122,21 @@ class _DataTransmissionState extends State<DataTransmission> {
       return;
     }
     // 写入数据到特征码 启动采集
-    // await targetCharacteristic!
-    //     .write([0x68, 0x0C, 0x00, 0x73, 0x02, 0x78], withoutResponse: false);
+    await targetCharacteristic!
+        .write([0x68, 0x0C, 0x00, 0x73, 0x02, 0x78], withoutResponse: false);
     print('探管取数');
-    EasyLoading.show(status: '正在同步中...');
+    EasyLoading.show(status: '正在读取探管数据...');
     // 监听特征码的通知
-    // await targetCharacteristic.setNotifyValue(true);
-    // _lastValueSubscription =
-    //     targetCharacteristic.onValueReceived.listen((value) {
-    //   // 转为16进制数据用来查看文档对照
-    //   List<String> hexArray = bytesToHexArray(value);
-    //   EasyLoading.dismiss();
-    //   print('探管取数返回');
-    //   print(hexArray);
-    // });
+    await targetCharacteristic.setNotifyValue(true);
+    _lastValueSubscription =
+        targetCharacteristic.onValueReceived.listen((value) {
+      // 转为16进制数据用来查看文档对照
+      List<String> hexArray = bytesToHexArray(value);
+      EasyLoading.dismiss();
+      SmartDialog.showToast('探管取数成功');
+      print('探管取数返回');
+      print(hexArray);
+    });
     print(_lastValueSubscription);
   }
 
@@ -125,7 +145,6 @@ class _DataTransmissionState extends State<DataTransmission> {
     _lastValueSubscription?.cancel();
     if (targetCharacteristic != null) {
       targetCharacteristic!.setNotifyValue(false);
-
     }
     super.dispose();
   }
@@ -308,7 +327,7 @@ class _DataTransmissionState extends State<DataTransmission> {
 
   List<DataModel> getEmployeeData() {
     return [
-     // DataModel(10001, '00:04:02', 3.0, 0.2, 4.11),
+      // DataModel(10001, '00:04:02', 3.0, 0.2, 4.11),
       //DataModel(10002, '00:04:02', 3.0, 0.2, 4.11),
     ];
   }
