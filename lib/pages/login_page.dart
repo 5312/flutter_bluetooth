@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bluetooth_mini/db/my_sp.dart';
 import 'package:bluetooth_mini/widgets/login_input.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -11,7 +12,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey _formKey = GlobalKey<FormState>();
-  final TextEditingController _userController = TextEditingController(text: 'admin');
+  final TextEditingController _userController =
+      TextEditingController(text: 'admin');
   final TextEditingController _passwordController =
       TextEditingController(text: '12345678');
 
@@ -62,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.only(bottom: 20, left: 200, right: 200),
             child: LoginInput(
               '请输入用户名',
-             const Icon(Icons.perm_identity),
+              const Icon(Icons.perm_identity),
               _userController,
               validator: (value) {
                 return value!.trim().isNotEmpty ? null : "用户名不能为空";
@@ -73,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.only(bottom: 20, left: 200, right: 200),
             child: LoginInput(
               '请输入密码',
-              const  Icon(Icons.lock_outline),
+              const Icon(Icons.lock_outline),
               _passwordController,
               obscureText: true,
               validator: (value) {
@@ -130,14 +132,19 @@ class _LoginPageState extends State<LoginPage> {
                 //   'username': _userController.text.trim(),
                 //   'password': _passwordController.text.trim(),
                 // });
-                // // 保存登录令牌
-                MySP.setToken('adaadaa'); //res['data']['accessToken']);
-                MySP.setName(_userController.text.trim());
-                // EasyLoading.dismiss();
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  'navigator',
-                  (route) => false,
-                );
+                if (_userController.text.trim() == 'admin' &&
+                    _passwordController.text.trim() == '12345678') {
+                  // // 保存登录令牌
+                  MySP.setToken('adaadaa'); //res['data']['accessToken']);
+                  MySP.setName(_userController.text.trim());
+                  // EasyLoading.dismiss();
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    'navigator',
+                    (route) => false,
+                  );
+                } else {
+                  SmartDialog.showToast('账号密码错误');
+                }
               }
             },
             child: const Text("登录"),

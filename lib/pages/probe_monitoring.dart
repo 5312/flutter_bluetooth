@@ -300,21 +300,21 @@ class _ProbeState extends State<Probe> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end, // 可选：根据需要调整按钮间的间距
                     children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(10)), // 设置圆角为10
-                          ),
-                        ),
-                        child: const Text('储存',
-                            style: TextStyle(fontSize: 16, color: Colors.blue)),
-                        onPressed: () {
-                          // 添加操作的逻辑
-                          open();
-                        },
-                      ),
+                      // ElevatedButton(
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor: Colors.white,
+                      //     shape: const RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.all(
+                      //           Radius.circular(10)), // 设置圆角为10
+                      //     ),
+                      //   ),
+                      //   child: const Text('储存',
+                      //       style: TextStyle(fontSize: 16, color: Colors.blue)),
+                      //   onPressed: () {
+                      //     // 添加操作的逻辑
+                      //     open();
+                      //   },
+                      // ),
                       const SizedBox(
                         width: 10,
                       ),
@@ -327,7 +327,7 @@ class _ProbeState extends State<Probe> {
                           ),
                         ),
                         onPressed: _addEmployee,
-                        child: const Text('保存',
+                        child: const Text('采集',
                             style:
                                 TextStyle(fontSize: 16, color: Colors.white)),
                       ),

@@ -123,7 +123,7 @@ class _DataTransmissionState extends State<DataTransmission> {
     }
     // 写入数据到特征码 启动采集
     await targetCharacteristic!
-        .write([0x68, 0x0C, 0x00, 0x73, 0x02, 0x78], withoutResponse: false);
+        .write([0x68, 0x0C, 0x00, 0x73, 0x02, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x81], withoutResponse: false);
     print('探管取数');
     EasyLoading.show(status: '正在读取探管数据...');
     // 监听特征码的通知
@@ -135,6 +135,8 @@ class _DataTransmissionState extends State<DataTransmission> {
       EasyLoading.dismiss();
       SmartDialog.showToast('探管取数成功');
       print('探管取数返回');
+      // [68, 14, 00, f0, 02, 00, 04, 96, 00, 03, 73, 00, 01, 42, 02, 19, 85, 03, 00, 00, fc]
+      // 【5】【6】【7】之和为第几条数据
       print(hexArray);
     });
     print(_lastValueSubscription);
@@ -144,6 +146,10 @@ class _DataTransmissionState extends State<DataTransmission> {
   void dispose() {
     _lastValueSubscription?.cancel();
     if (targetCharacteristic != null) {
+      print('取消上传');
+      // 停止采集
+      targetCharacteristic!
+          .write([0x68, 0x0C, 0x00, 0x73, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x81], withoutResponse: false);
       targetCharacteristic!.setNotifyValue(false);
     }
     super.dispose();

@@ -1,6 +1,5 @@
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:flutter/material.dart';
-import 'package:bluetooth_mini/db/database_helper.dart';
 
 class RepoModel {
   /// Creates the employee class with required details.

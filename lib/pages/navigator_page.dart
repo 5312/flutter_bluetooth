@@ -33,10 +33,19 @@ class _NavigatorPageState extends State<NavigatorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WillPopScope(
-        onWillPop: exitApp,
-        child: _pages[_currentIndex],
-      ),
+      body: PopScope(
+          canPop: false,
+          onPopInvoked: (bool didPop) {
+            print(didPop);
+            print('------tuichu ');
+            exitApp();
+          },
+          child: _pages[_currentIndex]),
+
+      // WillPopScope(
+      //   onWillPop: exitApp,
+      //   child: _pages[_currentIndex],
+      // ),
       // bottomNavigationBar: BottomNavigationBar(
       //   currentIndex: _currentIndex,
       //   type: BottomNavigationBarType.fixed,

@@ -452,6 +452,8 @@ class _TimeOutState extends State<TimeOut> {
   //删除末尾数据
   void delePop() {
     employees.removeLast();
+    // 覆盖
+    MyTime.setTimeData(employees);
     employeeDataSource = EmployeeDataSource(employeeData: employees);
   }
 

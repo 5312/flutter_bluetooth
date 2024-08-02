@@ -80,6 +80,8 @@ class BluetoothManager with ChangeNotifier {
         _connectionState = state;
         if (state != BluetoothConnectionState.connected) {
           nowConnectDevice = null;
+          print('断开连接');
+          notifyListeners();
         }
       });
     }
