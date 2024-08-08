@@ -26,10 +26,10 @@ class EmployeeDataSourceData extends DataGridSource {
               DataGridCell<int>(columnName: 'id', value: e.id),
               DataGridCell<String>(columnName: 'timeData', value: e.timeData),
               DataGridCell<double>(columnName: 'deep', value: e.deep),
-              DataGridCell<double>(
-                  columnName: 'inclination', value: e.inclination ?? 0.0),
-              DataGridCell<double>(
-                  columnName: 'azimuth', value: e.azimuth ?? 0.0),
+              DataGridCell<Object>(
+                  columnName: 'inclination', value: e.inclination ?? ''),
+              DataGridCell<Object>(
+                  columnName: 'azimuth', value: e.azimuth ?? ''),
             ]))
         .toList();
   }

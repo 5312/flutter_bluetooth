@@ -15,6 +15,7 @@ import 'package:bluetooth_mini/widgets/cus_dialog.dart';
 import 'package:bluetooth_mini/db/my_setting.dart';
 import 'package:bluetooth_mini/db/my_time.dart';
 
+// 定时同步
 class TimeOut extends StatefulWidget {
   const TimeOut({Key? key}) : super(key: key);
 
@@ -27,6 +28,8 @@ class _TimeOutState extends State<TimeOut> {
   late EmployeeDataSource employeeDataSource;
   final TextEditingController _controllerLen = TextEditingController();
   final TextEditingController _controllerName = TextEditingController();
+  final TextEditingController _controllerPicth = TextEditingController();
+  final TextEditingController _controllerHeadinng = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -74,7 +77,6 @@ class _TimeOutState extends State<TimeOut> {
     isFixed = false;
     isPop = false;
 
-    employees = getEmployeeData();
     employeeDataSource = EmployeeDataSource(employeeData: employees);
     // 先弹窗
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
@@ -283,7 +285,7 @@ class _TimeOutState extends State<TimeOut> {
         return DialogKeyboard(
           contentBody: ConstrainedBox(
               constraints: const BoxConstraints(
-                minWidth: 500, // 设置最大宽度
+                minWidth: 550, // 设置最大宽度
               ),
               child: Column(
                 children: <Widget>[
@@ -291,6 +293,16 @@ class _TimeOutState extends State<TimeOut> {
                   _buildRowWorkSelect(),
                   _buildRowFactorySelect(),
                   _buildRowDrillSelect(),
+                  MyForm(
+                    label: '设计俯仰角',
+                    suffixIcon: '',
+                    controller: _controllerPicth,
+                  ),
+                  MyForm(
+                    label: '设计方位角',
+                    suffixIcon: '',
+                    controller: _controllerHeadinng,
+                  ),
                   MyForm(
                     label: '钻杆长度',
                     suffixIcon: 'm',
@@ -385,7 +397,7 @@ class _TimeOutState extends State<TimeOut> {
       return;
     }
     // 写入数据到特征码 启动采集
-    await targetCharacteristic!
+    await targetCharacteristic
         .write([0x68, 0x05, 0x00, 0x71, 0x01, 0x77], withoutResponse: false);
     print('启动采集');
     EasyLoading.show(status: '正在同步中...');
@@ -402,11 +414,13 @@ class _TimeOutState extends State<TimeOut> {
       EasyLoading.dismiss();
       print('定时同步');
       if (hexArray[3] == 'f0') {
-        List<int> numbers = [value[5], value[6], value[7]];
-        // 将每个整数转换为两位补零的字符串
-        List<String> formattedNumbers =
-            numbers.map((num) => num.toString().padLeft(2, '0')).toList();
-        _time = formattedNumbers.join(':');
+        int seconds = value[7];
+        int minutes = value[6] * 255;
+        int hours = value[5] * minutes;
+        int formattedTime = hours + minutes + seconds;
+        print(_formatTime(formattedTime));
+
+        _time = _formatTime(formattedTime);
         //   // 【3】-fo-对应和 HCM600 命令字 0x84
         //   // 【5】【6】【7】之和为第几条数据
         //   // 【8】【9】【10】picth仰角
@@ -459,7 +473,7 @@ class _TimeOutState extends State<TimeOut> {
 
   // 启动成功后倒计时
   void backTime() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _currentTime += 1;
       });
@@ -487,164 +501,197 @@ class _TimeOutState extends State<TimeOut> {
     super.dispose();
   }
 
+  // 弹出对话框
+  Future<bool?> showDeleteConfirmDialog1(context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("提示"),
+          content: const Text("您确定要退出定时同步吗?"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("取消"),
+              onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+            ),
+            TextButton(
+              child: const Text("确定"),
+              onPressed: () {
+                //关闭对话框并返回true
+                Navigator.of(context).pop(true);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar('定时同步'),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 10, left: 30, right: 30),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              // 可选：根据需要调整按钮间的间距
-              children: [
-                Text('矿区：${_mineString}'),
-                Text('工作圈:${_workString}'),
-                Text('钻厂：${_factoryString}'),
-                Text('钻孔：${_drillingString}'),
-                Text('检测名称：${_nString}'),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          Expanded(
-              flex: 1,
+      body: PopScope(
+        canPop: false,
+        onPopInvoked: (bool didPop) {
+          if (didPop) {
+            return;
+          }
+          showDeleteConfirmDialog1(context);
+        },
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 10, bottom: 10, left: 30, right: 30),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // 可选：根据需要调整按钮间的间距
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: SizedBox(
-                      width: 200,
-                      child: Column(
-                        children: [
-                          const Text('深度信息：0'),
-                          Text('累计时间：${_formatTime(_currentTime)}'),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isSync
-                                  ? Colors.blueAccent
-                                  : const Color.fromRGBO(242, 243, 247, 1),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)), // 设置圆角为10
+                  Text('矿区：$_mineString'),
+                  Text('工作圈:$_workString'),
+                  Text('钻厂：$_factoryString'),
+                  Text('钻孔：$_drillingString'),
+                  Text('检测名称：$_nString'),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: SizedBox(
+                        width: 200,
+                        child: Column(
+                          children: [
+                            Text('深度信息：${_ptcth}'),
+                            Text('累计时间：${_formatTime(_currentTime)}'),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isSync
+                                    ? Colors.blueAccent
+                                    : const Color.fromRGBO(242, 243, 247, 1),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10)), // 设置圆角为10
+                                ),
                               ),
+                              child: Text('定时同步',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: isSync
+                                          ? Colors.white
+                                          : const Color.fromRGBO(
+                                              147, 153, 177, 1))),
+                              onPressed: () async {
+                                if (isSync) {
+                                  // handleSync(bluetooth?.targetCharacteristic);
+                                  discoverServices(bluetooth.nowConnectDevice);
+                                }
+                              },
                             ),
-                            child: Text('定时同步',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: isSync
-                                        ? Colors.white
-                                        : Color.fromRGBO(147, 153, 177, 1))),
-                            onPressed: () async {
-                              if (isSync) {
-                                // handleSync(bluetooth?.targetCharacteristic);
-                                discoverServices(bluetooth.nowConnectDevice);
-                              }
-                            },
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isFixed
-                                  ? Colors.blueAccent
-                                  : const Color.fromRGBO(242, 243, 247, 1),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)), // 设置圆角为10
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isFixed
+                                    ? Colors.blueAccent
+                                    : const Color.fromRGBO(242, 243, 247, 1),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10)), // 设置圆角为10
+                                ),
                               ),
+                              child: Text('定点测量',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: isFixed
+                                          ? Colors.white
+                                          : const Color.fromRGBO(
+                                              147, 153, 177, 1))),
+                              onPressed: () {
+                                if (isFixed) {
+                                  savePicth();
+                                }
+                                // 保存操作的逻辑
+                              },
                             ),
-                            child: Text('定点测量',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: isFixed
-                                        ? Colors.white
-                                        : Color.fromRGBO(147, 153, 177, 1))),
-                            onPressed: () {
-                              if (isFixed) {
-                                savePicth();
-                              }
-                              // 保存操作的逻辑
-                            },
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isPop
-                                  ? Colors.blueAccent
-                                  : const Color.fromRGBO(242, 243, 247, 1),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)), // 设置圆角为10
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isPop
+                                    ? Colors.blueAccent
+                                    : const Color.fromRGBO(242, 243, 247, 1),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10)), // 设置圆角为10
+                                ),
                               ),
-                            ),
-                            child: Text('删除末尾数据',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: isPop
-                                        ? Colors.white
-                                        : Color.fromRGBO(147, 153, 177, 1))),
-                            onPressed: () {
-                              // 保存操作的逻辑
-                              if (isPop) {
-                                delePop();
-                              }
-                            },
-                          )
-                        ],
+                              child: Text('删除末尾数据',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: isPop
+                                          ? Colors.white
+                                          : const Color.fromRGBO(
+                                              147, 153, 177, 1))),
+                              onPressed: () {
+                                // 保存操作的逻辑
+                                if (isPop) {
+                                  delePop();
+                                }
+                              },
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                      flex: 1,
-                      child: SfDataGrid(
-                        source: employeeDataSource,
-                        gridLinesVisibility: GridLinesVisibility.none,
-                        columnWidthMode: ColumnWidthMode.fill,
-                        columns: <GridColumn>[
-                          GridColumn(
-                              columnName: 'id',
-                              label: Container(
-                                padding: const EdgeInsets.all(16.0),
-                                alignment: Alignment.center,
-                                color: const Color.fromRGBO(234, 236, 255, 1),
-                                child: const Text(
-                                  '序号',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              )),
-                          GridColumn(
-                              columnName: 'inclination',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  color: const Color.fromRGBO(234, 236, 255, 1),
-                                  child: const Text('深度/m'))),
-                          GridColumn(
-                              columnName: 'azimuth',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
+                    Expanded(
+                        flex: 1,
+                        child: SfDataGrid(
+                          source: employeeDataSource,
+                          gridLinesVisibility: GridLinesVisibility.none,
+                          columnWidthMode: ColumnWidthMode.fill,
+                          columns: <GridColumn>[
+                            GridColumn(
+                                columnName: 'id',
+                                label: Container(
+                                  padding: const EdgeInsets.all(16.0),
                                   alignment: Alignment.center,
                                   color: const Color.fromRGBO(234, 236, 255, 1),
                                   child: const Text(
-                                    '时间',
-                                    overflow: TextOverflow.ellipsis,
-                                  ))),
-                        ],
-                      ))
-                ],
-              ))
-        ],
+                                    '序号',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                )),
+                            GridColumn(
+                                columnName: 'inclination',
+                                label: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    alignment: Alignment.center,
+                                    color:
+                                        const Color.fromRGBO(234, 236, 255, 1),
+                                    child: const Text('深度/m'))),
+                            GridColumn(
+                                columnName: 'azimuth',
+                                label: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    alignment: Alignment.center,
+                                    color:
+                                        const Color.fromRGBO(234, 236, 255, 1),
+                                    child: const Text(
+                                      '时间',
+                                      overflow: TextOverflow.ellipsis,
+                                    ))),
+                          ],
+                        ))
+                  ],
+                ))
+          ],
+        ),
       ),
     );
-  }
-
-  List<TimeModel> getEmployeeData() {
-    return [
-      //TimeModel(10001, 0.2, '00:04:02'),
-      //TimeModel(10002, 0.2, '00:04:02'),
-      // TimeModel(10002, 0.2, '00:04:02'),
-      // TimeModel(10002, 0.2, '00:04:02'),
-    ];
   }
 }

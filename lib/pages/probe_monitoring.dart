@@ -15,6 +15,7 @@ import 'package:bluetooth_mini/db/database_helper.dart';
 import 'package:bluetooth_mini/models/repo_model.dart';
 import 'dart:math';
 
+// 探管监测
 class Probe extends StatefulWidget {
   const Probe({Key? key}) : super(key: key);
 
@@ -23,7 +24,7 @@ class Probe extends StatefulWidget {
 }
 
 class _ProbeState extends State<Probe> {
-  List<Employee> _employees = <Employee>[];
+  final List<Employee> _employees = <Employee>[];
   late EmployeeDataSource _employeeDataSource;
   late BluetoothManager bluetooth;
   bool received = false;
@@ -45,7 +46,7 @@ class _ProbeState extends State<Probe> {
     _employeeDataSource = EmployeeDataSource(employeeData: _employees);
 
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
-    // TODO~
+
     if (bluetooth.nowConnectDevice == null) {
       Navigator.of(context).pop();
       SmartDialog.showToast('请连接蓝牙');
@@ -109,8 +110,8 @@ class _ProbeState extends State<Probe> {
         print('启动采集返回值');
         // 【3】-fo-对应和 HCM600 命令字 0x84
         // 【5】【6】【7】之和为第几条数据
-        // 【8】【9】【10】picth仰角
-        // 【11】【12】【13】roll倾斜角
+        // 【8】【9】【10】picth 俯仰角
+        // 【11】【12】【13】roll 倾斜角
         // 【14】【15】【16】heading 方位角
         String roll = readAngle(hexArray[11], hexArray[12], hexArray[13]);
         String heading = readAngle(hexArray[14], hexArray[15], hexArray[16]);
@@ -203,7 +204,7 @@ class _ProbeState extends State<Probe> {
             id: randomId, name: _controller.text, mnTime: time.toString()),
       );
       int randomId2 = generateRandomId();
-      List<Employee> _e = _employees.map((e) {
+      List<Employee> e = _employees.map((e) {
         return Employee(
           id: e.id,
           inclination: e.inclination,
@@ -211,7 +212,7 @@ class _ProbeState extends State<Probe> {
           repoId: randomId,
         );
       }).toList();
-      await DatabaseHelper().insertEmployees(_e);
+      await DatabaseHelper().insertEmployees(e);
       Navigator.of(context).pop();
     } else {
       SmartDialog.showToast('请填写信息');
@@ -255,6 +256,7 @@ class _ProbeState extends State<Probe> {
     );
   }
 
+  // 采集
   void _addEmployee() {
     int id = _employeeDataSource.rows.length + 1;
     Employee rows = Employee(

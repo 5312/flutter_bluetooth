@@ -31,6 +31,7 @@ class _DataTransmissionState extends State<DataTransmission> {
   String _factoryString = '';
   String _drillingString = '';
   String _name = '';
+  List<String> _backList = [];
 
   // 选中特征码
   BluetoothCharacteristic? targetCharacteristic;
@@ -122,8 +123,21 @@ class _DataTransmissionState extends State<DataTransmission> {
       return;
     }
     // 写入数据到特征码 启动采集
-    await targetCharacteristic!
-        .write([0x68, 0x0C, 0x00, 0x73, 0x02, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x81], withoutResponse: false);
+    await targetCharacteristic.write([
+      0x68,
+      0x0C,
+      0x00,
+      0x73,
+      0x02,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x81
+    ], withoutResponse: false);
     print('探管取数');
     EasyLoading.show(status: '正在读取探管数据...');
     // 监听特征码的通知
@@ -137,9 +151,20 @@ class _DataTransmissionState extends State<DataTransmission> {
       print('探管取数返回');
       // [68, 14, 00, f0, 02, 00, 04, 96, 00, 03, 73, 00, 01, 42, 02, 19, 85, 03, 00, 00, fc]
       // 【5】【6】【7】之和为第几条数据
-      print(hexArray);
+      _backList.addAll(hexArray);
+      getData(_backList);
     });
-    print(_lastValueSubscription);
+  }
+
+  void getData(List<String> list) {
+    // 找到第二个 '68' 的索引
+    int firstIndex = list.indexOf('68');
+    int secondIndex = list.indexOf('68', firstIndex + 1);
+
+    // 从第二个 '68' 开始截取数据
+    List<String> result = list.sublist(secondIndex);
+
+    print(result); // 输出结果
   }
 
   @override
@@ -148,8 +173,21 @@ class _DataTransmissionState extends State<DataTransmission> {
     if (targetCharacteristic != null) {
       print('取消上传');
       // 停止采集
-      targetCharacteristic!
-          .write([0x68, 0x0C, 0x00, 0x73, 0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x81], withoutResponse: false);
+      targetCharacteristic!.write([
+        0x68,
+        0x0C,
+        0x00,
+        0x73,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x81
+      ], withoutResponse: false);
       targetCharacteristic!.setNotifyValue(false);
     }
     super.dispose();
@@ -207,7 +245,8 @@ class _DataTransmissionState extends State<DataTransmission> {
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 10, left: 30, right: 30),
+            padding:
+                const EdgeInsets.only(top: 10, bottom: 10, left: 30, right: 30),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               // 可选：根据需要调整按钮间的间距

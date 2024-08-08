@@ -37,8 +37,12 @@ class _NavigatorPageState extends State<NavigatorPage> {
           canPop: false,
           onPopInvoked: (bool didPop) {
             print(didPop);
-            print('------tuichu ');
-            exitApp();
+            if (didPop) {
+              return;
+            } else {
+              print('------tuichu ');
+              exitApp();
+            }
           },
           child: _pages[_currentIndex]),
 
@@ -82,6 +86,7 @@ class _NavigatorPageState extends State<NavigatorPage> {
       _lastPressedAt = DateTime.now();
       return Future.value(false);
     }
+    // Navigator.of(context).pop();
     return Future.value(true);
   }
 }
