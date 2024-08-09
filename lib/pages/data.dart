@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import 'package:bluetooth_mini/models/data_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/db/my_time.dart';
 import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:bluetooth_mini/utils/hex.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:bluetooth_mini/models/time_model.dart';
-import '../utils/analytical.dart';
+import 'package:bluetooth_mini/models/data_list_model.dart';
+import 'package:bluetooth_mini/db/database_helper.dart';
 
 import 'dart:async';
+import '../utils/analytical.dart';
+
+// import 'package:bluetooth_mini/models/data_model.dart';
+// import 'package:bluetooth_mini/utils/hex.dart';
+// import 'package:bluetooth_mini/models/time_model.dart';
 
 class DataTransmission extends StatefulWidget {
   const DataTransmission({Key? key}) : super(key: key);
@@ -24,8 +27,9 @@ class DataTransmission extends StatefulWidget {
 class _DataTransmissionState extends State<DataTransmission> {
   late BluetoothManager bluetooth;
 
-  List<DataModel> employees = <DataModel>[];
-  late EmployeeDataSourceData employeeDataSource;
+  late List<DataListModel> employees = <DataListModel>[];
+  late EmployeeDataSourceData employeeDataSource =
+      EmployeeDataSourceData(dataModels: []);
 
   String _mineString = '';
   String _workString = '';
@@ -47,37 +51,19 @@ class _DataTransmissionState extends State<DataTransmission> {
     _factoryString = MyTime.getFactory() ?? '';
     _drillingString = MyTime.getDirlling() ?? '';
     _name = MyTime.getMonName() ?? '';
+    // employeeDataSource = EmployeeDataSourceData(dataModels: employees);
 
-    employees = convertToDataModelList(MyTime.getTimeData(), null, null);
-
-    employeeDataSource = EmployeeDataSourceData(dataModels: employees);
-
+    getDatabaseData();
     // 先弹窗
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // if (bluetooth.nowConnectDevice == null) {
-      //   Navigator.of(context).pop();
-      //   SmartDialog.showToast('请连接蓝牙');
-      // }
+      if (bluetooth.currentDevice == null) {
+        Navigator.of(context).pop();
+        SmartDialog.showToast('请连接蓝牙');
+      }
     });
     super.initState();
-  }
-
-  List<DataModel> convertToDataModelList(List<TimeModel> timeModels,
-      double? defaultInclina, double? defaultAzimuth) {
-    return timeModels.map((timeModel) {
-      // 假设你需要将 `inclination` 和 `timeData` 转换为 double 类型
-      double inclinationValue = double.tryParse(timeModel.inclination) ?? 0.0;
-
-      return DataModel(
-        id: timeModel.id,
-        timeData: timeModel.timeData,
-        deep: inclinationValue,
-        inclination: defaultInclina,
-        azimuth: defaultAzimuth,
-      );
-    }).toList();
   }
 
   // foreach 读取特征值
@@ -92,7 +78,7 @@ class _DataTransmissionState extends State<DataTransmission> {
           if (mounted) {
             setState(() {
               targetCharacteristic = c;
-              handleSync(targetCharacteristic);
+              handleSync(c);
             });
           }
 
@@ -117,12 +103,9 @@ class _DataTransmissionState extends State<DataTransmission> {
   }
 
   // 发送命令
-  Future<void> handleSync(BluetoothCharacteristic? targetCharacteristic) async {
-    if (targetCharacteristic == null) {
-      return;
-    }
+  Future<void> handleSync(BluetoothCharacteristic c) async {
     // 写入数据到特征码 启动采集
-    await targetCharacteristic.write([
+    await c.write([
       0x68,
       0x0C,
       0x00,
@@ -140,14 +123,11 @@ class _DataTransmissionState extends State<DataTransmission> {
     print('探管取数');
     EasyLoading.show(status: '正在读取探管数据...');
     // 监听特征码的通知
-    await targetCharacteristic.setNotifyValue(true);
-    _lastValueSubscription =
-        targetCharacteristic.onValueReceived.listen((value) {
+    await c.setNotifyValue(true);
+    _lastValueSubscription = c.onValueReceived.listen((value) {
       EasyLoading.dismiss();
       SmartDialog.showToast('探管取数成功');
 
-      // 转为16进制数据用来查看文档对照
-      // List<String> hexArray = bytesToHexArray(value);
       _backList.addAll(value);
       getData(_backList);
     });
@@ -166,8 +146,21 @@ class _DataTransmissionState extends State<DataTransmission> {
 
     // 打印每一段
     for (var chunk in chunks) {
+      EasyLoading.dismiss();
       Analytical analytical = Analytical(chunk);
-      employees = convertToDataModelList(MyTime.getTimeData(), null, null);
+      List<DataListModel> r = employees.map((e) {
+        if (e.time == analytical.dataTime()) {
+          e.roll = double.parse(analytical.getRoll());
+          e.heading = double.parse(analytical.getHeading());
+          return e;
+        }
+        return e;
+      }).toList();
+      setState(() {
+        employees = r;
+        employeeDataSource = EmployeeDataSourceData(dataModels: employees);
+      });
+      //employees = convertToDataModelList(MyTime.getTimeData(), null, null);
     }
   }
 
@@ -290,11 +283,7 @@ class _DataTransmissionState extends State<DataTransmission> {
                                 style: TextStyle(
                                     fontSize: 16, color: Colors.white)),
                             onPressed: () {
-                              // 保存操作的逻辑
-
-                              // handleSync(bluetooth?.targetCharacteristic);
-
-                              // discoverServices(bluetooth.nowConnectDevice);
+                              discoverServices(bluetooth.currentDevice);
                             },
                           ),
                           dataButton,
@@ -377,10 +366,46 @@ class _DataTransmissionState extends State<DataTransmission> {
     );
   }
 
-  List<DataModel> getEmployeeData() {
-    return [
-      // DataModel(10001, '00:04:02', 3.0, 0.2, 4.11),
-      //DataModel(10002, '00:04:02', 3.0, 0.2, 4.11),
-    ];
+  Future<void> getDatabaseData() async {
+    List<DataListModel> result = await DatabaseHelper().getDataList();
+
+    setState(() {
+      employees = result;
+
+      employeeDataSource = EmployeeDataSourceData(dataModels: result);
+    });
+  }
+}
+
+class EmployeeDataSourceData extends DataGridSource {
+  /// Creates the data source class with required details.
+  EmployeeDataSourceData({required List<DataListModel> dataModels}) {
+    _employeeData = dataModels
+        .map<DataGridRow>((e) => DataGridRow(cells: [
+              DataGridCell<int>(columnName: 'id', value: e.id),
+              DataGridCell<String>(columnName: 'time', value: e.time),
+              DataGridCell<num>(columnName: 'pitch', value: e.pitch),
+              DataGridCell<Object>(columnName: 'roll', value: e.roll ?? ''),
+              DataGridCell<Object>(
+                  columnName: 'heading', value: e.heading ?? ''),
+            ]))
+        .toList();
+  }
+
+  List<DataGridRow> _employeeData = [];
+
+  @override
+  List<DataGridRow> get rows => _employeeData;
+
+  @override
+  DataGridRowAdapter buildRow(DataGridRow row) {
+    return DataGridRowAdapter(
+        cells: row.getCells().map<Widget>((e) {
+      return Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(8.0),
+        child: Text(e.value.toString()),
+      );
+    }).toList());
   }
 }
