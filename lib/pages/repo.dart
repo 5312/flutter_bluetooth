@@ -5,6 +5,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/repo_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
+import 'package:bluetooth_mini/pages/repo_detail.dart';
 
 class Repo extends StatefulWidget {
   const Repo({Key? key}) : super(key: key);
@@ -15,8 +16,11 @@ class Repo extends StatefulWidget {
 
 class _RepoState extends State<Repo> {
   List<RepoModel> employees = <RepoModel>[];
-  late RepoDataSource employeeDataSource =
-      RepoDataSource(employeeData: [], onDelete: delete);
+  late RepoDataSource employeeDataSource = RepoDataSource(
+      employeeData: [],
+      onDelete: delete,
+      onDetail: onDetail,
+      onOrigin: onOrigin);
 
   @override
   void initState() {
@@ -29,9 +33,25 @@ class _RepoState extends State<Repo> {
     print(list.toString());
     setState(() {
       employees = list;
-      employeeDataSource =
-          RepoDataSource(employeeData: employees, onDelete: delete);
+      employeeDataSource = RepoDataSource(
+          employeeData: employees,
+          onDelete: delete,
+          onDetail: onDetail,
+          onOrigin: onOrigin);
     });
+  }
+
+  Future<void> onDetail(RepoModel row) async {
+    print('----${row.id}');
+    // 导航至详细页面
+    MaterialPageRoute route = MaterialPageRoute(
+        builder: (context) => RepoDetail(row: row),
+        settings: const RouteSettings(name: '/RepoDetail'));
+    Navigator.of(context).push(route);
+  }
+
+  Future<void> onOrigin(RepoModel row) async {
+    print('----${row.id}');
   }
 
   Future<void> delete(int id) async {

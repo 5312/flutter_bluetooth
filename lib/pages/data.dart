@@ -335,7 +335,7 @@ class _DataTransmissionState extends State<DataTransmission> {
                                 ),
                               )),
                           GridColumn(
-                              columnName: 'timeData',
+                              columnName: 'time',
                               label: Container(
                                   padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
@@ -345,24 +345,24 @@ class _DataTransmissionState extends State<DataTransmission> {
                                     overflow: TextOverflow.ellipsis,
                                   ))),
                           GridColumn(
-                              columnName: 'deep',
+                              columnName: 'pitch',
                               label: Container(
                                   padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
                                   color: const Color.fromRGBO(234, 236, 255, 1),
-                                  child: const Text('深度/m'))),
+                                  child: const Text('俯仰角'))),
                           GridColumn(
-                              columnName: 'inclination',
+                              columnName: 'roll',
                               label: Container(
                                   padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
                                   color: const Color.fromRGBO(234, 236, 255, 1),
                                   child: const Text(
-                                    '倾角/°',
+                                    '翻滚角',
                                     overflow: TextOverflow.ellipsis,
                                   ))),
                           GridColumn(
-                              columnName: 'azimuth',
+                              columnName: 'heading',
                               label: Container(
                                   padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,

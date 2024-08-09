@@ -215,16 +215,16 @@ class _DeviceScreenState extends State<DeviceScreen> {
       index: (_isDiscoveringServices) ? 1 : 0,
       children: <Widget>[
         TextButton(
-          child: const Text("Get Services"),
           onPressed: onDiscoverServicesPressed,
+          child: const Text("Get Services"),
         ),
         const IconButton(
           icon: SizedBox(
+            width: 18.0,
+            height: 18.0,
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(Colors.grey),
             ),
-            width: 18.0,
-            height: 18.0,
           ),
           onPressed: null,
         )
@@ -253,11 +253,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
               : (isConnected ? onDisconnectPressed : onConnectPressed),
           child: Text(
             _isConnecting ? "取消" : (isConnected ? "断开" : "连接"),
-
-            //  style:Theme.of(context)
-            //     .primaryTextTheme
-            //     .labelLarge
-            //     ?.copyWith(color: Colors.white),
           ))
     ]);
   }

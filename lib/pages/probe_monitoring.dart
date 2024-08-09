@@ -10,11 +10,6 @@ import 'package:bluetooth_mini/utils/hex.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 import '../utils/analytical.dart';
 
-// import 'package:bluetooth_mini/widgets/time_form.dart';
-// import 'package:bluetooth_mini/widgets/cus_dialog.dart';
-// import 'package:bluetooth_mini/db/database_helper.dart';
-// import 'package:bluetooth_mini/models/employee_model.dart';
-
 // 探管监测
 class Probe extends StatefulWidget {
   const Probe({Key? key}) : super(key: key);
@@ -36,7 +31,7 @@ class _ProbeState extends State<Probe> {
   // 监听订阅
   StreamSubscription<List<int>>? _lastValueSubscription;
 
-  // 倾角
+  // 翻滚角
   String _roll = '0';
   String _heading = '0';
 
@@ -124,7 +119,7 @@ class _ProbeState extends State<Probe> {
 
   Widget rollText() {
     return Text(
-      "倾角：$_roll",
+      "翻滚角：$_roll",
       textAlign: TextAlign.left,
       style: const TextStyle(
         color: Colors.black54,
@@ -227,13 +222,13 @@ class _ProbeState extends State<Probe> {
                             '序号',
                           ))),
                   GridColumn(
-                      columnName: 'inclination',
+                      columnName: 'roll',
                       label: Container(
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,
-                          child: const Text('倾角/'))),
+                          child: const Text('翻滚角/°'))),
                   GridColumn(
-                      columnName: 'azimuth',
+                      columnName: 'heading',
                       label: Container(
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,

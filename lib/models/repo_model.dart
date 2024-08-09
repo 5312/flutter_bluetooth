@@ -34,15 +34,20 @@ class RepoModel {
 /// is used to map the employee data to the datagrid widget.
 class RepoDataSource extends DataGridSource {
   final void Function(int) onDelete; // 删除按钮回调
-
+  final void Function(RepoModel) onDetail; // 详情按钮回调
+  final void Function(RepoModel) onOrigin; // 原始数据按钮回调
   List<DataGridRow> _employeeData = [];
 
   @override
   List<DataGridRow> get rows => _employeeData;
 
   /// Creates the employee data source class with required details.
-  RepoDataSource(
-      {required List<RepoModel> employeeData, required this.onDelete}) {
+  RepoDataSource({
+    required List<RepoModel> employeeData,
+    required this.onDelete,
+    required this.onDetail,
+    required this.onOrigin,
+  }) {
     _employeeData = employeeData
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
@@ -56,17 +61,11 @@ class RepoDataSource extends DataGridSource {
                   children: [
                     TextButton(
                       child: const Text('测点数据'),
-                      onPressed: () {
-                        // 编辑按钮的操作
-                        //print('Edit ${e.name}');
-                      },
+                      onPressed: () => onDetail(e),
                     ),
                     TextButton(
                       child: const Text('原始数据'),
-                      onPressed: () {
-                        // 删除按钮的操作
-                        print('Delete ${e.name}');
-                      },
+                      onPressed: () => onOrigin(e),
                     ),
                     TextButton(
                       child: const Text('删除'),

@@ -454,7 +454,6 @@ class _TimeOutState extends State<TimeOut> {
       time: _time,
     );
     employees.add(rows);
-    print(rows.toJson());
     await DatabaseHelper().insertDataList(DataListModel(
       id: id,
       pitch: double.parse(_pitch),
@@ -558,7 +557,7 @@ class _TimeOutState extends State<TimeOut> {
                         width: 200,
                         child: Column(
                           children: [
-                            Text('深度信息：$_pitch'),
+                            Text('俯仰角：$_pitch'),
                             Text(
                                 '累计时间：${Analytical([]).formatTime(_currentTime)}'),
                             ElevatedButton(
@@ -661,7 +660,7 @@ class _TimeOutState extends State<TimeOut> {
                                     alignment: Alignment.center,
                                     color:
                                         const Color.fromRGBO(234, 236, 255, 1),
-                                    child: const Text('深度/m'))),
+                                    child: const Text('俯仰角'))),
                             GridColumn(
                                 columnName: 'azimuth',
                                 label: Container(

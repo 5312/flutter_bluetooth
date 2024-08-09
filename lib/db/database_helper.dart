@@ -71,6 +71,16 @@ class DatabaseHelper {
     });
   }
 
+  // 更具repoId查询数据
+  Future<List<DataListModel>> getDataListByRepoId(int repoId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps =
+        await db.query('data', where: 'repoId = ?', whereArgs: [repoId]);
+    return List.generate(maps.length, (i) {
+      return DataListModel.fromJson(maps[i]);
+    });
+  }
+
   Future<void> deleteDataList(int id) async {
     // Get a reference to the database.
     final db = await database;
