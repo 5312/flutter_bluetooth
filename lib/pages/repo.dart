@@ -15,7 +15,8 @@ class Repo extends StatefulWidget {
 
 class _RepoState extends State<Repo> {
   List<RepoModel> employees = <RepoModel>[];
-  late RepoDataSource employeeDataSource;
+  late RepoDataSource employeeDataSource =
+      RepoDataSource(employeeData: [], onDelete: delete);
 
   @override
   void initState() {

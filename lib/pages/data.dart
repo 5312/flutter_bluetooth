@@ -9,7 +9,8 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
-
+import 'package:bluetooth_mini/models/repo_model.dart';
+import 'dart:math';
 import 'dart:async';
 import '../utils/analytical.dart';
 
@@ -58,10 +59,11 @@ class _DataTransmissionState extends State<DataTransmission> {
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (bluetooth.currentDevice == null) {
-        Navigator.of(context).pop();
-        SmartDialog.showToast('请连接蓝牙');
-      }
+      // TODO 判断是否连接蓝牙
+      // if (bluetooth.currentDevice == null) {
+      //   Navigator.of(context).pop();
+      //   SmartDialog.showToast('请连接蓝牙');
+      // }
     });
     super.initState();
   }
@@ -222,21 +224,6 @@ class _DataTransmissionState extends State<DataTransmission> {
     },
   );
 
-  // 数据保存
-  Widget dataSaveButton = ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.blueAccent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10)), // 设置圆角为10
-      ),
-    ),
-    child:
-        const Text('数据保存', style: TextStyle(fontSize: 16, color: Colors.white)),
-    onPressed: () {
-      // 保存操作的逻辑
-    },
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -288,16 +275,43 @@ class _DataTransmissionState extends State<DataTransmission> {
                           ),
                           dataButton,
                           orificeButton,
-                          dataSaveButton,
-                          const Padding(
-                            padding:
-                                EdgeInsets.only(top: 10, left: 10, right: 10),
-                            child: Text(
-                              '数据传输总数： 7',
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.black38),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)), // 设置圆角为10
+                              ),
                             ),
-                          )
+                            child: const Text('数据保存',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white)),
+                            onPressed: () {
+                              int repoId = Random().nextInt(1000000);
+                              DatabaseHelper().insertRepo(RepoModel(
+                                  id: repoId,
+                                  name: _name,
+                                  mnTime: DateTime.now().toString()));
+                              // 将原始数据保存
+                              employees.forEach((element) {
+                                element.repoId = repoId;
+                                DatabaseHelper().updateDataList(element);
+                              });
+                              // 根据name 保存一个组
+                              // 随机数
+
+                              SmartDialog.showToast('数据保存成功');
+                            },
+                          ),
+                          // const Padding(
+                          //   padding:
+                          //       EdgeInsets.only(top: 10, left: 10, right: 10),
+                          //   child: Text(
+                          //     '数据传输总数： 7',
+                          //     style: TextStyle(
+                          //         fontSize: 12, color: Colors.black38),
+                          //   ),
+                          // )
                         ],
                       ),
                     ),
@@ -371,7 +385,6 @@ class _DataTransmissionState extends State<DataTransmission> {
 
     setState(() {
       employees = result;
-
       employeeDataSource = EmployeeDataSourceData(dataModels: result);
     });
   }

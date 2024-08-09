@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:bluetooth_mini/models/employee_model.dart';
 import 'package:bluetooth_mini/models/repo_model.dart';
 
 import 'package:bluetooth_mini/models/data_list_model.dart';
@@ -25,17 +24,14 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'app_data_database.db');
+    String path = join(await getDatabasesPath(), 'app_data_list_database.db');
     return await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) async {
-        // await db.execute(
-        //   "CREATE TABLE employees(id INTEGER PRIMARY KEY, inclination REAL, azimuth REAL, repoId INTEGER)",
-        // );
-        // await db.execute(
-        //   "CREATE TABLE repos(id INTEGER PRIMARY KEY, name TEXT, mnTime TEXT)",
-        // );
+        await db.execute(
+          "CREATE TABLE repos(id INTEGER PRIMARY KEY, name TEXT, mnTime TEXT)",
+        );
         await db.execute(
           "CREATE TABLE data(id INTEGER PRIMARY KEY, time TEXT, pitch REAL, roll REAL, heading REAL, repoId INTEGER, designPitch REAL, designRoll REAL)",
         );
@@ -54,6 +50,16 @@ class DatabaseHelper {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     await batch.commit(noResult: true);
+  }
+
+  Future<void> updateDataList(DataListModel dataList) async {
+    final db = await database;
+    await db.update(
+      'data',
+      dataList.toJson(),
+      where: "id = ?",
+      whereArgs: [dataList.id],
+    );
   }
 
 // 查询数据
@@ -79,28 +85,14 @@ class DatabaseHelper {
   }
 
 // -----------------
-  Future<void> insertEmployees(List<Employee> employees) async {
+  Future<void> insertRepo(RepoModel repo) async {
     final db = await database;
-    final batch = db.batch();
-
-    for (var employee in employees) {
-      batch.insert(
-        'employees',
-        employee.toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-
-    await batch.commit(noResult: true);
-  }
-
-  Future<List<Employee>> getEmployees() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('employees');
-
-    return List.generate(maps.length, (i) {
-      return Employee.fromJson(maps[i]);
-    });
+    await db.insert(
+      'repos',
+      repo.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    print('inter success');
   }
 
   Future<List<RepoModel>> getRepos() async {
@@ -112,20 +104,20 @@ class DatabaseHelper {
     });
   }
 
-  Future<void> updateEmployee(Employee employee) async {
+  Future<void> updateRepo(RepoModel repo) async {
     final db = await database;
     await db.update(
-      'employees',
-      employee.toJson(),
+      'repos',
+      repo.toJson(),
       where: "id = ?",
-      whereArgs: [employee.id],
+      whereArgs: [repo.id],
     );
   }
 
-  Future<void> deleteEmployee(int id) async {
+  Future<void> deleteRepo(int id) async {
     final db = await database;
     await db.delete(
-      'employees',
+      'repos',
       where: "id = ?",
       whereArgs: [id],
     );
