@@ -8,7 +8,6 @@ import 'dart:async';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:bluetooth_mini/utils/hex.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
-import 'dart:math';
 import '../utils/analytical.dart';
 
 // import 'package:bluetooth_mini/widgets/time_form.dart';
@@ -84,7 +83,7 @@ class _ProbeState extends State<Probe> {
       return;
     }
     // 写入数据到特征码 启动采集
-    await targetCharacteristic!
+    await targetCharacteristic
         .write([0x68, 0x05, 0x00, 0x71, 0x02, 0x78], withoutResponse: false);
     // 监听特征码的通知
     targetCharacteristic.setNotifyValue(true);
