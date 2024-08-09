@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import 'package:bluetooth_mini/models/employee_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
 import 'package:provider/provider.dart';
@@ -8,12 +7,14 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:async';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:bluetooth_mini/utils/hex.dart';
-import 'package:bluetooth_mini/widgets/cus_dialog.dart';
-import 'package:bluetooth_mini/widgets/time_form.dart';
-import 'package:bluetooth_mini/db/database_helper.dart';
-
-import 'package:bluetooth_mini/models/repo_model.dart';
+import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'dart:math';
+import '../utils/analytical.dart';
+
+// import 'package:bluetooth_mini/widgets/time_form.dart';
+// import 'package:bluetooth_mini/widgets/cus_dialog.dart';
+// import 'package:bluetooth_mini/db/database_helper.dart';
+// import 'package:bluetooth_mini/models/employee_model.dart';
 
 // 探管监测
 class Probe extends StatefulWidget {
@@ -24,11 +25,11 @@ class Probe extends StatefulWidget {
 }
 
 class _ProbeState extends State<Probe> {
-  final List<Employee> _employees = <Employee>[];
+  final List<DataListModel> _employees = <DataListModel>[];
   late EmployeeDataSource _employeeDataSource;
+
   late BluetoothManager bluetooth;
   bool received = false;
-  final TextEditingController _controller = TextEditingController();
 
   // 选中特征码
   BluetoothCharacteristic? targetCharacteristic;
@@ -43,14 +44,23 @@ class _ProbeState extends State<Probe> {
   @override
   void initState() {
     super.initState();
+    // 表格数据
     _employeeDataSource = EmployeeDataSource(employeeData: _employees);
 
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
+  }
 
-    // if (bluetooth.nowConnectDevice == null) {
-    //   Navigator.of(context).pop();
-    //   SmartDialog.showToast('请连接蓝牙');
-    // }
+  // 读取指定服务及特征值
+  void discoverServices(BluetoothDevice? onConnectDevice) async {
+    if (onConnectDevice == null) {
+      return;
+    }
+    if (!onConnectDevice.isConnected) {
+      SmartDialog.showToast('请连接设备后再试！');
+      return;
+    }
+    List<BluetoothService> services = await onConnectDevice.discoverServices();
+    services.forEach(readServiceFunction);
   }
 
   // foreach 读取特征值
@@ -61,36 +71,15 @@ class _ProbeState extends State<Probe> {
       var characteristics = service.characteristics;
       for (BluetoothCharacteristic c in characteristics) {
         if (c.uuid.toString() == 'ffe1') {
-          // 例如读取特征码的值
-          if (mounted) {
-            setState(() {
-              targetCharacteristic = c;
-            });
-          }
-
-          // readCharacteristicValue();
-          // writeAndListen();
+          sendCollection(c);
         }
       }
     }
   }
 
-  // 读取指定服务及特征值
-  void discoverServices(BluetoothDevice? onConnectdevice) async {
-    if (onConnectdevice == null) {
-      return;
-    }
-    if (!onConnectdevice.isConnected) {
-      SmartDialog.showToast('请连接设备后再试！');
-      return;
-    }
-    List<BluetoothService> services = await onConnectdevice.discoverServices();
-    services.forEach(readServiceFunction);
-  }
-
   // 启动采集
   Future<void> sendCollection(
-      BluetoothCharacteristic? targetCharacteristic) async {
+      BluetoothCharacteristic targetCharacteristic) async {
     if (received) {
       return;
     }
@@ -106,15 +95,9 @@ class _ProbeState extends State<Probe> {
       // 转为16进制数据用来查看文档对照
       List<String> hexArray = bytesToHexArray(value);
       if (hexArray[3] == 'f0') {
-        // 在这里处理接收到的数据
-        print('启动采集返回值');
-        // 【3】-fo-对应和 HCM600 命令字 0x84
-        // 【5】【6】【7】之和为第几条数据
-        // 【8】【9】【10】pitch 俯仰角
-        // 【11】【12】【13】roll 倾斜角
-        // 【14】【15】【16】heading 方位角
-        String roll = readAngle(hexArray[11], hexArray[12], hexArray[13]);
-        String heading = readAngle(hexArray[14], hexArray[15], hexArray[16]);
+        Analytical analytical = Analytical(value);
+        String roll = analytical.getRoll();
+        String heading = analytical.getHeading();
         setState(() {
           _roll = roll;
           _heading = heading;
@@ -123,32 +106,9 @@ class _ProbeState extends State<Probe> {
     });
     // 等待3秒，如果没有接收到数据，则重新执行函数
     await Future.delayed(const Duration(seconds: 3));
-
     if (!received) {
-      print('没有收到数据，重新执行...');
       await sendCollection(targetCharacteristic); // 递归调用
     }
-  }
-
-  //
-  String readAngle(String roll1, String roll2, String roll3) {
-    // 从第一个元素中取出第一个字符
-    String firstChar = roll1[0];
-    String data = '';
-    if (firstChar == '0') {
-      data += '+';
-    } else {
-      data += '-';
-    }
-    // 使用字符串插值来拼接结果
-    data += '${roll1[1]}$roll2.$roll3';
-    return data;
-  }
-
-  @override
-  void deactivate() {
-    super.deactivate();
-    //print('probe:--deactiveate');
   }
 
   @override
@@ -187,82 +147,14 @@ class _ProbeState extends State<Probe> {
     );
   }
 
-  int generateRandomId({int min = 1, int max = 1000000}) {
-    final Random random = Random();
-    return random.nextInt(max - min + 1) + min;
-  }
-
-  // 储存
-  Future<void> _onStore() async {
-    if (_controller.text != '') {
-      print(_controller.text);
-      DateTime time = DateTime.now();
-      print(time);
-      int randomId = generateRandomId();
-      await DatabaseHelper().insertRepo(
-        RepoModel(
-            id: randomId, name: _controller.text, mnTime: time.toString()),
-      );
-      int randomId2 = generateRandomId();
-      List<Employee> e = _employees.map((e) {
-        return Employee(
-          id: e.id,
-          inclination: e.inclination,
-          azimuth: e.azimuth,
-          repoId: randomId,
-        );
-      }).toList();
-      await DatabaseHelper().insertEmployees(e);
-      Navigator.of(context).pop();
-    } else {
-      SmartDialog.showToast('请填写信息');
-    }
-  }
-
-  void open() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return DialogKeyboard(
-          contentBody: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minWidth: 500, // 设置最大宽度
-              ),
-              child: Column(
-                children: <Widget>[
-                  MyForm(
-                    label: '检测名称',
-                    suffixIcon: '',
-                    controller: _controller,
-                  ),
-                ],
-              )),
-          title: const Text(
-            '添加矿区',
-            style: TextStyle(fontSize: 14),
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(backgroundColor: Colors.blue),
-              onPressed: _onStore,
-              child: const Text(
-                '下一步',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // 采集
+  // 采集 仅保存当前表格
   void _addEmployee() {
     int id = _employeeDataSource.rows.length + 1;
-    Employee rows = Employee(
+    DataListModel rows = DataListModel(
         id: id,
-        inclination: double.parse(_roll),
-        azimuth: double.parse(_heading),
+        pitch: null,
+        roll: double.parse(_roll),
+        heading: double.parse(_heading),
         repoId: null);
     _employees.add(rows);
     // 保存操作的逻辑
@@ -271,13 +163,11 @@ class _ProbeState extends State<Probe> {
 
   @override
   Widget build(BuildContext context) {
-    if (targetCharacteristic == null) {
-      // discoverServices(bluetooth.nowConnectDevice);
-    } else {
-      // 启动采集
-      sendCollection(targetCharacteristic);
+    if (!bluetooth.isConnected) {
+      Navigator.of(context).pop();
+      SmartDialog.showToast('请连接蓝牙');
     }
-
+    discoverServices(bluetooth.currentDevice);
     return Scaffold(
       appBar: const CustomAppBar('探管检测'),
       body: Column(
@@ -302,21 +192,6 @@ class _ProbeState extends State<Probe> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end, // 可选：根据需要调整按钮间的间距
                     children: [
-                      // ElevatedButton(
-                      //   style: ElevatedButton.styleFrom(
-                      //     backgroundColor: Colors.white,
-                      //     shape: const RoundedRectangleBorder(
-                      //       borderRadius: BorderRadius.all(
-                      //           Radius.circular(10)), // 设置圆角为10
-                      //     ),
-                      //   ),
-                      //   child: const Text('储存',
-                      //       style: TextStyle(fontSize: 16, color: Colors.blue)),
-                      //   onPressed: () {
-                      //     // 添加操作的逻辑
-                      //     open();
-                      //   },
-                      // ),
                       const SizedBox(
                         width: 10,
                       ),
@@ -374,5 +249,37 @@ class _ProbeState extends State<Probe> {
         ],
       ),
     );
+  }
+}
+
+/// An object to set the employee collection data source to the datagrid. This
+/// is used to map the employee data to the datagrid widget.
+class EmployeeDataSource extends DataGridSource {
+  /// Creates the employee data source class with required details.
+  EmployeeDataSource({required List<DataListModel> employeeData}) {
+    _employeeData = employeeData
+        .map<DataGridRow>((e) => DataGridRow(cells: [
+              DataGridCell<int>(columnName: 'id', value: e.id),
+              DataGridCell<Object>(columnName: 'roll', value: e.roll),
+              DataGridCell<Object>(columnName: 'heading', value: e.heading),
+            ]))
+        .toList();
+  }
+
+  List<DataGridRow> _employeeData = [];
+
+  @override
+  List<DataGridRow> get rows => _employeeData;
+
+  @override
+  DataGridRowAdapter buildRow(DataGridRow row) {
+    return DataGridRowAdapter(
+        cells: row.getCells().map<Widget>((e) {
+      return Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(8.0),
+        child: Text(e.value.toString()),
+      );
+    }).toList());
   }
 }
