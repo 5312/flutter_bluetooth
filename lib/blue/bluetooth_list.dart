@@ -44,6 +44,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
         .toList();
   }
 
+  // 已连接设备列表
   List<Widget> _buildConnectedDeviceTiles(BuildContext context) {
     return _connectedResult
         .map(
@@ -122,6 +123,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
     );
   }
 
+  // 扫描按钮
   Widget buildScanButton(BuildContext context) {
     if (FlutterBluePlus.isScanningNow) {
       return FloatingActionButton(

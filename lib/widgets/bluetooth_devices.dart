@@ -28,7 +28,7 @@ class _DevicesStateState extends State<DevicesState> {
 
   // 特征值监听器
   // StreamSubscription? streamSubscription;
-  late StreamSubscription<List<int>> _lastValueSubscription;
+  StreamSubscription<List<int>>? _lastValueSubscription;
 
   @override
   void initState() {
@@ -45,6 +45,9 @@ class _DevicesStateState extends State<DevicesState> {
     super.dispose();
     // 跳转 homecard 不会执行这里
     // 退出登录会执行
+    if (_lastValueSubscription != null) {
+      _lastValueSubscription = null;
+    }
     if (bluetoothManagerInstant != null) {
       // 更改navicat 模式后不需要取消订阅了
       // bluetoothManagerInstant?.adapterStateSubscription.cancel();
@@ -150,12 +153,13 @@ class _DevicesStateState extends State<DevicesState> {
           _power = hex; // int.parse(hex.toString(), radix: 16);
         });
       }
-      _lastValueSubscription.cancel();
+      _lastValueSubscription?.cancel();
       targetCharacteristic!.setNotifyValue(false);
       //print('取消订阅');
       //print(_lastValueSubscription);
     });
   }
+
   @override
   void deactivate() {
     super.deactivate();

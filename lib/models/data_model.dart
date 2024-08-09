@@ -16,6 +16,26 @@ class DataModel {
     this.inclination,
     this.azimuth,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'timeData': timeData,
+      'deep': deep,
+      'inclination': inclination,
+      'azimuth': azimuth,
+    };
+  }
+
+  factory DataModel.fromJson(Map<String, dynamic> json) {
+    return DataModel(
+      id: json['id'],
+      timeData: json['timeData'],
+      deep: json['deep'],
+      inclination: json['inclination'],
+      azimuth: json['azimuth'],
+    );
+  }
 }
 
 class EmployeeDataSourceData extends DataGridSource {

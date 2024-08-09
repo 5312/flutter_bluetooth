@@ -10,6 +10,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:bluetooth_mini/utils/hex.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:bluetooth_mini/models/time_model.dart';
+import '../utils/analytical.dart';
 
 import 'dart:async';
 
@@ -31,7 +32,7 @@ class _DataTransmissionState extends State<DataTransmission> {
   String _factoryString = '';
   String _drillingString = '';
   String _name = '';
-  List<String> _backList = [];
+  List<int> _backList = [];
 
   // 选中特征码
   BluetoothCharacteristic? targetCharacteristic;
@@ -55,8 +56,6 @@ class _DataTransmissionState extends State<DataTransmission> {
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      print('--------------页面buildOver-------------------');
-
       if (bluetooth.nowConnectDevice == null) {
         Navigator.of(context).pop();
         SmartDialog.showToast('请连接蓝牙');
@@ -144,27 +143,32 @@ class _DataTransmissionState extends State<DataTransmission> {
     await targetCharacteristic.setNotifyValue(true);
     _lastValueSubscription =
         targetCharacteristic.onValueReceived.listen((value) {
-      // 转为16进制数据用来查看文档对照
-      List<String> hexArray = bytesToHexArray(value);
       EasyLoading.dismiss();
       SmartDialog.showToast('探管取数成功');
-      print('探管取数返回');
-      // [68, 14, 00, f0, 02, 00, 04, 96, 00, 03, 73, 00, 01, 42, 02, 19, 85, 03, 00, 00, fc]
-      // 【5】【6】【7】之和为第几条数据
-      _backList.addAll(hexArray);
+
+      // 转为16进制数据用来查看文档对照
+      // List<String> hexArray = bytesToHexArray(value);
+      _backList.addAll(value);
       getData(_backList);
     });
   }
 
-  void getData(List<String> list) {
-    // 找到第二个 '68' 的索引
-    int firstIndex = list.indexOf('68');
-    int secondIndex = list.indexOf('68', firstIndex + 1);
+  void getData(List<int> originalArray) {
+    // 去掉前导部分
+    List<int> trimmedArray = originalArray.sublist(9); // 去掉前 9 个元素
 
-    // 从第二个 '68' 开始截取数据
-    List<String> result = list.sublist(secondIndex);
+    // 分割数组，每段 21 个元素
+    List<List<int>> chunks = [];
+    for (int i = 0; i < trimmedArray.length; i += 21) {
+      int end = (i + 21 < trimmedArray.length) ? i + 21 : trimmedArray.length;
+      chunks.add(trimmedArray.sublist(i, end));
+    }
 
-    print(result); // 输出结果
+    // 打印每一段
+    for (var chunk in chunks) {
+      Analytical analytical = Analytical(chunk);
+      employees = convertToDataModelList(MyTime.getTimeData(), null, null);
+    }
   }
 
   @override
@@ -190,6 +194,8 @@ class _DataTransmissionState extends State<DataTransmission> {
       ], withoutResponse: false);
       targetCharacteristic!.setNotifyValue(false);
     }
+    targetCharacteristic = null;
+    _lastValueSubscription = null;
     super.dispose();
   }
 

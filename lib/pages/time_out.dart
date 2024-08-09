@@ -14,6 +14,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:bluetooth_mini/widgets/cus_dialog.dart';
 import 'package:bluetooth_mini/db/my_setting.dart';
 import 'package:bluetooth_mini/db/my_time.dart';
+import '../utils/analytical.dart';
 
 // 定时同步
 class TimeOut extends StatefulWidget {
@@ -63,7 +64,7 @@ class _TimeOutState extends State<TimeOut> {
   String _drillingString = '';
 
   String _nString = '';
-  String _ptcth = '';
+  String _pitch = '';
   String _time = '';
 
   @override
@@ -393,6 +394,7 @@ class _TimeOutState extends State<TimeOut> {
 
   // 启动连接
   Future<void> handleSync(BluetoothCharacteristic? targetCharacteristic) async {
+    bool iniTime = true;
     if (targetCharacteristic == null) {
       return;
     }
@@ -401,7 +403,7 @@ class _TimeOutState extends State<TimeOut> {
         .write([0x68, 0x05, 0x00, 0x71, 0x01, 0x77], withoutResponse: false);
     print('启动采集');
     EasyLoading.show(status: '正在同步中...');
-    backTime();
+
     // 监听特征码的通知
     targetCharacteristic.setNotifyValue(true);
     _lastValueSubscription =
@@ -409,27 +411,20 @@ class _TimeOutState extends State<TimeOut> {
       isSync = false;
       isFixed = true;
       isPop = true;
+      // 第一次返回才开始计数
+      if (iniTime) {
+        backTime();
+        iniTime = false;
+      }
       // 转为16进制数据用来查看文档对照
       List<String> hexArray = bytesToHexArray(value);
       EasyLoading.dismiss();
-      print('定时同步');
       if (hexArray[3] == 'f0') {
-        int seconds = value[7];
-        int minutes = value[6] * 255;
-        int hours = value[5] * minutes;
-        int formattedTime = hours + minutes + seconds;
-        print(_formatTime(formattedTime));
-
-        _time = _formatTime(formattedTime);
-        //   // 【3】-fo-对应和 HCM600 命令字 0x84
-        //   // 【5】【6】【7】之和为第几条数据
-        //   // 【8】【9】【10】picth仰角
-        //   // 【11】【12】【13】roll倾斜角
-        //   // 【14】【15】【16】heading 方位角
-        // _time = value[5] + value[6] + value[7];
-        String ptcth = readAngle(hexArray[8], hexArray[9], hexArray[10]);
+        Analytical analytical = Analytical(value);
+        _time = analytical.dataTime();
+        String pitch = analytical.getPitch();
         setState(() {
-          _ptcth = ptcth;
+          _pitch = pitch;
         });
       }
     });
@@ -450,11 +445,11 @@ class _TimeOutState extends State<TimeOut> {
   }
 
   //顶点测量
-  void savePicth() {
+  void savePitch() {
     int id = employeeDataSource.rows.length + 1;
     TimeModel rows = TimeModel(
       id: id,
-      inclination: _ptcth,
+      inclination: _pitch,
       timeData: _time,
     );
 
@@ -474,11 +469,15 @@ class _TimeOutState extends State<TimeOut> {
   // 启动成功后倒计时
   void backTime() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _currentTime += 1;
-      });
+      if (mounted) {
+        setState(() {
+          _currentTime += 1;
+        });
+      }
     });
   }
+
+  String _twoDigits(int n) => n.toString().padLeft(2, '0');
 
   String _formatTime(int seconds) {
     int hours = seconds ~/ 3600;
@@ -486,8 +485,6 @@ class _TimeOutState extends State<TimeOut> {
     int secs = seconds % 60;
     return '${_twoDigits(hours)}:${_twoDigits(minutes)}:${_twoDigits(secs)}';
   }
-
-  String _twoDigits(int n) => n.toString().padLeft(2, '0');
 
   @override
   void dispose() {
@@ -570,7 +567,7 @@ class _TimeOutState extends State<TimeOut> {
                         width: 200,
                         child: Column(
                           children: [
-                            Text('深度信息：${_ptcth}'),
+                            Text('深度信息：$_pitch'),
                             Text('累计时间：${_formatTime(_currentTime)}'),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
@@ -615,7 +612,7 @@ class _TimeOutState extends State<TimeOut> {
                                               147, 153, 177, 1))),
                               onPressed: () {
                                 if (isFixed) {
-                                  savePicth();
+                                  savePitch();
                                 }
                                 // 保存操作的逻辑
                               },

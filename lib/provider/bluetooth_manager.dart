@@ -23,8 +23,6 @@ class BluetoothManager with ChangeNotifier {
   // 适配器状态
   BluetoothAdapterState adapterState = BluetoothAdapterState.unknown;
 
-  late StreamSubscription<BluetoothConnectionState>
-      _connectionStateSubscription;
   BluetoothConnectionState _connectionState =
       BluetoothConnectionState.disconnected;
 
@@ -75,8 +73,7 @@ class BluetoothManager with ChangeNotifier {
   // 监听设备状态
   void onDevice() {
     if (nowConnectDevice != null) {
-      _connectionStateSubscription =
-          nowConnectDevice!.connectionState.listen((state) {
+      nowConnectDevice!.connectionState.listen((state) {
         _connectionState = state;
         if (state != BluetoothConnectionState.connected) {
           nowConnectDevice = null;

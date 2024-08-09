@@ -1,4 +1,4 @@
-
+import 'dart:ffi';
 
 String bytesToHex(bytes) {
   final buffer = StringBuffer();
@@ -8,6 +8,7 @@ String bytesToHex(bytes) {
   }
   return buffer.toString();
 }
+
 // 字节转换16进制列表
 List<String> bytesToHexArray(bytes) {
   final hexArray = <String>[];

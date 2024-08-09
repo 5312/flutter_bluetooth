@@ -110,7 +110,7 @@ class _ProbeState extends State<Probe> {
         print('启动采集返回值');
         // 【3】-fo-对应和 HCM600 命令字 0x84
         // 【5】【6】【7】之和为第几条数据
-        // 【8】【9】【10】picth 俯仰角
+        // 【8】【9】【10】pitch 俯仰角
         // 【11】【12】【13】roll 倾斜角
         // 【14】【15】【16】heading 方位角
         String roll = readAngle(hexArray[11], hexArray[12], hexArray[13]);
