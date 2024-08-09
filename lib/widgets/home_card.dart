@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
+import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -16,9 +16,8 @@ class HomeCard extends StatelessWidget {
     return Material(
         child: InkWell(
       onTap: () {
-
         if (FlutterBluePlus.adapterStateNow == BluetoothAdapterState.off) {
-          bluetooth.turnOnBlue();
+          // bluetooth.turnOnBlue();
         } else {
           Navigator.of(context).pushNamed(nameAndType);
         }

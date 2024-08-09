@@ -1,149 +1,166 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
-import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
-import 'package:provider/provider.dart';
-import '../widgets/system_device_tile.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:bluetooth_mini/utils/extra.dart';
-import 'package:bluetooth_mini/utils/snackbar.dart';
 
-class FlutterBlueApp extends StatefulWidget {
-  const FlutterBlueApp({Key? key}) : super(key: key);
+import 'device_screen.dart';
+import '../utils/snackbar.dart';
+import '../widgets/system_device_tile.dart';
+import '../widgets/scan_result_tile.dart';
+import '../utils/extra.dart';
+
+class ScanScreen extends StatefulWidget {
+  const ScanScreen({Key? key}) : super(key: key);
 
   @override
-  State<FlutterBlueApp> createState() => _FlutterBlueAppState();
+  State<ScanScreen> createState() => _ScanScreenState();
 }
 
-class _FlutterBlueAppState extends State<FlutterBlueApp> {
-  BluetoothManager? bluetoothManagerInstant;
-
-  List<ScanResult> _scanResult = [];
-  List<BluetoothDevice> _connectedResult = [];
+class _ScanScreenState extends State<ScanScreen> {
+  List<BluetoothDevice> _systemDevices = [];
+  List<ScanResult> _scanResults = [];
+  bool _isScanning = false;
+  late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
+  late StreamSubscription<bool> _isScanningSubscription;
 
   @override
   void initState() {
     super.initState();
-    bluetoothManagerInstant =
-        Provider.of<BluetoothManager>(context, listen: false);
-    _scanResult = bluetoothManagerInstant?.scanResults ?? [];
-    _connectedResult = bluetoothManagerInstant?.connectedDevices ?? [];
-    filterOnconnected();
-  }
 
-  List<Widget> _buildScanResultDeviceTiles(BuildContext context) {
-    return _scanResult
-        .map(
-          (d) => SystemDeviceTile(
-            device: d.device,
-            disConnect: () => disconnectTheDevice(d.device),
-            onConnect: () => connectTheDevice(d.device),
-          ),
-        )
-        .toList();
-  }
+    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+      _scanResults = results;
+      if (mounted) {
+        setState(() {});
+      }
+    }, onError: (e) {
+      Snackbar.show(ABC.b, prettyException("Scan Error:", e), success: false);
+    });
 
-  // 已连接设备列表
-  List<Widget> _buildConnectedDeviceTiles(BuildContext context) {
-    return _connectedResult
-        .map(
-          (d) => SystemDeviceTile(
-            device: d,
-            disConnect: () => disconnectTheDevice(d),
-            onConnect: () => connectTheDevice(d),
-          ),
-        )
-        .toList();
-  }
-
-  // 开始连接
-  Future<void> connectTheDevice(BluetoothDevice onDevice) async {
-    EasyLoading.show();
-    //print('连接 状态：');
-    //print(onDevice.isConnected);
-    if (!onDevice.isConnected) {
-      //await onDevice.disconnectAndUpdateStream();
-      await onDevice.connectAndUpdateStream().catchError((e) {
-        Snackbar.show(ABC.c, prettyException("Connect Error:", e),
-            success: false);
-      });
-    }
-    if (!onDevice.isConnected) {
-      bluetoothManagerInstant?.updateNowDevice(onDevice);
-    }
-    EasyLoading.dismiss();
-  }
-
-  // 断开连接
-  Future<void> disconnectTheDevice(BluetoothDevice onDevice) async {
-    EasyLoading.show();
-    await onDevice.disconnectAndUpdateStream();
-    bluetoothManagerInstant?.updateNowDevice(null);
-    EasyLoading.dismiss();
-  }
-
-  // 从扫描列表中排除 已连接设备
-  void filterOnconnected() {
-    setState(() {
-      // 过滤掉_connectedResult中已经在_scanResult中存在的元素
-      List<BluetoothDevice> filteredConnectedResult = _connectedResult
-          .where((device) =>
-              !_scanResult.any((scanResult) => scanResult.device == device))
-          .toList();
-      _connectedResult = filteredConnectedResult;
+    _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
+      _isScanning = state;
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
-  // 构建主界面
   @override
-  Widget build(BuildContext context) {
-    return Consumer<BluetoothManager>(
-      builder: (BuildContext context, BluetoothManager bluetoothManager,
-          Widget? child) {
-        _scanResult = bluetoothManager.scanResults;
-        _connectedResult = bluetoothManager.connectedDevices;
-
-        return ScaffoldMessenger(
-          child: Scaffold(
-            appBar: const CustomAppBar('蓝牙列表'),
-            body: RefreshIndicator(
-              onRefresh: onRefresh,
-              child: ListView(
-                children: <Widget>[
-                  ..._buildScanResultDeviceTiles(context),
-                  ..._buildConnectedDeviceTiles(context)
-                ],
-              ),
-            ),
-            floatingActionButton: buildScanButton(context),
-          ),
-        );
-      },
-    );
+  void dispose() {
+    _scanResultsSubscription.cancel();
+    _isScanningSubscription.cancel();
+    super.dispose();
   }
 
-  // 扫描按钮
-  Widget buildScanButton(BuildContext context) {
-    if (FlutterBluePlus.isScanningNow) {
-      return FloatingActionButton(
-        onPressed: bluetoothManagerInstant?.onStopPressed,
-        child: const Icon(Icons.stop),
-        // backgroundColor: Colors.red,
-      );
-    } else {
-      return FloatingActionButton(
-          onPressed: bluetoothManagerInstant?.onScanPressed,
-          // child: const Text("扫描")
-          child: const Icon(Icons.bluetooth));
+  Future onScanPressed() async {
+    try {
+      _systemDevices = await FlutterBluePlus.systemDevices;
+    } catch (e) {
+      Snackbar.show(ABC.b, prettyException("获取系统设备错误:", e), success: false);
+    }
+    try {
+      // 15秒后停止扫描
+      await FlutterBluePlus.startScan(
+          timeout: const Duration(seconds: 15),
+          withServices: [Guid('0000FFE0-0000-1000-8000-00805F9B34FB')]);
+    } catch (e) {
+      Snackbar.show(ABC.b, prettyException("Start Scan Error:", e),
+          success: false);
+    }
+    if (mounted) {
+      setState(() {});
     }
   }
 
-  // 刷新列表
-  Future<void> onRefresh() async {
+  Future onStopPressed() async {
+    try {
+      FlutterBluePlus.stopScan();
+    } catch (e) {
+      Snackbar.show(ABC.b, prettyException("Stop Scan Error:", e),
+          success: false);
+    }
+  }
+
+  void onConnectPressed(BluetoothDevice device) {
+    device.connectAndUpdateStream().catchError((e) {
+      Snackbar.show(ABC.c, prettyException("Connect Error:", e),
+          success: false);
+    });
+    MaterialPageRoute route = MaterialPageRoute(
+        builder: (context) => DeviceScreen(device: device),
+        settings: const RouteSettings(name: '/DeviceScreen'));
+    Navigator.of(context).push(route);
+  }
+
+  Future onRefresh() {
+    if (_isScanning == false) {
+      FlutterBluePlus.startScan(
+          timeout: const Duration(seconds: 15),
+          withServices: [Guid('0000FFE0-0000-1000-8000-00805F9B34FB')]);
+    }
     if (mounted) {
       setState(() {});
     }
     return Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  Widget buildScanButton(BuildContext context) {
+    if (FlutterBluePlus.isScanningNow) {
+      return FloatingActionButton(
+        onPressed: onStopPressed,
+        backgroundColor: Colors.red,
+        child: const Icon(Icons.stop),
+      );
+    } else {
+      return FloatingActionButton(
+        onPressed: onScanPressed,
+        child: const Text("SCAN"),
+      );
+    }
+  }
+
+  List<Widget> _buildSystemDeviceTiles(BuildContext context) {
+    return _systemDevices
+        .map(
+          (d) => SystemDeviceTile(
+            device: d,
+            onOpen: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => DeviceScreen(device: d),
+                settings: RouteSettings(name: '/DeviceScreen'),
+              ),
+            ),
+            onConnect: () => onConnectPressed(d),
+          ),
+        )
+        .toList();
+  }
+
+  List<Widget> _buildScanResultTiles(BuildContext context) {
+    return _scanResults
+        .map(
+          (r) => ScanResultTile(
+            result: r,
+            onTap: () => onConnectPressed(r.device),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const CustomAppBar('蓝牙列表'),
+      body: RefreshIndicator(
+        onRefresh: onRefresh,
+        child: ListView(
+          children: <Widget>[
+            ..._buildSystemDeviceTiles(context),
+            ..._buildScanResultTiles(context),
+          ],
+        ),
+      ),
+      floatingActionButton: buildScanButton(context),
+    );
   }
 }

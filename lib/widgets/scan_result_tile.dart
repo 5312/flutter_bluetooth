@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class ScanResultTile extends StatefulWidget {
-  const ScanResultTile({Key? key, required this.result, required this.onOpen})
+  const ScanResultTile({Key? key, required this.result, this.onTap})
       : super(key: key);
 
   final ScanResult result;
-  final VoidCallback onOpen;
+  final VoidCallback? onTap;
 
   @override
   State<ScanResultTile> createState() => _ScanResultTileState();
@@ -28,6 +28,9 @@ class _ScanResultTileState extends State<ScanResultTile> {
     _connectionStateSubscription =
         widget.result.device.connectionState.listen((state) {
       _connectionState = state;
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -42,7 +45,10 @@ class _ScanResultTileState extends State<ScanResultTile> {
   }
 
   String getNiceManufacturerData(List<List<int>> data) {
-    return data.map((val) => getNiceHexArray(val)).join(', ').toUpperCase();
+    return data
+        .map((val) => '${getNiceHexArray(val)}')
+        .join(', ')
+        .toUpperCase();
   }
 
   String getNiceServiceData(Map<Guid, List<int>> data) {
@@ -83,19 +89,13 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
   Widget _buildConnectButton(BuildContext context) {
     return ElevatedButton(
+      child: isConnected ? const Text('OPEN') : const Text('CONNECT'),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      onPressed: () {
-        if (isConnected) {
-          widget.result.device.disconnect();
-        } else {
-          widget.onOpen();
-        }
-        setState(() {});
-      },
-      child: isConnected ? const Text('已连接') : const Text('未连接'),
+      onPressed:
+          (widget.result.advertisementData.connectable) ? widget.onTap : null,
     );
   }
 

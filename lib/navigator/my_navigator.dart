@@ -38,7 +38,7 @@ class MyNavigator {
         case "detail":
           return const DetailPage(id: 1);
         case "bluetoothList":
-          return const FlutterBlueApp();
+          return const ScanScreen();
         case "setting":
           return const Setting();
         case "scan":

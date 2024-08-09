@@ -7,6 +7,7 @@ enum ABC {
   b,
   c,
 }
+
 // 错误处理
 class Snackbar {
   static final snackBarKeyA = GlobalKey<ScaffoldMessengerState>();
@@ -29,10 +30,13 @@ class Snackbar {
         ? SnackBar(content: Text(msg), backgroundColor: Colors.blue)
         : SnackBar(content: Text(msg), backgroundColor: Colors.red);
     getSnackbar(abc).currentState?.removeCurrentSnackBar();
-    getSnackbar(abc).currentState?.showSnackBar(snackBar);
+    try {
+      getSnackbar(abc).currentState?.showSnackBar(snackBar);
+    } catch (e) {
+      // print(e);
+    }
   }
 }
-
 
 String prettyException(String prefix, dynamic e) {
   if (e is FlutterBluePlusException) {

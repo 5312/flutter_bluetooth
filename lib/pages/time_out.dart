@@ -9,7 +9,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:async';
 import 'package:bluetooth_mini/utils/hex.dart';
 import 'package:provider/provider.dart';
-import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
+import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:bluetooth_mini/widgets/cus_dialog.dart';
 import 'package:bluetooth_mini/db/my_setting.dart';
@@ -85,12 +85,12 @@ class _TimeOutState extends State<TimeOut> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print('--------------页面buildOver-------------------');
       // TODO
-      if (bluetooth.nowConnectDevice == null) {
-        Navigator.of(context).pop();
-        SmartDialog.showToast('请连接蓝牙');
-      } else {
-        open();
-      }
+      // if (bluetooth.nowConnectDevice == null) {
+      //   Navigator.of(context).pop();
+      //   SmartDialog.showToast('请连接蓝牙');
+      // } else {
+      //   open();
+      // }
     });
     super.initState();
   }
@@ -589,7 +589,7 @@ class _TimeOutState extends State<TimeOut> {
                               onPressed: () async {
                                 if (isSync) {
                                   // handleSync(bluetooth?.targetCharacteristic);
-                                  discoverServices(bluetooth.nowConnectDevice);
+                                  // discoverServices(bluetooth.nowConnectDevice);
                                 }
                               },
                             ),

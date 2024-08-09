@@ -3,7 +3,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/data_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/db/my_time.dart';
-import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
+import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -56,10 +56,10 @@ class _DataTransmissionState extends State<DataTransmission> {
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (bluetooth.nowConnectDevice == null) {
-        Navigator.of(context).pop();
-        SmartDialog.showToast('请连接蓝牙');
-      }
+      // if (bluetooth.nowConnectDevice == null) {
+      //   Navigator.of(context).pop();
+      //   SmartDialog.showToast('请连接蓝牙');
+      // }
     });
     super.initState();
   }
@@ -293,7 +293,8 @@ class _DataTransmissionState extends State<DataTransmission> {
                               // 保存操作的逻辑
 
                               // handleSync(bluetooth?.targetCharacteristic);
-                              discoverServices(bluetooth.nowConnectDevice);
+
+                              // discoverServices(bluetooth.nowConnectDevice);
                             },
                           ),
                           dataButton,

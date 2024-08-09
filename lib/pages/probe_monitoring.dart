@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/employee_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
-import 'package:bluetooth_mini/provider/bluetooth_manager.dart';
+import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:async';
@@ -47,10 +47,10 @@ class _ProbeState extends State<Probe> {
 
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
-    if (bluetooth.nowConnectDevice == null) {
-      Navigator.of(context).pop();
-      SmartDialog.showToast('请连接蓝牙');
-    }
+    // if (bluetooth.nowConnectDevice == null) {
+    //   Navigator.of(context).pop();
+    //   SmartDialog.showToast('请连接蓝牙');
+    // }
   }
 
   // foreach 读取特征值
@@ -272,7 +272,7 @@ class _ProbeState extends State<Probe> {
   @override
   Widget build(BuildContext context) {
     if (targetCharacteristic == null) {
-      discoverServices(bluetooth.nowConnectDevice);
+      // discoverServices(bluetooth.nowConnectDevice);
     } else {
       // 启动采集
       sendCollection(targetCharacteristic);

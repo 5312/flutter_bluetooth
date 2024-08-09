@@ -1,7 +1,7 @@
 name: bluetooth_mini
 description: bluetooth_mini
 
-publish_to: 'none'
+publish_to: "none"
 
 # 版本号
 version: 1.0.0+1

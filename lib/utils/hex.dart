@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 String bytesToHex(bytes) {
   final buffer = StringBuffer();
   for (int byte in bytes) {
