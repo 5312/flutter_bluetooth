@@ -4,6 +4,9 @@ import 'package:sqflite/sqflite.dart';
 import 'package:bluetooth_mini/models/employee_model.dart';
 import 'package:bluetooth_mini/models/repo_model.dart';
 import 'package:bluetooth_mini/models/time_model.dart';
+
+import 'package:bluetooth_mini/models/data_list_model.dart';
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
@@ -23,21 +26,60 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'app_database.db');
+    String path = join(await getDatabasesPath(), 'app_data_database.db');
     return await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) async {
+        // await db.execute(
+        //   "CREATE TABLE employees(id INTEGER PRIMARY KEY, inclination REAL, azimuth REAL, repoId INTEGER)",
+        // );
+        // await db.execute(
+        //   "CREATE TABLE repos(id INTEGER PRIMARY KEY, name TEXT, mnTime TEXT)",
+        // );
         await db.execute(
-          "CREATE TABLE employees(id INTEGER PRIMARY KEY, inclination REAL, azimuth REAL, repoId INTEGER)",
-        );
-        await db.execute(
-          "CREATE TABLE repos(id INTEGER PRIMARY KEY, name TEXT, mnTime TEXT)",
+          "CREATE TABLE data(id INTEGER PRIMARY KEY, time TEXT, pitch REAL, roll REAL, heading REAL, repoId INTEGER, designPitch REAL, designRoll REAL)",
         );
       },
     );
   }
 
+// 插入DataListModel
+  Future<void> insertDataList(DataListModel dataList) async {
+    final db = await database;
+    final batch = db.batch();
+
+    batch.insert(
+      'data',
+      dataList.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await batch.commit(noResult: true);
+  }
+
+// 查询数据
+  Future<List<DataListModel>> getDataList() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('data');
+    return List.generate(maps.length, (i) {
+      return DataListModel.fromJson(maps[i]);
+    });
+  }
+
+  Future<void> deleteDataList(int id) async {
+    // Get a reference to the database.
+    final db = await database;
+    // Remove the Dog from the database.
+    await db.delete(
+      'data',
+      // Use a `where` clause to delete a specific dog.
+      where: 'id = ?',
+      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      whereArgs: [id],
+    );
+  }
+
+// -----------------
   Future<void> insertEmployees(List<Employee> employees) async {
     final db = await database;
     final batch = db.batch();
@@ -52,6 +94,7 @@ class DatabaseHelper {
 
     await batch.commit(noResult: true);
   }
+
   //  保存定时同步数据
   Future<void> insertTime(List<TimeModel> employees) async {
     final db = await database;
@@ -66,7 +109,6 @@ class DatabaseHelper {
     }
     await batch.commit(noResult: true);
   }
-
 
   Future<void> insertRepo(RepoModel repo) async {
     final db = await database;

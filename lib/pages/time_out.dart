@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import 'package:bluetooth_mini/models/time_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:bluetooth_mini/widgets/time_form.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'dart:async';
 import 'package:bluetooth_mini/utils/hex.dart';
 import 'package:provider/provider.dart';
 import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
@@ -14,7 +12,12 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:bluetooth_mini/widgets/cus_dialog.dart';
 import 'package:bluetooth_mini/db/my_setting.dart';
 import 'package:bluetooth_mini/db/my_time.dart';
+import 'package:bluetooth_mini/db/database_helper.dart';
 import '../utils/analytical.dart';
+import '../models/data_list_model.dart';
+import 'dart:async';
+
+// import 'package:bluetooth_mini/models/time_model.dart';
 
 // 定时同步
 class TimeOut extends StatefulWidget {
@@ -25,19 +28,19 @@ class TimeOut extends StatefulWidget {
 }
 
 class _TimeOutState extends State<TimeOut> {
-  List<TimeModel> employees = <TimeModel>[];
+  late BluetoothManager bluetooth;
+
+  List<DataListModel> employees = <DataListModel>[];
   late EmployeeDataSource employeeDataSource;
+
   final TextEditingController _controllerLen = TextEditingController();
   final TextEditingController _controllerName = TextEditingController();
-  final TextEditingController _controllerPicth = TextEditingController();
-  final TextEditingController _controllerHeadinng = TextEditingController();
-
-  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _controllerPitch = TextEditingController();
+  final TextEditingController _controllerHeading = TextEditingController();
 
   bool isSync = false;
   bool isFixed = false;
   bool isPop = false;
-  late BluetoothManager bluetooth;
 
   // 选中特征码
   BluetoothCharacteristic? targetCharacteristic;
@@ -45,7 +48,6 @@ class _TimeOutState extends State<TimeOut> {
   // 监听订阅
   StreamSubscription<List<int>>? _lastValueSubscription;
 
-  late Timer _timer;
   int _currentTime = 0;
 
   String? _selectedMine;
@@ -62,11 +64,13 @@ class _TimeOutState extends State<TimeOut> {
   String _workString = '';
   String _factoryString = '';
   String _drillingString = '';
-
   String _nString = '';
   String _pitch = '';
+  String _designPitch = '';
+  String _designHeading = '';
   String _time = '';
 
+  Timer? _timer;
   @override
   void initState() {
     _miningArea = MySetting.getMine();
@@ -83,16 +87,111 @@ class _TimeOutState extends State<TimeOut> {
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      print('--------------页面buildOver-------------------');
-      // TODO
-      // if (bluetooth.nowConnectDevice == null) {
-      //   Navigator.of(context).pop();
-      //   SmartDialog.showToast('请连接蓝牙');
-      // } else {
-      //   open();
-      // }
+      if (bluetooth.currentDevice == null) {
+        Navigator.of(context).pop();
+        SmartDialog.showToast('请连接蓝牙');
+      } else {
+        open();
+      }
     });
     super.initState();
+  }
+
+  // 弹窗
+  void open() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return PopScope(
+            canPop: false,
+            onPopInvoked: (bool didPop) {
+              if (didPop) {
+                return;
+              }
+              showDeleteConfirmDialog1(context);
+            },
+            child: DialogKeyboard(
+              contentBody: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minWidth: 550, // 设置最大宽度
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      _buildRowMineSelect(),
+                      _buildRowWorkSelect(),
+                      _buildRowFactorySelect(),
+                      _buildRowDrillSelect(),
+                      MyForm(
+                        label: '设计俯仰角',
+                        suffixIcon: '',
+                        controller: _controllerPitch,
+                      ),
+                      MyForm(
+                        label: '设计方位角',
+                        suffixIcon: '',
+                        controller: _controllerHeading,
+                      ),
+                      MyForm(
+                        label: '钻杆长度',
+                        suffixIcon: 'm',
+                        controller: _controllerLen,
+                      ),
+                      MyForm(
+                        label: '检测名称',
+                        suffixIcon: '',
+                        controller: _controllerName,
+                      ),
+                    ],
+                  )),
+              title: const Text(
+                '添加矿区',
+                style: TextStyle(fontSize: 14),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  style: TextButton.styleFrom(backgroundColor: Colors.blue),
+                  onPressed: () {
+                    if (_controllerName.text != '' &&
+                        _controllerPitch.text != '' &&
+                        _controllerHeading.text != '') {
+                      setState(() {
+                        isSync = true;
+                        // 矿区
+                        _mineString = _selectedMine ?? '';
+                        MyTime.setMine(_mineString);
+                        // 工作面
+                        _workString = _selectedWork ?? '';
+                        MyTime.setWork(_workString);
+                        // 钻厂
+                        _factoryString = _selectedFactory ?? '';
+                        MyTime.setFactory(_factoryString);
+                        // 钻孔
+                        _drillingString = _selectedDrilling ?? '';
+                        MyTime.setDirlling(_drillingString);
+                        // 检测名称
+                        _nString = _controllerName.text;
+                        MyTime.setMonName(_nString);
+                        // 设计俯仰角
+                        _designPitch = _controllerPitch.text;
+                        MyTime.setPitch(_designPitch);
+                        // 设计方位角
+                        _designHeading = _controllerHeading.text;
+                        MyTime.setHeading(_designHeading);
+                      });
+                      Navigator.of(context).pop();
+                    } else {
+                      SmartDialog.showToast('请填写信息');
+                    }
+                  },
+                  child: const Text(
+                    '下一步',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ));
+      },
+    );
   }
 
   /// 矿区
@@ -279,81 +378,17 @@ class _TimeOutState extends State<TimeOut> {
     );
   }
 
-  void open() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return DialogKeyboard(
-          contentBody: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minWidth: 550, // 设置最大宽度
-              ),
-              child: Column(
-                children: <Widget>[
-                  _buildRowMineSelect(),
-                  _buildRowWorkSelect(),
-                  _buildRowFactorySelect(),
-                  _buildRowDrillSelect(),
-                  MyForm(
-                    label: '设计俯仰角',
-                    suffixIcon: '',
-                    controller: _controllerPicth,
-                  ),
-                  MyForm(
-                    label: '设计方位角',
-                    suffixIcon: '',
-                    controller: _controllerHeadinng,
-                  ),
-                  MyForm(
-                    label: '钻杆长度',
-                    suffixIcon: 'm',
-                    controller: _controllerLen,
-                  ),
-                  MyForm(
-                    label: '检测名称',
-                    suffixIcon: '',
-                    controller: _controllerName,
-                  ),
-                ],
-              )),
-          title: const Text(
-            '添加矿区',
-            style: TextStyle(fontSize: 14),
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(backgroundColor: Colors.blue),
-              onPressed: () {
-                if (_controllerName.text != '') {
-                  setState(() {
-                    isSync = true;
-                    _mineString = _selectedMine ?? '';
-                    MyTime.setMine(_mineString);
-                    _workString = _selectedWork ?? '';
-                    MyTime.setWork(_workString);
-
-                    _factoryString = _selectedFactory ?? '';
-                    MyTime.setFactory(_factoryString);
-
-                    _drillingString = _selectedDrilling ?? '';
-                    MyTime.setDirlling(_drillingString);
-                    _nString = _controllerName.text;
-                    MyTime.setMonName(_nString);
-                  });
-                  Navigator.of(context).pop();
-                } else {
-                  SmartDialog.showToast('请填写信息');
-                }
-              },
-              child: const Text(
-                '下一步',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+  // 读取指定服务及特征值
+  void discoverServices(BluetoothDevice? device) async {
+    if (device == null) {
+      return;
+    }
+    if (!device.isConnected) {
+      SmartDialog.showToast('请连接设备后再试！');
+      return;
+    }
+    List<BluetoothService> services = await device.discoverServices();
+    services.forEach(readServiceFunction);
   }
 
   // foreach 读取特征值
@@ -368,46 +403,25 @@ class _TimeOutState extends State<TimeOut> {
           if (mounted) {
             setState(() {
               targetCharacteristic = c;
-              handleSync(targetCharacteristic);
+              handleSync(c);
             });
           }
-
-          // readCharacteristicValue();
-          // writeAndListen();
         }
       }
     }
   }
 
-  // 读取指定服务及特征值
-  void discoverServices(BluetoothDevice? onConnectdevice) async {
-    if (onConnectdevice == null) {
-      return;
-    }
-    if (!onConnectdevice.isConnected) {
-      SmartDialog.showToast('请连接设备后再试！');
-      return;
-    }
-    List<BluetoothService> services = await onConnectdevice.discoverServices();
-    services.forEach(readServiceFunction);
-  }
-
   // 启动连接
-  Future<void> handleSync(BluetoothCharacteristic? targetCharacteristic) async {
+  Future<void> handleSync(BluetoothCharacteristic c) async {
     bool iniTime = true;
-    if (targetCharacteristic == null) {
-      return;
-    }
-    // 写入数据到特征码 启动采集
-    await targetCharacteristic
-        .write([0x68, 0x05, 0x00, 0x71, 0x01, 0x77], withoutResponse: false);
-    print('启动采集');
-    EasyLoading.show(status: '正在同步中...');
 
+    // 写入数据到特征码 启动采集
+    await c.write([0x68, 0x05, 0x00, 0x71, 0x01, 0x77], withoutResponse: false);
+
+    EasyLoading.show(status: '正在同步中...');
     // 监听特征码的通知
-    targetCharacteristic.setNotifyValue(true);
-    _lastValueSubscription =
-        targetCharacteristic.onValueReceived.listen((value) {
+    c.setNotifyValue(true);
+    _lastValueSubscription = c.onValueReceived.listen((value) {
       isSync = false;
       isFixed = true;
       isPop = true;
@@ -430,39 +444,33 @@ class _TimeOutState extends State<TimeOut> {
     });
   }
 
-  String readAngle(String roll1, String roll2, String roll3) {
-    // 从第一个元素中取出第一个字符
-    String firstChar = roll1[0];
-    String data = '';
-    if (firstChar == '0') {
-      data += '+';
-    } else {
-      data += '-';
-    }
-    // 使用字符串插值来拼接结果
-    data += '${roll1[1]}$roll2.$roll3';
-    return data;
-  }
-
-  //顶点测量
-  void savePitch() {
+  //定点测量
+  Future<void> savePitch() async {
     int id = employeeDataSource.rows.length + 1;
-    TimeModel rows = TimeModel(
+    DataListModel rows = DataListModel(
       id: id,
-      inclination: _pitch,
-      timeData: _time,
+      pitch: double.parse(_pitch),
+      time: _time,
     );
-
     employees.add(rows);
-    MyTime.setTimeData(employees);
+    print(rows.toJson());
+    await DatabaseHelper().insertDataList(DataListModel(
+      id: id,
+      pitch: double.parse(_pitch),
+      time: _time,
+      repoId: null,
+      designPitch: double.parse(_designPitch),
+      designRoll: double.parse(_designHeading),
+    ));
+
     employeeDataSource = EmployeeDataSource(employeeData: employees);
   }
 
   //删除末尾数据
   void delePop() {
-    employees.removeLast();
     // 覆盖
-    MyTime.setTimeData(employees);
+    DatabaseHelper().deleteDataList(employees.last.id ?? 0);
+    employees.removeLast();
     employeeDataSource = EmployeeDataSource(employeeData: employees);
   }
 
@@ -475,27 +483,6 @@ class _TimeOutState extends State<TimeOut> {
         });
       }
     });
-  }
-
-  String _twoDigits(int n) => n.toString().padLeft(2, '0');
-
-  String _formatTime(int seconds) {
-    int hours = seconds ~/ 3600;
-    int minutes = (seconds % 3600) ~/ 60;
-    int secs = seconds % 60;
-    return '${_twoDigits(hours)}:${_twoDigits(minutes)}:${_twoDigits(secs)}';
-  }
-
-  @override
-  void dispose() {
-    _lastValueSubscription?.cancel();
-    if (targetCharacteristic != null) {
-      targetCharacteristic!.setNotifyValue(false);
-// 停止采集
-      targetCharacteristic!
-          .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
-    }
-    super.dispose();
   }
 
   // 弹出对话框
@@ -515,7 +502,10 @@ class _TimeOutState extends State<TimeOut> {
               child: const Text("确定"),
               onPressed: () {
                 //关闭对话框并返回true
+                // 停止定时器
+                _timer?.cancel();
                 Navigator.of(context).pop(true);
+                Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
             ),
@@ -568,7 +558,8 @@ class _TimeOutState extends State<TimeOut> {
                         child: Column(
                           children: [
                             Text('深度信息：$_pitch'),
-                            Text('累计时间：${_formatTime(_currentTime)}'),
+                            Text(
+                                '累计时间：${Analytical([]).formatTime(_currentTime)}'),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isSync
@@ -588,8 +579,7 @@ class _TimeOutState extends State<TimeOut> {
                                               147, 153, 177, 1))),
                               onPressed: () async {
                                 if (isSync) {
-                                  // handleSync(bluetooth?.targetCharacteristic);
-                                  // discoverServices(bluetooth.nowConnectDevice);
+                                  discoverServices(bluetooth.currentDevice);
                                 }
                               },
                             ),
@@ -690,5 +680,52 @@ class _TimeOutState extends State<TimeOut> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _lastValueSubscription?.cancel();
+    if (targetCharacteristic != null) {
+      targetCharacteristic!.setNotifyValue(false);
+// 停止采集
+      targetCharacteristic!
+          .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
+    }
+
+    // 停止定时器
+    _timer?.cancel();
+    super.dispose();
+  }
+}
+
+/// An object to set the employee collection data source to the datagrid. This
+/// is used to map the employee data to the datagrid widget.
+class EmployeeDataSource extends DataGridSource {
+  /// Creates the employee data source class with required details.
+  EmployeeDataSource({required List<DataListModel> employeeData}) {
+    _employeeData = employeeData
+        .map<DataGridRow>((e) => DataGridRow(cells: [
+              DataGridCell<int>(columnName: 'id', value: e.id),
+              DataGridCell<num>(columnName: 'pitch', value: e.pitch),
+              DataGridCell<String>(columnName: 'time', value: e.time),
+            ]))
+        .toList();
+  }
+
+  List<DataGridRow> _employeeData = [];
+
+  @override
+  List<DataGridRow> get rows => _employeeData;
+
+  @override
+  DataGridRowAdapter buildRow(DataGridRow row) {
+    return DataGridRowAdapter(
+        cells: row.getCells().map<Widget>((e) {
+      return Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(8.0),
+        child: Text(e.value.toString()),
+      );
+    }).toList());
   }
 }

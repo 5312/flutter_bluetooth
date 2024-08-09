@@ -62,6 +62,26 @@ class MyTime {
     return await prefs?.setString('time_name', string);
   }
 
+  // 设计俯仰角
+  static String? getPitch() {
+    return prefs?.getString('time_pitch');
+  }
+
+  // 设置设计俯仰角
+  static Future<bool?> setPitch(string) async {
+    return await prefs?.setString('time_pitch', string);
+  }
+
+  // 设计方位角
+  static String? getHeading() {
+    return prefs?.getString('time_heading');
+  }
+
+  // 设置设计方位角
+  static Future<bool?> setHeading(string) async {
+    return await prefs?.setString('time_heading', string);
+  }
+
   // 数据
   static List<TimeModel> getTimeData() {
     List<String>? employeeJsonList = prefs?.getStringList('probe_monitoring');

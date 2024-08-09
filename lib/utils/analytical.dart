@@ -7,7 +7,7 @@ class Analytical {
   // 补零
   String _twoDigits(int n) => n.toString().padLeft(2, '0');
 // 格式化时间
-  String _formatTime(int seconds) {
+  String formatTime(int seconds) {
     int hours = seconds ~/ 3600;
     int minutes = (seconds % 3600) ~/ 60;
     int secs = seconds % 60;
@@ -21,7 +21,7 @@ class Analytical {
     int minutes = value[6] * 255;
     int hours = value[5] * minutes;
     int formattedTime = hours + minutes + seconds;
-    String time = _formatTime(formattedTime);
+    String time = formatTime(formattedTime);
     return time;
   }
 

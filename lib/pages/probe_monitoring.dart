@@ -77,18 +77,16 @@ class _ProbeState extends State<Probe> {
   }
 
   // 启动采集
-  Future<void> sendCollection(
-      BluetoothCharacteristic targetCharacteristic) async {
+  Future<void> sendCollection(BluetoothCharacteristic c) async {
+    targetCharacteristic = c;
     if (received) {
       return;
     }
     // 写入数据到特征码 启动采集
-    await targetCharacteristic
-        .write([0x68, 0x05, 0x00, 0x71, 0x02, 0x78], withoutResponse: false);
+    await c.write([0x68, 0x05, 0x00, 0x71, 0x02, 0x78], withoutResponse: false);
     // 监听特征码的通知
-    targetCharacteristic.setNotifyValue(true);
-    _lastValueSubscription =
-        targetCharacteristic.onValueReceived.listen((value) {
+    c.setNotifyValue(true);
+    _lastValueSubscription = c.onValueReceived.listen((value) {
       // 返回值为10进制数据不用转换
       received = true;
       // 转为16进制数据用来查看文档对照
@@ -106,7 +104,7 @@ class _ProbeState extends State<Probe> {
     // 等待3秒，如果没有接收到数据，则重新执行函数
     await Future.delayed(const Duration(seconds: 3));
     if (!received) {
-      await sendCollection(targetCharacteristic); // 递归调用
+      await sendCollection(c); // 递归调用
     }
   }
 
