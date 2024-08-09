@@ -21,7 +21,7 @@ class BluetoothManager with ChangeNotifier {
     // 设置并监听当前连接状态
     _currentDevice = device;
     _connectionStateSubscription = device.connectionState.listen((state) {
-      print('状态变化：$state');
+      _currentDevice = device; // 有时会先执行一次断开
       _connectionState = state;
       if (state == BluetoothConnectionState.disconnected) {
         _currentDevice = null;

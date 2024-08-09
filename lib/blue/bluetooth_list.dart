@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
+import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
+import 'package:provider/provider.dart';
 
 import 'device_screen.dart';
 import '../utils/snackbar.dart';
@@ -81,11 +83,16 @@ class _ScanScreenState extends State<ScanScreen> {
     }
   }
 
+  // 连接设备
   void onConnectPressed(BluetoothDevice device) {
     device.connectAndUpdateStream().catchError((e) {
       Snackbar.show(ABC.c, prettyException("Connect Error:", e),
           success: false);
     });
+    // 更改provider 状态
+    Provider.of<BluetoothManager>(context, listen: false)
+        .setCurrentDevice(device);
+    // 导航至详细页面
     MaterialPageRoute route = MaterialPageRoute(
         builder: (context) => DeviceScreen(device: device),
         settings: const RouteSettings(name: '/DeviceScreen'));
@@ -127,7 +134,7 @@ class _ScanScreenState extends State<ScanScreen> {
             onOpen: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => DeviceScreen(device: d),
-                settings: RouteSettings(name: '/DeviceScreen'),
+                settings: const RouteSettings(name: '/DeviceScreen'),
               ),
             ),
             onConnect: () => onConnectPressed(d),

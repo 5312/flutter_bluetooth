@@ -40,7 +40,6 @@ class _NavigatorPageState extends State<NavigatorPage> {
             if (didPop) {
               return;
             } else {
-              print('------tuichu ');
               exitApp();
             }
           },

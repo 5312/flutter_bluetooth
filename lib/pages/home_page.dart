@@ -25,9 +25,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     super.dispose();
-    // 跳转 homecard 不会执行这里
-    // 退出登录会执行
-    // print('homedispose');
   }
 
   @override

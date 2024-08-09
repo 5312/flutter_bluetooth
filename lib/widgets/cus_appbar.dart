@@ -63,8 +63,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           leading: IconButton(
               onPressed: () {
-                print('---');
-                print(title);
                 if (title == '定时同步') {
                   showDeleteConfirmDialog1(context);
                 } else {

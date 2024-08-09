@@ -46,7 +46,7 @@ class _DevicesStateState extends State<DevicesState> {
 
       if (_scanResults.isNotEmpty) {
         // 自动连接第一个设备
-        // _connectDevice(_scanResults[0].device);
+        _connectDevice(_scanResults[0].device);
       }
     }, onError: (e) {
       if (mounted) {
@@ -145,7 +145,7 @@ class _DevicesStateState extends State<DevicesState> {
     StreamSubscription<List<int>>? lastValueSubscription = null;
     // 监听特征码的通知
     lastValueSubscription = characteristic.onValueReceived.listen((value) {
-      print('通知：$value');
+      print('特征码通知：$value');
       if (value[0] == 0x68 && value[1] == 0x14 && value[2] == 0x00) {
         // 电量
         if (mounted) {
@@ -160,6 +160,12 @@ class _DevicesStateState extends State<DevicesState> {
     });
   }
 
+  // 跳转到蓝牙列表
+  Future<void> goBluetoothList() async {
+    await Navigator.of(context).pushNamed('bluetoothList');
+    setState(() {});
+  }
+
   // 构建界面
   @override
   Widget build(BuildContext context) {
@@ -167,8 +173,6 @@ class _DevicesStateState extends State<DevicesState> {
       builder:
           (BuildContext context, BluetoothManager bluetooth, Widget? child) {
         String stateText = bluetooth.isConnected ? '已连接' : '未连接';
-        print('通知：');
-
         // 蓝牙管理器
         return Expanded(
           flex: 2,
@@ -242,10 +246,7 @@ class _DevicesStateState extends State<DevicesState> {
                           backgroundColor: Colors.blue,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: () {
-                          print('连接蓝牙页面');
-                          Navigator.of(context).pushNamed('bluetoothList');
-                        },
+                        onPressed: goBluetoothList,
                         child: const Text(
                           "连接蓝牙",
                           style: TextStyle(
