@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter/material.dart';
-import '../utils/snackbar.dart';
 
 class BluetoothManager with ChangeNotifier {
   // 当前连接设备

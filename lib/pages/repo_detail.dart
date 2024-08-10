@@ -101,17 +101,17 @@ class _RepoDetailState extends State<RepoDetail> {
                         alignment: Alignment.center,
                         color: const Color.fromRGBO(234, 236, 255, 1),
                         child: const Text(
-                          '设计俯仰角',
+                          '上下偏差',
                           overflow: TextOverflow.ellipsis,
                         ))),
                 GridColumn(
-                    columnName: 'designRoll',
+                    columnName: 'designHeading',
                     label: Container(
                         padding: const EdgeInsets.all(8.0),
                         alignment: Alignment.center,
                         color: const Color.fromRGBO(234, 236, 255, 1),
                         child: const Text(
-                          '设计方位角',
+                          '左右偏差',
                           overflow: TextOverflow.ellipsis,
                         ))),
               ],
@@ -139,7 +139,8 @@ class EmployeeDataSource extends DataGridSource {
               DataGridCell<num>(columnName: 'heading', value: e.heading),
               DataGridCell<num>(
                   columnName: 'designPitch', value: e.designPitch),
-              DataGridCell<num>(columnName: 'designRoll', value: e.designRoll),
+              DataGridCell<num>(
+                  columnName: 'designHeading', value: e.designHeading),
             ]))
         .toList();
   }

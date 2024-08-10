@@ -46,7 +46,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
 
   String getNiceManufacturerData(List<List<int>> data) {
     return data
-        .map((val) => '${getNiceHexArray(val)}')
+        .map((val) => getNiceHexArray(val))
         .join(', ')
         .toUpperCase();
   }

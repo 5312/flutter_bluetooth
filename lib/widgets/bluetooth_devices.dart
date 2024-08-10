@@ -142,7 +142,7 @@ class _DevicesStateState extends State<DevicesState> {
     await characteristic.write(command, withoutResponse: false);
     // 监听特征码的通知
     await characteristic.setNotifyValue(true);
-    StreamSubscription<List<int>>? lastValueSubscription = null;
+    StreamSubscription<List<int>>? lastValueSubscription;
     // 监听特征码的通知
     lastValueSubscription = characteristic.onValueReceived.listen((value) {
       print('特征码通知：$value');

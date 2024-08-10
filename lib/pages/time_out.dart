@@ -460,7 +460,7 @@ class _TimeOutState extends State<TimeOut> {
       time: _time,
       repoId: null,
       designPitch: double.parse(_designPitch),
-      designRoll: double.parse(_designHeading),
+      designHeading: double.parse(_designHeading),
     ));
 
     employeeDataSource = EmployeeDataSource(employeeData: employees);

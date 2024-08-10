@@ -3,7 +3,6 @@ import 'package:bluetooth_mini/utils/snackbar.dart';
 import 'dart:async';
 import 'package:bluetooth_mini/utils/extra.dart';
 
-import 'dart:io';
 
 class BluetoothCore {
   BluetoothCore() {

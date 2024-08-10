@@ -6,6 +6,7 @@ import 'package:bluetooth_mini/models/repo_model.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
 import 'package:bluetooth_mini/pages/repo_detail.dart';
+import 'package:bluetooth_mini/pages/repo_original.dart';
 
 class Repo extends StatefulWidget {
   const Repo({Key? key}) : super(key: key);
@@ -52,6 +53,11 @@ class _RepoState extends State<Repo> {
 
   Future<void> onOrigin(RepoModel row) async {
     print('----${row.id}');
+    // 导航至详细页面
+    MaterialPageRoute route = MaterialPageRoute(
+        builder: (context) => RepoOriginal(row: row),
+        settings: const RouteSettings(name: '/RepoOriginal'));
+    Navigator.of(context).push(route);
   }
 
   Future<void> delete(int id) async {

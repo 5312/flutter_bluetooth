@@ -15,8 +15,8 @@ class DataListModel {
   int? repoId;
   // 设计俯仰角
   num? designPitch;
-  // 设计翻滚角
-  num? designRoll;
+  // 设计方位角
+  num? designHeading;
 
   DataListModel({
     required this.id,
@@ -26,7 +26,7 @@ class DataListModel {
     this.heading,
     this.repoId,
     this.designPitch,
-    this.designRoll,
+    this.designHeading,
   });
 
   Map<String, dynamic> toJson() {
@@ -38,7 +38,7 @@ class DataListModel {
       'heading': heading,
       'repoId': repoId,
       'designPitch': designPitch,
-      'designRoll': designRoll,
+      'designHeading': designHeading,
     };
   }
 
@@ -51,7 +51,7 @@ class DataListModel {
       heading: json['heading'],
       repoId: json['repoId'],
       designPitch: json['designPitch'],
-      designRoll: json['designRoll'],
+      designHeading: json['designHeading'],
     );
   }
 }

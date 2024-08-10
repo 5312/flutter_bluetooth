@@ -37,7 +37,7 @@ class _DataTransmissionState extends State<DataTransmission> {
   String _factoryString = '';
   String _drillingString = '';
   String _name = '';
-  List<int> _backList = [];
+  final List<int> _backList = [];
 
   // 选中特征码
   BluetoothCharacteristic? targetCharacteristic;
@@ -293,10 +293,10 @@ class _DataTransmissionState extends State<DataTransmission> {
                                   name: _name,
                                   mnTime: DateTime.now().toString()));
                               // 将原始数据保存
-                              employees.forEach((element) {
+                              for (var element in employees) {
                                 element.repoId = repoId;
                                 DatabaseHelper().updateDataList(element);
-                              });
+                              }
                               // 根据name 保存一个组
                               // 随机数
 
