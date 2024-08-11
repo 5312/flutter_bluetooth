@@ -10,6 +10,8 @@ class RepoModel {
   final String name;
 
   final String mnTime;
+  // TODO
+  // 增加钻长钻孔等信息
 
   RepoModel({required this.id, required this.name, required this.mnTime});
 

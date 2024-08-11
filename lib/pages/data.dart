@@ -9,14 +9,12 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
-import 'package:bluetooth_mini/models/repo_model.dart';
-import 'dart:math';
 import 'dart:async';
 import '../utils/analytical.dart';
 
+// import 'package:bluetooth_mini/models/repo_model.dart';
 // import 'package:bluetooth_mini/models/data_model.dart';
 // import 'package:bluetooth_mini/utils/hex.dart';
-// import 'package:bluetooth_mini/models/time_model.dart';
 
 class DataTransmission extends StatefulWidget {
   const DataTransmission({Key? key}) : super(key: key);
@@ -37,6 +35,7 @@ class _DataTransmissionState extends State<DataTransmission> {
   String _factoryString = '';
   String _drillingString = '';
   String _name = '';
+  int _repoId = 0;
   final List<int> _backList = [];
 
   // 选中特征码
@@ -52,7 +51,7 @@ class _DataTransmissionState extends State<DataTransmission> {
     _factoryString = MyTime.getFactory() ?? '';
     _drillingString = MyTime.getDirlling() ?? '';
     _name = MyTime.getMonName() ?? '';
-    // employeeDataSource = EmployeeDataSourceData(dataModels: employees);
+    _repoId = MyTime.getRepoId() ?? 0;
 
     getDatabaseData();
     // 先弹窗
@@ -60,10 +59,10 @@ class _DataTransmissionState extends State<DataTransmission> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // TODO 判断是否连接蓝牙
-      // if (bluetooth.currentDevice == null) {
-      //   Navigator.of(context).pop();
-      //   SmartDialog.showToast('请连接蓝牙');
-      // }
+      if (bluetooth.currentDevice == null) {
+        Navigator.of(context).pop();
+        SmartDialog.showToast('请连接蓝牙');
+      }
     });
     super.initState();
   }
@@ -101,6 +100,7 @@ class _DataTransmissionState extends State<DataTransmission> {
       return;
     }
     List<BluetoothService> services = await onConnectdevice.discoverServices();
+    await onConnectdevice.requestMtu(512);
     services.forEach(readServiceFunction);
   }
 
@@ -128,14 +128,14 @@ class _DataTransmissionState extends State<DataTransmission> {
     await c.setNotifyValue(true);
     _lastValueSubscription = c.onValueReceived.listen((value) {
       EasyLoading.dismiss();
-      SmartDialog.showToast('探管取数成功');
 
       _backList.addAll(value);
-      getData(_backList);
+      // c.setNotifyValue(false);
     });
   }
 
   void getData(List<int> originalArray) {
+    if (originalArray.length < 9) return;
     // 去掉前导部分
     List<int> trimmedArray = originalArray.sublist(9); // 去掉前 9 个元素
 
@@ -150,18 +150,21 @@ class _DataTransmissionState extends State<DataTransmission> {
     for (var chunk in chunks) {
       EasyLoading.dismiss();
       Analytical analytical = Analytical(chunk);
-      List<DataListModel> r = employees.map((e) {
-        if (e.time == analytical.dataTime()) {
-          e.roll = double.parse(analytical.getRoll());
-          e.heading = double.parse(analytical.getHeading());
+      print(chunk);
+      if (chunk.length == 21) {
+        List<DataListModel> r = employees.map((e) {
+          if (e.time == analytical.dataTime()) {
+            e.roll = double.parse(analytical.getRoll());
+            e.heading = double.parse(analytical.getHeading());
+            return e;
+          }
           return e;
-        }
-        return e;
-      }).toList();
-      setState(() {
-        employees = r;
-        employeeDataSource = EmployeeDataSourceData(dataModels: employees);
-      });
+        }).toList();
+        setState(() {
+          employees = r;
+          employeeDataSource = EmployeeDataSourceData(dataModels: r);
+        });
+      }
       //employees = convertToDataModelList(MyTime.getTimeData(), null, null);
     }
   }
@@ -193,21 +196,6 @@ class _DataTransmissionState extends State<DataTransmission> {
     _lastValueSubscription = null;
     super.dispose();
   }
-
-  // 数据同步
-  Widget dataButton = ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.blueAccent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10)), // 设置圆角为10
-      ),
-    ),
-    child:
-        const Text('数据同步', style: TextStyle(fontSize: 16, color: Colors.white)),
-    onPressed: () {
-      // 保存操作的逻辑
-    },
-  );
 
   // 孔口校正
   Widget orificeButton = ElevatedButton(
@@ -273,7 +261,22 @@ class _DataTransmissionState extends State<DataTransmission> {
                               discoverServices(bluetooth.currentDevice);
                             },
                           ),
-                          dataButton,
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)), // 设置圆角为10
+                              ),
+                            ),
+                            child: const Text('数据同步',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white)),
+                            onPressed: () {
+                              // 保存操作的逻辑
+                              getData(_backList);
+                            },
+                          ),
                           orificeButton,
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -287,17 +290,11 @@ class _DataTransmissionState extends State<DataTransmission> {
                                 style: TextStyle(
                                     fontSize: 16, color: Colors.white)),
                             onPressed: () {
-                              int repoId = Random().nextInt(1000000);
-                              DatabaseHelper().insertRepo(RepoModel(
-                                  id: repoId,
-                                  name: _name,
-                                  mnTime: DateTime.now().toString()));
                               // 将原始数据保存
                               for (var element in employees) {
-                                element.repoId = repoId;
+                                element.repoId = _repoId;
                                 DatabaseHelper().updateDataList(element);
                               }
-
                               SmartDialog.showToast('数据保存成功');
                             },
                           ),
@@ -370,7 +367,8 @@ class _DataTransmissionState extends State<DataTransmission> {
   }
 
   Future<void> getDatabaseData() async {
-    List<DataListModel> result = await DatabaseHelper().getDataList();
+    List<DataListModel> result =
+        await DatabaseHelper().getDataListForRepoId(_repoId);
 
     setState(() {
       employees = result;

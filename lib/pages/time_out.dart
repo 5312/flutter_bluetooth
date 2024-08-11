@@ -15,6 +15,9 @@ import 'package:bluetooth_mini/db/my_time.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
 import '../utils/analytical.dart';
 import '../models/data_list_model.dart';
+import 'package:bluetooth_mini/models/repo_model.dart';
+import 'dart:math';
+
 import 'dart:async';
 
 // import 'package:bluetooth_mini/models/time_model.dart';
@@ -70,7 +73,7 @@ class _TimeOutState extends State<TimeOut> {
   String _designHeading = '';
   String _length = '';
   String _time = '';
-
+  int _repoId = 0;
   Timer? _timer;
   @override
   void initState() {
@@ -181,6 +184,15 @@ class _TimeOutState extends State<TimeOut> {
                         // 设计方位角
                         _designHeading = _controllerHeading.text;
                         MyTime.setHeading(_designHeading);
+                        // repoid
+                        //关闭对话框并保存repo
+                        _repoId = Random().nextInt(1000000);
+                        DatabaseHelper().insertRepo(RepoModel(
+                            id: _repoId,
+                            name: _nString,
+                            mnTime: DateTime.now().toString()));
+
+                        MyTime.setRepoId(_repoId);
                       });
                       Navigator.of(context).pop();
                     } else {
@@ -464,7 +476,7 @@ class _TimeOutState extends State<TimeOut> {
       pitch: double.parse(_pitch),
       time: _time,
       length: int.parse(_length),
-      repoId: null,
+      repoId: _repoId,
       designPitch: double.parse(_designPitch),
       designHeading: double.parse(_designHeading),
     ));
@@ -610,7 +622,6 @@ class _TimeOutState extends State<TimeOut> {
                                 if (isFixed) {
                                   savePitch();
                                 }
-                                // 保存操作的逻辑
                               },
                             ),
                             ElevatedButton(
@@ -631,7 +642,7 @@ class _TimeOutState extends State<TimeOut> {
                                           : const Color.fromRGBO(
                                               147, 153, 177, 1))),
                               onPressed: () {
-                                // 保存操作的逻辑
+                                //删除末尾数据
                                 if (isPop) {
                                   delePop();
                                 }

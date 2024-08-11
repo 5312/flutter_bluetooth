@@ -14,7 +14,9 @@ class Cloud extends StatefulWidget {
 
 class _CloudState extends State<Cloud> {
   List<CloudModel> employees = <CloudModel>[];
-  late EmployeeDataSource employeeDataSource;
+
+  late EmployeeDataSource employeeDataSource =
+      EmployeeDataSource(employeeData: employees);
 
   @override
   void initState() {

@@ -63,9 +63,10 @@ class DatabaseHelper {
   }
 
 // 查询数据
-  Future<List<DataListModel>> getDataList() async {
+  Future<List<DataListModel>> getDataListForRepoId(int repoId) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('data');
+    final List<Map<String, dynamic>> maps =
+        await db.query('data', where: 'repoId = ?', whereArgs: [repoId]);
     return List.generate(maps.length, (i) {
       return DataListModel.fromJson(maps[i]);
     });

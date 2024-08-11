@@ -89,4 +89,14 @@ class MyTime {
   static Future<bool?> setHeading(string) async {
     return await prefs?.setString('time_heading', string);
   }
+
+  // 设置repoid
+  static Future<bool?> setRepoId(int id) async {
+    return await prefs?.setInt('time_repo_id', id);
+  }
+
+  // 获取repoid
+  static int? getRepoId() {
+    return prefs?.getInt('time_repo_id');
+  }
 }

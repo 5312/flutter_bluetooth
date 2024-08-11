@@ -1,18 +1,18 @@
 import 'package:bluetooth_mini/resources/app_resources.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:bluetooth_mini/models/data_list_model.dart';
+import 'package:bluetooth_mini/models/data_list_extension.dart';
 
 import 'dart:math';
 
-// 上下偏差
+// 左右偏差
 class LineChartSample9 extends StatefulWidget {
-  final List<FlSpot> data;
-  final List<FlSpot> data2;
+  final List<DataListModel> data;
 
   const LineChartSample9({
     Key? key,
     required this.data,
-    required this.data2,
   }) : super(key: key);
 
   @override
@@ -20,6 +20,8 @@ class LineChartSample9 extends StatefulWidget {
 }
 
 class _LineChartSample9State extends State<LineChartSample9> {
+  late List<FlSpot> cList;
+
   @override
   void initState() {
     super.initState();
@@ -32,7 +34,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
     final style = TextStyle(
       color: AppColors.contentColorBlue,
       fontWeight: FontWeight.bold,
-      fontSize: min(18, 2 * chartWidth / 300),
+      fontSize: min(18, 8 * chartWidth / 300),
     );
     return SideTitleWidget(
       axisSide: meta.axisSide,
@@ -56,7 +58,20 @@ class _LineChartSample9State extends State<LineChartSample9> {
 
   @override
   Widget build(BuildContext context) {
+    print('LineChartSample9');
     //  widget.data 从头添加一组数据
+
+    cList = widget.data
+        .map(
+            (e) => FlSpot(e.calculateDesignPitchX(), e.calculateDesignPitchY()))
+        .toList();
+
+    // cList 中Y 值 每一个向前累加
+    for (int i = 1; i < cList.length; i++) {
+      cList[i] = FlSpot(cList[i].x, cList[i].y + (cList[i - 1].y ?? 0));
+    }
+    cList.insert(0, FlSpot(0, 0));
+    print(cList);
 
     return Padding(
       padding: const EdgeInsets.only(
@@ -96,18 +111,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
                 lineBarsData: [
                   LineChartBarData(
                     color: AppColors.contentColorPink,
-                    spots: widget.data,
-                    isCurved: true,
-                    isStrokeCapRound: true,
-                    barWidth: 3,
-                    belowBarData: BarAreaData(
-                      show: false,
-                    ),
-                    dotData: const FlDotData(show: false),
-                  ),
-                  LineChartBarData(
-                    color: AppColors.contentColorPink,
-                    spots: widget.data2,
+                    spots: cList,
                     isCurved: true,
                     isStrokeCapRound: true,
                     barWidth: 3,

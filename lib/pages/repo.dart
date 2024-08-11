@@ -58,7 +58,7 @@ class _RepoState extends State<Repo> {
   }
 
   Future<void> delete(int id) async {
-    // await DatabaseHelper().deleteRepo(id);
+    await DatabaseHelper().deleteRepo(id);
     GetList();
   }
 

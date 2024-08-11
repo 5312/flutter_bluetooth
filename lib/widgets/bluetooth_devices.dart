@@ -6,6 +6,7 @@ import 'package:bluetooth_mini/utils/snackbar.dart';
 import 'dart:async';
 import 'package:bluetooth_mini/utils/bluetooth_core.dart';
 import 'package:bluetooth_mini/utils/extra.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 // 设备状态card
 class DevicesState extends StatefulWidget {
@@ -15,7 +16,7 @@ class DevicesState extends StatefulWidget {
   State<DevicesState> createState() => _DevicesStateState();
 }
 
-class _DevicesStateState extends State<DevicesState> {
+class _DevicesStateState extends State<DevicesState> with RouteAware {
   BluetoothManager? bluetoothManagerInstant;
 
   //  监听扫描结果监听
@@ -138,6 +139,7 @@ class _DevicesStateState extends State<DevicesState> {
   // 发送命令
   Future<void> sendCommand(
       BluetoothCharacteristic characteristic, List<int> command) async {
+    EasyLoading.show(status: '正在读取电量...');
     // 写入数据到特征码 查询电量命令
     await characteristic.write(command, withoutResponse: false);
     // 监听特征码的通知
@@ -145,7 +147,7 @@ class _DevicesStateState extends State<DevicesState> {
     StreamSubscription<List<int>>? lastValueSubscription;
     // 监听特征码的通知
     lastValueSubscription = characteristic.onValueReceived.listen((value) {
-      print('特征码通知：$value');
+      print('电量通知：$value');
       if (value[0] == 0x68 && value[1] == 0x14 && value[2] == 0x00) {
         // 电量
         if (mounted) {
@@ -156,6 +158,7 @@ class _DevicesStateState extends State<DevicesState> {
         characteristic.setNotifyValue(true);
         lastValueSubscription?.cancel();
         lastValueSubscription = null;
+        EasyLoading.dismiss();
       }
     });
   }
@@ -268,6 +271,7 @@ class _DevicesStateState extends State<DevicesState> {
   @override
   void dispose() {
     super.dispose();
+    print('销毁');
     scanResultsSubscription?.cancel();
     scanResultsSubscription = null;
   }

@@ -1,29 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:bluetooth_mini/models/repo_model.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
 import 'package:bluetooth_mini/widgets/LineChartSample.dart';
-import 'dart:math';
-
-// 为 DataListModel 类添加扩展方法
-extension DataListModelExtensions on DataListModel {
-  // 上下偏差计算
-  String calculateDesignPitch(double length, num pitchAngle) {
-    // 计算 X 和 Y
-    double x = length * cos(pitchAngle);
-    double y = length * sin(pitchAngle);
-    // 输出结果
-    print('X: $x');
-    print('Y: $y');
-    return '${y.toString()},${x.toString()}';
-  }
-
-  // // 例如，更新宽度
-  // Rectangle withWidth(double newWidth) {
-  //   return Rectangle(newWidth, height);
-  // }
-}
+import 'package:bluetooth_mini/models/data_list_extension.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 // 测点数据
 class RepoDetail extends StatefulWidget {
@@ -38,10 +22,19 @@ class _RepoDetailState extends State<RepoDetail> {
   List<DataListModel> employees = <DataListModel>[];
   late EmployeeDataSource employeeDataSource =
       EmployeeDataSource(employeeData: []);
-
+  // 上下偏差
+  late List<FlSpot> design;
+  late List<FlSpot> actual;
+  // 左右偏差
+  late List<FlSpot> design2;
+  late List<FlSpot> actual2;
   @override
   void initState() {
     super.initState();
+    design = [];
+    actual = [];
+    design2 = [];
+    actual2 = [];
     getList();
   }
 
@@ -49,34 +42,113 @@ class _RepoDetailState extends State<RepoDetail> {
     List<DataListModel> list =
         await DatabaseHelper().getDataListByRepoId(widget.row.id);
 
-    List<DataListModel> tableData = modifyDesignPitch(list);
     setState(() {
-      employees = tableData;
+      employees = list;
       employeeDataSource = EmployeeDataSource(employeeData: employees);
+      // 上下
+      calculateDesignCurve(list);
+      calculateActualCurve(list);
+      // 左右
+      calculateDesignCurve2(list);
+      calculateActualCurve2(list);
     });
   }
 
-  // 修改表格数据中设计俯仰角为上下偏差值
-  List<DataListModel> modifyDesignPitch(List<DataListModel> list) {
-    for (var element in list) {
-      String upDown = calculateDesignPitch(10, element.pitch!);
-      print(upDown);
-      // element.designPitch = upDown;
+  // 计算设计曲线
+  void calculateDesignCurve(List<DataListModel> list) {
+    design = list
+        .map(
+            (e) => FlSpot(e.calculateDesignPitchX(), e.calculateDesignPitchY()))
+        .toList();
+    // cList 中Y 值 每一个向前累加
+    design.insert(0, const FlSpot(0, 0));
+    for (int i = 1; i < design.length; i++) {
+      if (i == 0) {
+        design[i] = FlSpot(design[i].x + 0, design[i].y + 0);
+      } else {
+        design[i] = FlSpot(
+            design[i].x + design[i - 1].x, design[i].y + (design[i - 1].y));
+      }
     }
-    return list;
   }
 
-  // 计算上下偏差
-  // 设计曲线Y=L x sin（A）,X=L x cos（A），
-  // L=钻杆长度，A=设计俯仰角
-  String calculateDesignPitch(double length, num pitchAngle) {
-    // 计算 X 和 Y
-    double x = length * cos(pitchAngle);
-    double y = length * sin(pitchAngle);
-    // 输出结果
-    print('X: $x');
-    print('Y: $y');
-    return '${y.toString()},${x.toString()}';
+  // 计算实际曲线
+  void calculateActualCurve(List<DataListModel> list) {
+    for (int i = 0; i < list.length; i++) {
+      if (i == 0) {
+        list[i].pitch = list[i].designPitch! + list[i].pitch!;
+      } else {
+        list[i].pitch = list[i].pitch! + (list[i - 1].pitch!);
+      }
+    }
+    actual = list.map((e) {
+      // X=L x cos（（A1+A2）/2）） // /A1=实测俯仰角1（第一个点为设计角度），A2=实测俯仰角2
+      // Y=L x sin(（A1+A2）/2）
+      double radiansX = e.pitch! / 2;
+      double radiansY = e.pitch! / 2;
+
+      double x = e.length * cos(radiansX);
+      double y = e.length * sin(radiansY);
+      return FlSpot(x, y);
+    }).toList();
+    actual.insert(0, const FlSpot(0, 0));
+    // y 累加计算
+    for (int i = 0; i < actual.length; i++) {
+      if (i == 0) {
+        actual[i] = FlSpot(actual[i].x, actual[i].y + 0);
+      } else {
+        actual[i] = FlSpot(actual[i].x, actual[i].y + (actual[i - 1].y));
+      }
+    }
+  }
+
+  // 计算设计左右偏差
+  void calculateDesignCurve2(List<DataListModel> list) {
+    // Y=0，X=L x cos（A）
+    design2 =
+        list.map((e) => FlSpot(e.length * cos(e.designPitch!), 0)).toList();
+    design2.insert(0, const FlSpot(0, 0));
+    // y 累加计算
+    for (int i = 0; i < design2.length; i++) {
+      if (i == 0) {
+        design2[i] = FlSpot(design2[i].x, design2[i].y + 0);
+      } else {
+        design2[i] = FlSpot(design2[i].x, design2[i].y + (design2[i - 1].y));
+      }
+    }
+  }
+
+  // 计算实际左右偏差
+  void calculateActualCurve2(List<DataListModel> list) {
+    // Y= -L x cos （（A1+A2）/2）x sin（（B1+B2）/2-B），X=L x cos（（A1+A2）/2））
+    // 计算A1 + A2 , B1 + B2
+    for (int i = 0; i < list.length; i++) {
+      if (i == 0) {
+        list[i].pitch = list[i].designPitch! + list[i].pitch!;
+        list[i].heading = list[i].designHeading! + list[i].heading!;
+      } else {
+        list[i].pitch = list[i].pitch! + (list[i - 1].pitch!);
+        list[i].heading = list[i].heading! + (list[i - 1].heading!);
+      }
+    }
+    actual2 = list.map((e) {
+      double radiansX = e.pitch! / 2;
+
+      double radiansY = e.heading! / 2 - e.designHeading!;
+
+      double x = e.length * cos(radiansX);
+      double y = -e.length * cos(radiansX) * sin(radiansY);
+      return FlSpot(x, y);
+    }).toList();
+    actual2.insert(0, const FlSpot(0, 0));
+    // y 累加计算
+    for (int i = 0; i < actual2.length; i++) {
+      if (i == 0) {
+        actual2[i] = FlSpot(actual2[i].x, actual2[i].y + 0);
+      } else {
+        actual2[i] = FlSpot(actual2[i].x, actual2[i].y + (actual2[i - 1].y));
+      }
+    }
   }
 
   @override
@@ -85,9 +157,11 @@ class _RepoDetailState extends State<RepoDetail> {
       appBar: AppBar(
         title: Text(widget.row.name),
       ),
-      body: Column(
+      body: ListView(
         children: [
-          Expanded(
+          Container(
+            height: 300,
+            padding: const EdgeInsets.only(bottom: 30),
             child: SfDataGrid(
               source: employeeDataSource,
               columnWidthMode: ColumnWidthMode.fill,
@@ -138,37 +212,16 @@ class _RepoDetailState extends State<RepoDetail> {
                           '方位角（°）',
                           overflow: TextOverflow.ellipsis,
                         ))),
-                GridColumn(
-                    columnName: 'designPitch',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '上下偏差',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-                GridColumn(
-                    columnName: 'designHeading',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '左右偏差',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
               ],
             ),
           ),
           const SizedBox(height: 10.0),
-          const Expanded(
-              child: Row(
+          Row(
             children: [
-              Expanded(child: LineChartSample9()),
-              Expanded(child: LineChartSample9())
+              Expanded(child: LineChartSample9(data: design, data2: actual)),
+              Expanded(child: LineChartSample9(data: design2, data2: actual2))
             ],
-          ))
+          )
         ],
       ),
     );
@@ -187,10 +240,6 @@ class EmployeeDataSource extends DataGridSource {
               DataGridCell<num>(columnName: 'pitch', value: e.pitch),
               DataGridCell<num>(columnName: 'roll', value: e.roll),
               DataGridCell<num>(columnName: 'heading', value: e.heading),
-              DataGridCell<num>(
-                  columnName: 'designPitch', value: e.designPitch),
-              DataGridCell<num>(
-                  columnName: 'designHeading', value: e.designHeading),
             ]))
         .toList();
   }
