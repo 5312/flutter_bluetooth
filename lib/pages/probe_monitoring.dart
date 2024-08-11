@@ -145,6 +145,7 @@ class _ProbeState extends State<Probe> {
     DataListModel rows = DataListModel(
         id: id,
         pitch: null,
+        length: 0,
         roll: double.parse(_roll),
         heading: double.parse(_heading),
         repoId: null);

@@ -297,21 +297,10 @@ class _DataTransmissionState extends State<DataTransmission> {
                                 element.repoId = repoId;
                                 DatabaseHelper().updateDataList(element);
                               }
-                              // 根据name 保存一个组
-                              // 随机数
 
                               SmartDialog.showToast('数据保存成功');
                             },
                           ),
-                          // const Padding(
-                          //   padding:
-                          //       EdgeInsets.only(top: 10, left: 10, right: 10),
-                          //   child: Text(
-                          //     '数据传输总数： 7',
-                          //     style: TextStyle(
-                          //         fontSize: 12, color: Colors.black38),
-                          //   ),
-                          // )
                         ],
                       ),
                     ),

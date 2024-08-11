@@ -31,7 +31,6 @@ class _RepoState extends State<Repo> {
 
   Future<void> GetList() async {
     List<RepoModel> list = await DatabaseHelper().getRepos();
-    print(list.toString());
     setState(() {
       employees = list;
       employeeDataSource = RepoDataSource(
@@ -43,7 +42,6 @@ class _RepoState extends State<Repo> {
   }
 
   Future<void> onDetail(RepoModel row) async {
-    print('----${row.id}');
     // 导航至详细页面
     MaterialPageRoute route = MaterialPageRoute(
         builder: (context) => RepoDetail(row: row),
@@ -52,7 +50,6 @@ class _RepoState extends State<Repo> {
   }
 
   Future<void> onOrigin(RepoModel row) async {
-    print('----${row.id}');
     // 导航至详细页面
     MaterialPageRoute route = MaterialPageRoute(
         builder: (context) => RepoOriginal(row: row),

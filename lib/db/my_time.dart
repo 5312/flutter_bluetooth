@@ -55,6 +55,16 @@ class MyTime {
     return prefs?.getString('time_name');
   }
 
+  // 设置钻杆长度
+  static Future<bool?> setLength(string) async {
+    return await prefs?.setString('time_length', string);
+  }
+
+  // 获取钻杆长度
+  static String? getLength() {
+    return prefs?.getString('time_length');
+  }
+
   // 设置钻孔
   static Future<bool?> setMonName(string) async {
     return await prefs?.setString('time_name', string);

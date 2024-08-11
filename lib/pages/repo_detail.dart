@@ -4,6 +4,26 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
 import 'package:bluetooth_mini/widgets/LineChartSample.dart';
+import 'dart:math';
+
+// 为 DataListModel 类添加扩展方法
+extension DataListModelExtensions on DataListModel {
+  // 上下偏差计算
+  String calculateDesignPitch(double length, num pitchAngle) {
+    // 计算 X 和 Y
+    double x = length * cos(pitchAngle);
+    double y = length * sin(pitchAngle);
+    // 输出结果
+    print('X: $x');
+    print('Y: $y');
+    return '${y.toString()},${x.toString()}';
+  }
+
+  // // 例如，更新宽度
+  // Rectangle withWidth(double newWidth) {
+  //   return Rectangle(newWidth, height);
+  // }
+}
 
 // 测点数据
 class RepoDetail extends StatefulWidget {
@@ -22,17 +42,41 @@ class _RepoDetailState extends State<RepoDetail> {
   @override
   void initState() {
     super.initState();
-    GetList();
+    getList();
   }
 
-  Future<void> GetList() async {
+  Future<void> getList() async {
     List<DataListModel> list =
         await DatabaseHelper().getDataListByRepoId(widget.row.id);
 
+    List<DataListModel> tableData = modifyDesignPitch(list);
     setState(() {
-      employees = list;
+      employees = tableData;
       employeeDataSource = EmployeeDataSource(employeeData: employees);
     });
+  }
+
+  // 修改表格数据中设计俯仰角为上下偏差值
+  List<DataListModel> modifyDesignPitch(List<DataListModel> list) {
+    for (var element in list) {
+      String upDown = calculateDesignPitch(10, element.pitch!);
+      print(upDown);
+      // element.designPitch = upDown;
+    }
+    return list;
+  }
+
+  // 计算上下偏差
+  // 设计曲线Y=L x sin（A）,X=L x cos（A），
+  // L=钻杆长度，A=设计俯仰角
+  String calculateDesignPitch(double length, num pitchAngle) {
+    // 计算 X 和 Y
+    double x = length * cos(pitchAngle);
+    double y = length * sin(pitchAngle);
+    // 输出结果
+    print('X: $x');
+    print('Y: $y');
+    return '${y.toString()},${x.toString()}';
   }
 
   @override
@@ -118,7 +162,13 @@ class _RepoDetailState extends State<RepoDetail> {
             ),
           ),
           const SizedBox(height: 10.0),
-          Expanded(child: LineChartSample9())
+          const Expanded(
+              child: Row(
+            children: [
+              Expanded(child: LineChartSample9()),
+              Expanded(child: LineChartSample9())
+            ],
+          ))
         ],
       ),
     );

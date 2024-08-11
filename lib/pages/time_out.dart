@@ -68,6 +68,7 @@ class _TimeOutState extends State<TimeOut> {
   String _pitch = '';
   String _designPitch = '';
   String _designHeading = '';
+  String _length = '';
   String _time = '';
 
   Timer? _timer;
@@ -168,6 +169,9 @@ class _TimeOutState extends State<TimeOut> {
                         // 钻孔
                         _drillingString = _selectedDrilling ?? '';
                         MyTime.setDirlling(_drillingString);
+                        // 钻杆长度
+                        _length = _controllerLen.text;
+                        MyTime.setLength(_length);
                         // 检测名称
                         _nString = _controllerName.text;
                         MyTime.setMonName(_nString);
@@ -452,12 +456,14 @@ class _TimeOutState extends State<TimeOut> {
       id: id,
       pitch: double.parse(_pitch),
       time: _time,
+      length: int.parse(_length),
     );
     employees.add(rows);
     await DatabaseHelper().insertDataList(DataListModel(
       id: id,
       pitch: double.parse(_pitch),
       time: _time,
+      length: int.parse(_length),
       repoId: null,
       designPitch: double.parse(_designPitch),
       designHeading: double.parse(_designHeading),

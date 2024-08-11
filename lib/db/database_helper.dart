@@ -24,7 +24,7 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'blue_database.db');
+    String path = join(await getDatabasesPath(), 'bluetooth_database.db');
     return await openDatabase(
       path,
       version: 1,
@@ -33,7 +33,7 @@ class DatabaseHelper {
           "CREATE TABLE repos(id INTEGER PRIMARY KEY, name TEXT, mnTime TEXT)",
         );
         await db.execute(
-          "CREATE TABLE data(id INTEGER PRIMARY KEY, time TEXT, pitch REAL, roll REAL, heading REAL, repoId INTEGER, designPitch REAL, designHeading REAL)",
+          "CREATE TABLE data(id INTEGER PRIMARY KEY, time TEXT, pitch REAL, roll REAL, heading REAL, length INTEGER, repoId INTEGER, designPitch REAL, designHeading REAL)",
         );
       },
     );

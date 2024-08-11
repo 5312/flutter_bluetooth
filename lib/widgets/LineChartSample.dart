@@ -4,16 +4,26 @@ import 'package:bluetooth_mini/resources/app_resources.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-// ignore: must_be_immutable
-class LineChartSample9 extends StatelessWidget {
-  // LineChartSample9( super.key);
-  LineChartSample9({
+// 测点数据
+class LineChartSample9 extends StatefulWidget {
+  const LineChartSample9({
     Key? key,
   }) : super(key: key);
 
+  @override
+  State<LineChartSample9> createState() => _LineChartSample9State();
+}
+
+class _LineChartSample9State extends State<LineChartSample9> {
   final spots = List.generate(101, (i) => (i - 50) / 10)
       .map((x) => FlSpot(x, cos(x)))
       .toList();
+
+  @override
+  void initState() {
+    super.initState();
+    print(spots);
+  }
 
   Widget bottomTitleWidgets(double value, TitleMeta meta, double chartWidth) {
     if (value % 1 != 0) {
@@ -49,7 +59,7 @@ class LineChartSample9 extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(
         left: 12,
-        bottom: 12,
+        bottom: 20,
         right: 20,
         top: 20,
       ),

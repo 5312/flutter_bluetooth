@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+// import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
+// import 'package:provider/provider.dart';
 
 class HomeCard extends StatelessWidget {
   final String nameAndType;
@@ -10,9 +10,6 @@ class HomeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BluetoothManager bluetooth =
-        Provider.of<BluetoothManager>(context, listen: false);
-
     return Material(
         child: InkWell(
       onTap: () {
