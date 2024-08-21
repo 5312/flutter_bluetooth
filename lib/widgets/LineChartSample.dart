@@ -106,7 +106,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
                     dotData: const FlDotData(show: false),
                   ),
                   LineChartBarData(
-                    color: AppColors.contentColorPink,
+                    color: AppColors.contentColorGreen,
                     spots: widget.data2,
                     isCurved: true,
                     isStrokeCapRound: true,
