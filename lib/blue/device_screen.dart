@@ -244,7 +244,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   // 连接按钮
   Widget buildConnectButton(BuildContext context) {
-    print('buildConnectButton:$_isConnecting');
     return Row(children: [
       if (_isConnecting || _isDisconnecting) buildSpinner(context),
       TextButton(

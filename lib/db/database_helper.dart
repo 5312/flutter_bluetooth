@@ -103,7 +103,6 @@ class DatabaseHelper {
       repo.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    print('inter success');
   }
 
   Future<List<RepoModel>> getRepos() async {

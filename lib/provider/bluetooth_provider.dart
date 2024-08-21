@@ -13,7 +13,8 @@ class BluetoothManager with ChangeNotifier {
 
   // 当前设备连接状态订阅
   StreamSubscription<BluetoothConnectionState>? _connectionStateSubscription;
-
+  StreamSubscription<BluetoothConnectionState>
+      get connectionStateSubscription => _connectionStateSubscription!;
   // 设置当前连接设备
   void setCurrentDevice(BluetoothDevice device) {
     // 设置并监听当前连接状态

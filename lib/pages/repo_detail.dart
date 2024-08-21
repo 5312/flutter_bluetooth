@@ -5,7 +5,7 @@ import 'package:bluetooth_mini/models/repo_model.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
-import 'package:bluetooth_mini/widgets/LineChartSample.dart';
+import 'package:bluetooth_mini/widgets/Line_chart_sample.dart';
 import 'package:bluetooth_mini/models/data_list_extension.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -54,7 +54,7 @@ class _RepoDetailState extends State<RepoDetail> {
     });
   }
 
-  // 计算设计曲线
+  // 计算设计上下偏差曲线
   void calculateDesignCurve(List<DataListModel> list) {
     design = list
         .map(
@@ -72,7 +72,7 @@ class _RepoDetailState extends State<RepoDetail> {
     }
   }
 
-  // 计算实际曲线
+  // 计算实际上下偏差曲线
   void calculateActualCurve(List<DataListModel> list) {
     for (int i = 0; i < list.length; i++) {
       if (i == 0) {
@@ -218,8 +218,20 @@ class _RepoDetailState extends State<RepoDetail> {
           const SizedBox(height: 10.0),
           Row(
             children: [
-              Expanded(child: LineChartSample9(data: design, data2: actual)),
-              Expanded(child: LineChartSample9(data: design2, data2: actual2))
+              Expanded(
+                  child: Column(
+                children: [
+                  const Text('上下偏差'),
+                  LineChartSample9(data: design, data2: actual)
+                ],
+              )),
+              Expanded(
+                  child: Column(
+                children: [
+                  const Text('左右偏差'),
+                  LineChartSample9(data: design2, data2: actual2)
+                ],
+              ))
             ],
           )
         ],

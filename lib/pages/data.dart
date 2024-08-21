@@ -58,7 +58,6 @@ class _DataTransmissionState extends State<DataTransmission> {
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // TODO 判断是否连接蓝牙
       if (bluetooth.currentDevice == null) {
         Navigator.of(context).pop();
         SmartDialog.showToast('请连接蓝牙');
@@ -173,7 +172,6 @@ class _DataTransmissionState extends State<DataTransmission> {
   void dispose() {
     _lastValueSubscription?.cancel();
     if (targetCharacteristic != null) {
-      print('取消上传');
       // 停止采集
       targetCharacteristic!.write([
         0x68,
