@@ -31,6 +31,7 @@ class _SettingState extends State<Setting> {
     _work = MySetting.getWork();
     _factory = MySetting.getFactory();
     _drilling = MySetting.getDrilling();
+
     super.initState();
   }
 

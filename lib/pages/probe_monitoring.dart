@@ -42,6 +42,12 @@ class _ProbeState extends State<Probe> {
     _employeeDataSource = EmployeeDataSource(employeeData: _employees);
 
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (bluetooth.currentDevice == null) {
+        Navigator.of(context).pop();
+        SmartDialog.showToast('请连接蓝牙');
+      }
+    });
   }
 
   // 读取指定服务及特征值

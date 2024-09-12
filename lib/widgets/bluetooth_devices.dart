@@ -207,13 +207,13 @@ class _DevicesStateState extends State<DevicesState> with RouteAware {
                   Padding(
                     padding: const EdgeInsets.all(2.0),
                     child: Text(
-                      "设备信息：${bluetooth.currentDevice?.platformName ?? '-'}",
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 12,
-                      ),
-                    ),
+                        "设备信息：${bluetooth.currentDevice?.platformName ?? '-'}",
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 10,
+                        ),
+                        softWrap: false),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(2.0),
