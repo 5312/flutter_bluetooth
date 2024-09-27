@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'interfaceDb.dart';
 
 // SharedPreferences
 class MySetting {
@@ -12,53 +13,61 @@ class MySetting {
   }
 
   // 矿区
-  static List<String> getMine() {
-    final String? itemsString = prefs?.getString('setting_mine');
-    if (itemsString != null) {
-      return List<String>.from(json.decode(itemsString));
+  static List<MyMine> getMine() {
+    final List<String>? jsonList = prefs?.getStringList('setting_mines');
+    if (jsonList != null) {
+      return jsonList.map((json) => MyMine.fromJson(json)).toList();
     }
     return [];
   }
 
-  static Future<bool?> setMine(List<String> list) async {
-    return await prefs?.setString('setting_mine', json.encode(list));
+  static Future<bool?> setMine(List<MyMine> myMines) async {
+    List<String> jsonList = myMines.map((item) => item.toJson()).toList();
+    return await prefs?.setStringList('setting_mines', jsonList);
   }
 
+  //-------------------
   // 工作面
-  static List<String> getWork() {
-    final String? itemsString = prefs?.getString('setting_work');
-    if (itemsString != null) {
-      return List<String>.from(json.decode(itemsString));
+  static List<MyWork> getWork() {
+    final List<String>? jsonList = prefs?.getStringList('setting_works');
+    if (jsonList != null) {
+      return jsonList.map((json) => MyWork.fromJson(json)).toList();
     }
     return [];
   }
 
-  static Future<bool?> setWork(List<String> list) async {
-    return await prefs?.setString('setting_work', json.encode(list));
+  static Future<bool?> setWork(List<MyWork> list) async {
+    List<String> jsonList = list.map((item) => item.toJson()).toList();
+    return await prefs?.setStringList('setting_works', jsonList);
   }
+
+  // ------------------
   // 钻厂
-  static List<String> getFactory() {
-    final String? itemsString = prefs?.getString('setting_factory');
-    if (itemsString != null) {
-      return List<String>.from(json.decode(itemsString));
+  static List<MyFactory> getFactory() {
+    final List<String>? jsonList = prefs?.getStringList('setting_factorys');
+    if (jsonList != null) {
+      return jsonList.map((json) => MyFactory.fromJson(json)).toList();
     }
     return [];
   }
 
-  static Future<bool?> setFactory(List<String> list) async {
-    return await prefs?.setString('setting_factory', json.encode(list));
+  static Future<bool?> setFactory(List<MyFactory> list) async {
+    List<String> jsonList = list.map((item) => item.toJson()).toList();
+    return await prefs?.setStringList('setting_factorys', jsonList);
   }
 
-  // 钻空
-  static List<String> getDrilling() {
-    final String? itemsString = prefs?.getString('setting_drilling');
-    if (itemsString != null) {
-      return List<String>.from(json.decode(itemsString));
+  //--------------------
+  // 钻孔
+  static List<MyDrilling> getDrilling() {
+    final List<String>? jsonList = prefs?.getStringList('setting_drillings');
+    if (jsonList != null) {
+      return jsonList.map((json) => MyDrilling.fromJson(json)).toList();
     }
     return [];
   }
 
-  static Future<bool?> setDrilling(List<String> list) async {
-    return await prefs?.setString('setting_drilling', json.encode(list));
+  static Future<bool?> setDrilling(List<MyDrilling> list) async {
+    List<String> jsonList = list.map((item) => item.toJson()).toList();
+    return await prefs?.setStringList('setting_drillings', jsonList);
   }
 }

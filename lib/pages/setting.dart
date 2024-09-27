@@ -1,7 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:bluetooth_mini/widgets/setting_list.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/db/my_setting.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:bluetooth_mini/db/interfaceDb.dart';
+import 'dart:convert';
 
 class Setting extends StatefulWidget {
   const Setting({Key? key}) : super(key: key);
@@ -20,18 +24,27 @@ class _SettingState extends State<Setting> {
   String? _selectedWork;
   String? _selectedFactory;
 
-  List<String> _miningArea = [];
-  List<String> _work = [];
-  List<String> _factory = [];
-  List<String> _drilling = [];
+  List<MyMine> _miningArea = [];
+  List<MyWork> _work = [];
+  List<MyFactory> _factory = [];
+  List<MyDrilling> _drilling = [];
+
+  int? selectedItem1;
+  int? selectedItem2;
+  int? selectedItem3;
+
+  int? selectedIndex1 = null;
+  int? selectedIndex2 = null;
+  int? selectedIndex3 = null;
+  int? selectedIndex4 = null;
 
   @override
   void initState() {
     _miningArea = MySetting.getMine();
     _work = MySetting.getWork();
+
     _factory = MySetting.getFactory();
     _drilling = MySetting.getDrilling();
-
     super.initState();
   }
 
@@ -43,6 +56,8 @@ class _SettingState extends State<Setting> {
 
   /// 矿区
   Widget _buildRowWorkSelect() {
+    print(_miningArea.map((item) => item.toJson()).toList());
+
     return Row(
       children: [
         const SizedBox(
@@ -56,10 +71,10 @@ class _SettingState extends State<Setting> {
           child: DropdownButtonFormField<String>(
             value: _selectedMine,
             hint: const Text('请选择一个选项'),
-            items: _miningArea.map((String value) {
+            items: _miningArea.map((MyMine value) {
               return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
+                value: value.name,
+                child: Text(value.name),
               );
             }).toList(),
             onChanged: (String? newValue) {
@@ -87,8 +102,9 @@ class _SettingState extends State<Setting> {
     );
   }
 
-  /// 工作面模块
+  /// 工作面
   Widget _buildRowFactorySelect() {
+    final showList = _work.where((i) => i.mineId == selectedItem1).toList();
     return Row(
       children: [
         const SizedBox(
@@ -102,10 +118,10 @@ class _SettingState extends State<Setting> {
           child: DropdownButtonFormField<String>(
             value: _selectedWork,
             hint: const Text('请选择一个选项'),
-            items: _work.map((String value) {
+            items: showList.map((MyWork value) {
               return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
+                value: value.name,
+                child: Text(value.name),
               );
             }).toList(),
             onChanged: (String? newValue) {
@@ -133,8 +149,9 @@ class _SettingState extends State<Setting> {
     );
   }
 
-  /// 钻厂组件模块
+  /// 钻厂
   Widget _buildRowDrillSelect() {
+    final showList = _factory.where((i) => i.workId == selectedItem2).toList();
     return Row(
       children: [
         const SizedBox(
@@ -148,10 +165,10 @@ class _SettingState extends State<Setting> {
           child: DropdownButtonFormField<String>(
             value: _selectedFactory,
             hint: const Text('请选择一个选项'),
-            items: _factory.map((String value) {
+            items: showList.map((MyFactory value) {
               return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
+                value: value.name,
+                child: Text(value.name),
               );
             }).toList(),
             onChanged: (String? newValue) {
@@ -189,10 +206,34 @@ class _SettingState extends State<Setting> {
               padding: const EdgeInsets.only(
                   left: 19, right: 19, top: 19, bottom: 19),
               child: Row(children: <Widget>[
+                // 矿区
                 Expanded(
-                  child: ListCard(
+                  child: ListCard<MyMine>(
                     items: _miningArea,
+                    selectedIndex: selectedIndex1,
                     buttonText: '添加矿区',
+                    canOpen: () {
+                      return true;
+                    },
+                    onItemSelected: (int item, int index) {
+                      setState(() {
+                        selectedItem2 = null;
+                        selectedItem3 = null;
+                        _selectedMine =
+                            _miningArea.firstWhere((i) => i.id == item).name;
+                        // 自己选中
+                        if (selectedIndex1 == index) {
+                          selectedIndex1 = null;
+                        } else {
+                          selectedIndex1 = index;
+                        }
+                        selectedItem1 = item; // 更新选中项
+                        // 其他清空
+                        _selectedWork = null;
+                        selectedIndex2 = null;
+                        selectedIndex3 = null;
+                      });
+                    },
                     contentBody: ConstrainedBox(
                       constraints: const BoxConstraints(
                         minWidth: 500, // 设置最大宽度
@@ -217,21 +258,74 @@ class _SettingState extends State<Setting> {
                     ),
                     actions: <Widget>[
                       TextButton(
-                        style: TextButton.styleFrom(
-                            backgroundColor: Colors.black26),
+                        style:
+                            TextButton.styleFrom(backgroundColor: Colors.blue),
+                        child: const Text(
+                          '保存',
+                          style: TextStyle(color: Colors.white),
+                        ),
                         onPressed: () {
+                          setState(() {
+                            _miningArea.add(MyMine(
+                                _miningArea.length + 1, _controller.text));
+                            MySetting.setMine(_miningArea);
+                          });
                           Navigator.of(context).pop();
                         },
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.black)),
                       ),
+                    ],
+                    onDele: (int itemId) {
+                      setState(() {
+                        selectedItem1 = null;
+                        _miningArea
+                            .removeWhere((element) => element.id == itemId);
+                        MySetting.setMine(_miningArea);
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // 工作面
+                Expanded(
+                  child: ListCard<MyWork>(
+                    buttonText: '添加工作面',
+                    selectedIndex: selectedIndex2,
+                    items:
+                        _work.where((i) => i.mineId == selectedItem1).toList(),
+                    canOpen: () {
+                      if (selectedItem1 == null) {
+                        SmartDialog.showToast('请先选择矿区');
+                        return false;
+                      } else {
+                        return true;
+                      }
+                    },
+                    onItemSelected: (int item, int index) {
+                      setState(() {
+                        selectedItem2 = item; // 更新选中项id
+                        selectedItem3 = null;
+                        _selectedWork =
+                            _work.firstWhere((i) => i.id == item).name;
+                        if (selectedIndex2 == index) {
+                          selectedIndex2 = null;
+                        } else {
+                          selectedIndex2 = index;
+                        }
+                        // 其他清空
+                        selectedIndex3 = null;
+                      });
+                    },
+                    actions: <Widget>[
                       TextButton(
                         style:
                             TextButton.styleFrom(backgroundColor: Colors.blue),
                         onPressed: () {
                           setState(() {
-                            _miningArea.add(_controller.text);
-                            MySetting.setMine(_miningArea);
+                            if (selectedItem1 != null) {
+                              _work.add(MyWork(_work.length + 1, selectedItem1!,
+                                  _controller_work.text));
+                              MySetting.setWork(_work);
+                            }
                           });
                           Navigator.of(context).pop();
                         },
@@ -241,16 +335,13 @@ class _SettingState extends State<Setting> {
                         ),
                       ),
                     ],
-                    onDele: () {
-                      MySetting.setMine(_miningArea);
+                    onDele: (int itemId) {
+                      setState(() {
+                        selectedItem2 = null;
+                        _work.removeWhere((element) => element.id == itemId);
+                        MySetting.setWork(_work);
+                      });
                     },
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ListCard(
-                    buttonText: '添加工作面',
-                    items: _work,
                     contentBody: ConstrainedBox(
                       constraints: const BoxConstraints(
                         minWidth: 500, // 设置最大宽度
@@ -281,42 +372,37 @@ class _SettingState extends State<Setting> {
                       '添加工作面',
                       style: TextStyle(fontSize: 14),
                     ),
-                    actions: <Widget>[
-                      TextButton(
-                        style: TextButton.styleFrom(
-                            backgroundColor: Colors.black26),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.black)),
-                      ),
-                      TextButton(
-                        style:
-                            TextButton.styleFrom(backgroundColor: Colors.blue),
-                        onPressed: () {
-                          setState(() {
-                            _work.add(_controller_work.text);
-                            MySetting.setWork(_work);
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text(
-                          '保存',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ],
-                    onDele: () {
-                      MySetting.setWork(_work);
-                    },
                   ),
                 ),
                 const SizedBox(width: 10),
+                // 钻厂
                 Expanded(
                   child: ListCard(
                     buttonText: '添加钻厂',
-                    items: _factory,
+                    selectedIndex: selectedIndex3,
+                    items: _factory
+                        .where((i) => i.workId == selectedItem2)
+                        .toList(),
+                    canOpen: () {
+                      if (selectedItem2 == null) {
+                        SmartDialog.showToast('请先选择工作面');
+                        return false;
+                      } else {
+                        return true;
+                      }
+                    },
+                    onItemSelected: (int item, int index) {
+                      setState(() {
+                        selectedItem3 = item; // 更新选中项id
+                        _selectedFactory =
+                            _factory.firstWhere((i) => i.id == item).name;
+                        if (selectedIndex3 == index) {
+                          selectedIndex3 = null;
+                        } else {
+                          selectedIndex3 = index;
+                        }
+                      });
+                    },
                     contentBody: ConstrainedBox(
                       constraints: const BoxConstraints(
                         minWidth: 500, // 设置最大宽度
@@ -347,21 +433,15 @@ class _SettingState extends State<Setting> {
                     ),
                     actions: <Widget>[
                       TextButton(
-                        style: TextButton.styleFrom(
-                            backgroundColor: Colors.black26),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.black)),
-                      ),
-                      TextButton(
                         style:
                             TextButton.styleFrom(backgroundColor: Colors.blue),
                         onPressed: () {
                           setState(() {
-                            _factory.add(_controller_factory.text);
-                            MySetting.setFactory(_factory);
+                            if (selectedItem2 != null) {
+                              _factory.add(MyFactory(_factory.length + 1,
+                                  selectedItem2!, _controller_factory.text));
+                              MySetting.setFactory(_factory);
+                            }
                           });
                           Navigator.of(context).pop();
                         },
@@ -371,16 +451,33 @@ class _SettingState extends State<Setting> {
                         ),
                       ),
                     ],
-                    onDele: () {
-                      MySetting.setFactory(_factory);
+                    onDele: (int itemId) {
+                      setState(() {
+                        selectedItem3 = null;
+                        _factory.removeWhere((element) => element.id == itemId);
+                        MySetting.setFactory(_factory);
+                      });
                     },
                   ),
                 ),
                 const SizedBox(width: 10),
+                // 钻孔
                 Expanded(
                   child: ListCard(
                     buttonText: '添加钻孔',
-                    items: _drilling,
+                    selectedIndex: selectedIndex4,
+                    items: _drilling
+                        .where((i) => i.factoryId == selectedItem3)
+                        .toList(),
+                    canOpen: () {
+                      if (selectedItem3 == null) {
+                        SmartDialog.showToast('请先选择钻孔');
+                        return false;
+                      } else {
+                        return true;
+                      }
+                    },
+                    onItemSelected: (int item, int index) {},
                     contentBody: ConstrainedBox(
                       constraints: const BoxConstraints(
                         minWidth: 500, // 设置最大宽度
@@ -412,21 +509,15 @@ class _SettingState extends State<Setting> {
                     ),
                     actions: <Widget>[
                       TextButton(
-                        style: TextButton.styleFrom(
-                            backgroundColor: Colors.black26),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.black)),
-                      ),
-                      TextButton(
                         style:
                             TextButton.styleFrom(backgroundColor: Colors.blue),
                         onPressed: () {
                           setState(() {
-                            _drilling.add(_controller_drilling.text);
-                            MySetting.setDrilling(_drilling);
+                            if (selectedItem3 != null) {
+                              _drilling.add(MyDrilling(_drilling.length + 1,
+                                  selectedItem3!, _controller_drilling.text));
+                              MySetting.setDrilling(_drilling);
+                            }
                           });
                           Navigator.of(context).pop();
                         },
@@ -436,8 +527,12 @@ class _SettingState extends State<Setting> {
                         ),
                       ),
                     ],
-                    onDele: () {
-                      MySetting.setDrilling(_drilling);
+                    onDele: (int itemId) {
+                      setState(() {
+                        _drilling
+                            .removeWhere((element) => element.id == itemId);
+                        MySetting.setDrilling(_drilling);
+                      });
                     },
                   ),
                 ),

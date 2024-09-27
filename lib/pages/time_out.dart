@@ -1,24 +1,24 @@
-import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import 'package:bluetooth_mini/widgets/cus_appbar.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:bluetooth_mini/widgets/time_form.dart';
-
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:bluetooth_mini/utils/hex.dart';
-import 'package:provider/provider.dart';
-import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:bluetooth_mini/widgets/cus_dialog.dart';
-import 'package:bluetooth_mini/db/my_setting.dart';
-import 'package:bluetooth_mini/db/my_time.dart';
-import 'package:bluetooth_mini/db/database_helper.dart';
-import '../utils/analytical.dart';
-import '../models/data_list_model.dart';
-import 'package:bluetooth_mini/models/repo_model.dart';
+import 'dart:async';
 import 'dart:math';
 
-import 'dart:async';
+import 'package:bluetooth_mini/db/database_helper.dart';
+import 'package:bluetooth_mini/db/my_setting.dart';
+import 'package:bluetooth_mini/db/my_time.dart';
+import 'package:bluetooth_mini/models/repo_model.dart';
+import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
+import 'package:bluetooth_mini/utils/hex.dart';
+import 'package:bluetooth_mini/widgets/cus_appbar.dart';
+import 'package:bluetooth_mini/widgets/cus_dialog.dart';
+import 'package:bluetooth_mini/widgets/time_form.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'package:bluetooth_mini/db/interfaceDb.dart';
+import '../models/data_list_model.dart';
+import '../utils/analytical.dart';
 
 // import 'package:bluetooth_mini/models/time_model.dart';
 
@@ -58,10 +58,10 @@ class _TimeOutState extends State<TimeOut> {
   String? _selectedFactory;
   String? _selectedDrilling;
 
-  List<String> _miningArea = [];
-  List<String> _work = [];
-  List<String> _factory = [];
-  List<String> _drilling = [];
+  List<MyMine> _miningArea = [];
+  List<MyWork> _work = [];
+  List<MyFactory> _factory = [];
+  List<MyDrilling> _drilling = [];
 
   String _mineString = '';
   String _workString = '';
@@ -75,6 +75,7 @@ class _TimeOutState extends State<TimeOut> {
   String _time = '';
   int _repoId = 0;
   Timer? _timer;
+
   @override
   void initState() {
     _miningArea = MySetting.getMine();
@@ -153,6 +154,17 @@ class _TimeOutState extends State<TimeOut> {
               ),
               actions: <Widget>[
                 TextButton(
+                  style: TextButton.styleFrom(backgroundColor: Colors.black12),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    '取消',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                TextButton(
                   style: TextButton.styleFrom(backgroundColor: Colors.blue),
                   onPressed: () {
                     if (_controllerName.text != '' &&
@@ -225,10 +237,10 @@ class _TimeOutState extends State<TimeOut> {
           child: DropdownButtonFormField<String>(
             value: _selectedMine,
             hint: const Text('请选择一个选项'),
-            items: _miningArea.map((String value) {
+            items: _miningArea.map((MyMine value) {
               return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
+                value: value.name,
+                child: Text(value.name),
               );
             }).toList(),
             onChanged: (String? newValue) {
@@ -271,10 +283,10 @@ class _TimeOutState extends State<TimeOut> {
           child: DropdownButtonFormField<String>(
             value: _selectedWork,
             hint: const Text('请选择一个选项'),
-            items: _work.map((String value) {
+            items: _work.map((MyWork value) {
               return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
+                value: value.name,
+                child: Text(value.name),
               );
             }).toList(),
             onChanged: (String? newValue) {
@@ -317,10 +329,10 @@ class _TimeOutState extends State<TimeOut> {
           child: DropdownButtonFormField<String>(
             value: _selectedFactory,
             hint: const Text('请选择一个选项'),
-            items: _factory.map((String value) {
+            items: _factory.map((MyFactory value) {
               return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
+                value: value.name,
+                child: Text(value.name),
               );
             }).toList(),
             onChanged: (String? newValue) {
@@ -363,10 +375,10 @@ class _TimeOutState extends State<TimeOut> {
           child: DropdownButtonFormField<String>(
             value: _selectedDrilling,
             hint: const Text('请选择一个选项'),
-            items: _drilling.map((String value) {
+            items: _drilling.map((MyDrilling value) {
               return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
+                value: value.name,
+                child: Text(value.name),
               );
             }).toList(),
             onChanged: (String? newValue) {

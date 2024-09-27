@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:bluetooth_mini/widgets/cus_dialog.dart';
 
-class ListCard extends StatefulWidget {
+class ListCard<T> extends StatefulWidget {
   final String buttonText;
-  final List<String> items;
+  final List<T> items;
   final Widget? contentBody;
   final Widget? title;
   final List<Widget>? actions;
-  final void Function() onDele;
+  final void Function(int itemId) onDele;
+  final Function(int id,int index) onItemSelected;
+  final int? selectedIndex;// 选中的索引
+  final bool Function()? canOpen;
 
   const ListCard(
       {Key? key,
@@ -15,8 +18,11 @@ class ListCard extends StatefulWidget {
       required this.items,
       this.contentBody,
       this.title,
+      this.selectedIndex,
       this.actions,
-      required this.onDele})
+      required this.onDele,
+      required this.onItemSelected,
+      this.canOpen})
       : super(key: key);
 
   @override
@@ -32,17 +38,28 @@ class _ListCardState extends State<ListCard> {
         return DialogKeyboard(
           contentBody: widget.contentBody,
           title: widget.title,
-          actions: widget.actions,
+          actions: [_cancelBtn(), ...?widget.actions],
         );
       },
+    );
+  }
+
+  // 取消按钮
+  Widget _cancelBtn() {
+    return TextButton(
+      style: TextButton.styleFrom(backgroundColor: Colors.black26),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+      child: const Text('取消', style: TextStyle(color: Colors.black)),
     );
   }
 
   // 删除
   void _deleteItem(int index) {
     setState(() {
-      widget.items.removeAt(index);
-      widget.onDele();
+      int itemId = widget.items[index].id;
+      widget.onDele(itemId);
     });
   }
 
@@ -57,7 +74,9 @@ class _ListCardState extends State<ListCard> {
           children: <Widget>[
             ElevatedButton(
               onPressed: () {
-                addItem(); // 点击按钮时添加新项
+                if (widget.canOpen!()) {
+                  addItem();
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
@@ -67,13 +86,13 @@ class _ListCardState extends State<ListCard> {
                 ),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   const Icon(
                     Icons.add,
                     color: Colors.white,
                   ),
-                  const SizedBox(width: 8), // 可选，添加一些间距
+                  const SizedBox(width: 10),
                   Text(widget.buttonText,
                       style:
                           const TextStyle(fontSize: 16, color: Colors.white)),
@@ -85,15 +104,40 @@ class _ListCardState extends State<ListCard> {
               child: ListView.builder(
                 itemCount: widget.items.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(widget.items[index]),
-                    trailing: IconButton(
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                      ),
-                      onPressed: () => _deleteItem(index),
+                  final isSelected = widget.selectedIndex == index;
+                  return Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color.fromRGBO(235, 239, 255, 1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10), // 圆角半径
                     ),
+                    child: ListTile(
+                        title: Text(
+                          widget.items[index].name,
+                          style: TextStyle(
+                            color: isSelected
+                                ? const Color.fromRGBO(75, 116, 255, 1)
+                                : Colors.black,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        tileColor:
+                            isSelected ? Colors.blueAccent : Colors.transparent,
+                        trailing: IconButton(
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                          onPressed: () => _deleteItem(index),
+                        ),
+                        onTap: () {
+                          widget.onItemSelected(
+                              widget.items[index].id,index); // 将选中的项传递给父组件
+                        }),
                   );
                 },
               ),
