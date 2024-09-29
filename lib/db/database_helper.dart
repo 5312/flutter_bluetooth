@@ -72,7 +72,7 @@ class DatabaseHelper {
     });
   }
 
-  // 更具repoId查询数据
+  // 根据具repoId查询数据
   Future<List<DataListModel>> getDataListByRepoId(int repoId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps =

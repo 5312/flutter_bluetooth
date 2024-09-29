@@ -53,10 +53,10 @@ class _TimeOutState extends State<TimeOut> {
 
   int _currentTime = 0;
 
-  String? _selectedMine;
-  String? _selectedWork;
-  String? _selectedFactory;
-  String? _selectedDrilling;
+  MyMine? _selectedMine;
+  MyWork? _selectedWork;
+  MyFactory? _selectedFactory;
+  MyDrilling? _selectedDrilling;
 
   List<MyMine> _miningArea = [];
   List<MyWork> _work = [];
@@ -76,8 +76,12 @@ class _TimeOutState extends State<TimeOut> {
   int _repoId = 0;
   Timer? _timer;
 
+  late DataGridController scrollController;
+
   @override
   void initState() {
+    super.initState();
+
     _miningArea = MySetting.getMine();
     _work = MySetting.getWork();
     _factory = MySetting.getFactory();
@@ -99,7 +103,7 @@ class _TimeOutState extends State<TimeOut> {
         open();
       }
     });
-    super.initState();
+    scrollController = DataGridController();
   }
 
   // 弹窗
@@ -107,123 +111,129 @@ class _TimeOutState extends State<TimeOut> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return PopScope(
-            canPop: false,
-            onPopInvoked: (bool didPop) {
-              if (didPop) {
-                return;
-              }
-              showDeleteConfirmDialog1(context);
-            },
-            child: DialogKeyboard(
-              contentBody: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: 550, // 设置最大宽度
-                  ),
-                  child: Column(
-                    children: <Widget>[
-                      _buildRowMineSelect(),
-                      _buildRowWorkSelect(),
-                      _buildRowFactorySelect(),
-                      _buildRowDrillSelect(),
-                      MyForm(
-                        label: '设计俯仰角',
-                        suffixIcon: '',
-                        controller: _controllerPitch,
-                      ),
-                      MyForm(
-                        label: '设计方位角',
-                        suffixIcon: '',
-                        controller: _controllerHeading,
-                      ),
-                      MyForm(
-                        label: '钻杆长度',
-                        suffixIcon: 'm',
-                        controller: _controllerLen,
-                      ),
-                      MyForm(
-                        label: '检测名称',
-                        suffixIcon: '',
-                        controller: _controllerName,
-                      ),
-                    ],
-                  )),
-              title: const Text(
-                '添加矿区',
-                style: TextStyle(fontSize: 14),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  style: TextButton.styleFrom(backgroundColor: Colors.black12),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    '取消',
-                    style: TextStyle(color: Colors.white),
-                  ),
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter state) {
+          return PopScope(
+              canPop: false,
+              onPopInvoked: (bool didPop) {
+                if (didPop) {
+                  return;
+                }
+                showDeleteConfirmDialog1(context);
+              },
+              child: DialogKeyboard(
+                contentBody: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: 550, // 设置最大宽度
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        _buildRowMineSelect(state),
+                        _buildRowWorkSelect(state),
+                        _buildRowFactorySelect(state),
+                        _buildRowDrillSelect(state),
+                        MyForm(
+                          label: '设计俯仰角',
+                          suffixIcon: '',
+                          controller: _controllerPitch,
+                        ),
+                        MyForm(
+                          label: '设计方位角',
+                          suffixIcon: '',
+                          controller: _controllerHeading,
+                        ),
+                        MyForm(
+                          label: '钻杆长度',
+                          suffixIcon: 'm',
+                          controller: _controllerLen,
+                        ),
+                        MyForm(
+                          label: '检测名称',
+                          suffixIcon: '',
+                          controller: _controllerName,
+                        ),
+                      ],
+                    )),
+                title: const Text(
+                  '添加矿区',
+                  style: TextStyle(fontSize: 14),
                 ),
-                TextButton(
-                  style: TextButton.styleFrom(backgroundColor: Colors.blue),
-                  onPressed: () {
-                    if (_controllerName.text != '' &&
-                        _controllerPitch.text != '' &&
-                        _controllerHeading.text != '') {
-                      setState(() {
-                        isSync = true;
-                        // 矿区
-                        _mineString = _selectedMine ?? '';
-                        MyTime.setMine(_mineString);
-                        // 工作面
-                        _workString = _selectedWork ?? '';
-                        MyTime.setWork(_workString);
-                        // 钻厂
-                        _factoryString = _selectedFactory ?? '';
-                        MyTime.setFactory(_factoryString);
-                        // 钻孔
-                        _drillingString = _selectedDrilling ?? '';
-                        MyTime.setDirlling(_drillingString);
-                        // 钻杆长度
-                        _length = _controllerLen.text;
-                        MyTime.setLength(_length);
-                        // 检测名称
-                        _nString = _controllerName.text;
-                        MyTime.setMonName(_nString);
-                        // 设计俯仰角
-                        _designPitch = _controllerPitch.text;
-                        MyTime.setPitch(_designPitch);
-                        // 设计方位角
-                        _designHeading = _controllerHeading.text;
-                        MyTime.setHeading(_designHeading);
-                        // repoid
-                        //关闭对话框并保存repo
-                        _repoId = Random().nextInt(1000000);
-                        DatabaseHelper().insertRepo(RepoModel(
-                            id: _repoId,
-                            name: _nString,
-                            mnTime: DateTime.now().toString()));
-
-                        MyTime.setRepoId(_repoId);
-                      });
+                actions: <Widget>[
+                  TextButton(
+                    style:
+                        TextButton.styleFrom(backgroundColor: Colors.black12),
+                    onPressed: () {
                       Navigator.of(context).pop();
-                    } else {
-                      SmartDialog.showToast('请填写信息');
-                    }
-                  },
-                  child: const Text(
-                    '下一步',
-                    style: TextStyle(color: Colors.white),
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      '取消',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                ),
-              ],
-            ));
+                  TextButton(
+                    style: TextButton.styleFrom(backgroundColor: Colors.blue),
+                    onPressed: () {
+                      if (_controllerName.text != '' &&
+                          _controllerPitch.text != '' &&
+                          _controllerHeading.text != '') {
+                        setState(() async {
+                          isSync = true;
+                          // 矿区
+                          _mineString = _selectedMine!.name;
+                          MyTime.setMine(_mineString);
+                          // 工作面
+                          _workString = _selectedWork!.name;
+                          MyTime.setWork(_workString);
+                          // 钻厂
+                          _factoryString = _selectedFactory!.name;
+                          MyTime.setFactory(_factoryString);
+                          // 钻孔
+                          _drillingString = _selectedDrilling!.name;
+                          MyTime.setDirlling(_drillingString);
+                          // 钻杆长度
+                          _length = _controllerLen.text;
+                          MyTime.setLength(_length);
+                          // 检测名称
+                          _nString = _controllerName.text;
+                          MyTime.setMonName(_nString);
+                          // 设计俯仰角
+                          _designPitch = _controllerPitch.text;
+                          MyTime.setPitch(_designPitch);
+                          // 设计方位角
+                          _designHeading = _controllerHeading.text;
+                          MyTime.setHeading(_designHeading);
+                          // repoid
+                          //关闭对话框并保存repo
+                          List<RepoModel> list =
+                              await DatabaseHelper().getRepos();
+                          _repoId = list.length;
+                          DatabaseHelper().insertRepo(RepoModel(
+                              id: _repoId,
+                              name: _nString,
+                              mnTime: DateTime.now().toString()));
+
+                          MyTime.setRepoId(_repoId);
+                        });
+                        Navigator.of(context).pop();
+                      } else {
+                        SmartDialog.showToast('请填写信息');
+                      }
+                    },
+                    child: const Text(
+                      '下一步',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ));
+        });
       },
     );
   }
 
   /// 矿区
-  Widget _buildRowMineSelect() {
+  Widget _buildRowMineSelect(StateSetter state) {
     return Row(
       children: [
         const SizedBox(
@@ -234,22 +244,22 @@ class _TimeOutState extends State<TimeOut> {
           ),
         ),
         Expanded(
-          child: DropdownButtonFormField<String>(
+          child: DropdownButtonFormField<MyMine>(
             value: _selectedMine,
             hint: const Text('请选择一个选项'),
             items: _miningArea.map((MyMine value) {
-              return DropdownMenuItem<String>(
-                value: value.name,
+              return DropdownMenuItem<MyMine>(
+                value: value,
                 child: Text(value.name),
               );
             }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
+            onChanged: (MyMine? newValue) {
+              state(() {
                 _selectedMine = newValue;
               });
             },
             validator: (value) {
-              if (value == null || value.isEmpty) {
+              if (value == null) {
                 return '请选择一个选项';
               }
               return null;
@@ -269,7 +279,9 @@ class _TimeOutState extends State<TimeOut> {
   }
 
   /// 工作面
-  Widget _buildRowWorkSelect() {
+  Widget _buildRowWorkSelect(StateSetter state) {
+    List<MyWork> showList =
+        _work.where((i) => i.mineId == _selectedMine?.id).toList();
     return Row(
       children: [
         const SizedBox(
@@ -280,22 +292,22 @@ class _TimeOutState extends State<TimeOut> {
           ),
         ),
         Expanded(
-          child: DropdownButtonFormField<String>(
+          child: DropdownButtonFormField<MyWork>(
             value: _selectedWork,
             hint: const Text('请选择一个选项'),
-            items: _work.map((MyWork value) {
-              return DropdownMenuItem<String>(
-                value: value.name,
+            items: showList.map((MyWork value) {
+              return DropdownMenuItem<MyWork>(
+                value: value,
                 child: Text(value.name),
               );
             }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
+            onChanged: (MyWork? newValue) {
+              state(() {
                 _selectedWork = newValue;
               });
             },
             validator: (value) {
-              if (value == null || value.isEmpty) {
+              if (value == null) {
                 return '请选择一个选项';
               }
               return null;
@@ -315,7 +327,9 @@ class _TimeOutState extends State<TimeOut> {
   }
 
   /// 钻厂
-  Widget _buildRowFactorySelect() {
+  Widget _buildRowFactorySelect(StateSetter state) {
+    List<MyFactory> showList =
+        _factory.where((i) => i.workId == _selectedWork?.id).toList();
     return Row(
       children: [
         const SizedBox(
@@ -326,22 +340,22 @@ class _TimeOutState extends State<TimeOut> {
           ),
         ),
         Expanded(
-          child: DropdownButtonFormField<String>(
+          child: DropdownButtonFormField<MyFactory>(
             value: _selectedFactory,
             hint: const Text('请选择一个选项'),
-            items: _factory.map((MyFactory value) {
-              return DropdownMenuItem<String>(
-                value: value.name,
+            items: showList.map((MyFactory value) {
+              return DropdownMenuItem<MyFactory>(
+                value: value,
                 child: Text(value.name),
               );
             }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
+            onChanged: (MyFactory? newValue) {
+              state(() {
                 _selectedFactory = newValue;
               });
             },
             validator: (value) {
-              if (value == null || value.isEmpty) {
+              if (value == null) {
                 return '请选择一个选项';
               }
               return null;
@@ -361,7 +375,9 @@ class _TimeOutState extends State<TimeOut> {
   }
 
   /// 钻孔
-  Widget _buildRowDrillSelect() {
+  Widget _buildRowDrillSelect(StateSetter state) {
+    List<MyDrilling> showList =
+        _drilling.where((i) => i.factoryId == _selectedFactory?.id).toList();
     return Row(
       children: [
         const SizedBox(
@@ -372,22 +388,22 @@ class _TimeOutState extends State<TimeOut> {
           ),
         ),
         Expanded(
-          child: DropdownButtonFormField<String>(
+          child: DropdownButtonFormField<MyDrilling>(
             value: _selectedDrilling,
             hint: const Text('请选择一个选项'),
-            items: _drilling.map((MyDrilling value) {
-              return DropdownMenuItem<String>(
-                value: value.name,
+            items: showList.map((MyDrilling value) {
+              return DropdownMenuItem<MyDrilling>(
+                value: value,
                 child: Text(value.name),
               );
             }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
+            onChanged: (MyDrilling? newValue) {
+              state(() {
                 _selectedDrilling = newValue;
               });
             },
             validator: (value) {
-              if (value == null || value.isEmpty) {
+              if (value == null) {
                 return '请选择一个选项';
               }
               return null;
@@ -476,24 +492,33 @@ class _TimeOutState extends State<TimeOut> {
   Future<void> savePitch() async {
     // todo 应获取数据库长度
     int id = employeeDataSource.rows.length + 1;
+    // 最后一条数据
+    DataListModel endLen = employees[employees.length - 1];
     DataListModel rows = DataListModel(
       id: id,
       pitch: double.parse(_pitch),
       time: _time,
-      length: int.parse(_length),
+      // 长度累加
+      length: endLen.length + int.parse(_length),
     );
     employees.add(rows);
     await DatabaseHelper().insertDataList(DataListModel(
       id: id,
       pitch: double.parse(_pitch),
       time: _time,
-      length: int.parse(_length),
+      // 长度累加
+      length: endLen.length + int.parse(_length),
       repoId: _repoId,
       designPitch: double.parse(_designPitch),
       designHeading: double.parse(_designHeading),
     ));
 
     employeeDataSource = EmployeeDataSource(employeeData: employees);
+
+    // 在数据更新后滚动到底部
+    Future.delayed(Duration(milliseconds: 100), () {
+      scrollController.scrollToRow(employeeDataSource.rows.length - 1);
+    });
   }
 
   //删除末尾数据
@@ -667,14 +692,16 @@ class _TimeOutState extends State<TimeOut> {
                     Expanded(
                         flex: 1,
                         child: SfDataGrid(
+                          headerRowHeight:40,
                           source: employeeDataSource,
+                          controller: scrollController,
                           gridLinesVisibility: GridLinesVisibility.none,
                           columnWidthMode: ColumnWidthMode.fill,
                           columns: <GridColumn>[
                             GridColumn(
                                 columnName: 'id',
                                 label: Container(
-                                  padding: const EdgeInsets.all(16.0),
+                                  padding: const EdgeInsets.all(0.0),
                                   alignment: Alignment.center,
                                   color: const Color.fromRGBO(234, 236, 255, 1),
                                   child: const Text(
@@ -683,15 +710,15 @@ class _TimeOutState extends State<TimeOut> {
                                   ),
                                 )),
                             GridColumn(
-                                columnName: 'inclination',
+                                columnName: 'length',
                                 label: Container(
                                     padding: const EdgeInsets.all(8.0),
                                     alignment: Alignment.center,
                                     color:
                                         const Color.fromRGBO(234, 236, 255, 1),
-                                    child: const Text('俯仰角'))),
+                                    child: const Text('钻杆长度'))),
                             GridColumn(
-                                columnName: 'azimuth',
+                                columnName: 'time',
                                 label: Container(
                                     padding: const EdgeInsets.all(8.0),
                                     alignment: Alignment.center,
@@ -735,7 +762,7 @@ class EmployeeDataSource extends DataGridSource {
     _employeeData = employeeData
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<num>(columnName: 'pitch', value: e.pitch),
+              DataGridCell<num>(columnName: 'length', value: e.pitch),
               DataGridCell<String>(columnName: 'time', value: e.time),
             ]))
         .toList();

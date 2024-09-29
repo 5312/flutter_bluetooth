@@ -19,7 +19,7 @@ class _RepoState extends State<Repo> {
   List<RepoModel> employees = <RepoModel>[];
   late RepoDataSource employeeDataSource = RepoDataSource(
       employeeData: [],
-      onDelete: delete,
+      onDelete: showDeleteConfirmDialog1,
       onDetail: onDetail,
       onOrigin: onOrigin);
 
@@ -35,7 +35,7 @@ class _RepoState extends State<Repo> {
       employees = list;
       employeeDataSource = RepoDataSource(
           employeeData: employees,
-          onDelete: delete,
+          onDelete: showDeleteConfirmDialog1,
           onDetail: onDetail,
           onOrigin: onOrigin);
     });
@@ -57,10 +57,34 @@ class _RepoState extends State<Repo> {
     Navigator.of(context).push(route);
   }
 
-  Future<void> delete(int id) async {
-    await DatabaseHelper().deleteRepo(id);
-    GetList();
+// 弹出对话框
+  Future<bool?> showDeleteConfirmDialog1(int id) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("提示"),
+          content: Text("您确定要删除当前文件吗?"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("取消"),
+              onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+            ),
+            TextButton(
+              child: Text("删除"),
+              onPressed: () async {
+                await DatabaseHelper().deleteRepo(id);
+                GetList();
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +96,13 @@ class _RepoState extends State<Repo> {
               flex: 1,
               child: SfDataGrid(
                 source: employeeDataSource,
+                headerRowHeight:40,
                 columnWidthMode: ColumnWidthMode.fill,
                 columns: <GridColumn>[
                   GridColumn(
                       columnName: 'id',
                       label: Container(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(0.0),
                           color: const Color.fromRGBO(234, 236, 255, 1),
                           alignment: Alignment.center,
                           child: const Text(

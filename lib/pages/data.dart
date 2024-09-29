@@ -164,7 +164,6 @@ class _DataTransmissionState extends State<DataTransmission> {
           employeeDataSource = EmployeeDataSourceData(dataModels: r);
         });
       }
-      //employees = convertToDataModelList(MyTime.getTimeData(), null, null);
     }
   }
 
@@ -303,6 +302,7 @@ class _DataTransmissionState extends State<DataTransmission> {
                   Expanded(
                       flex: 1,
                       child: SfDataGrid(
+                        headerRowHeight:40,
                         source: employeeDataSource,
                         gridLinesVisibility: GridLinesVisibility.none,
                         columnWidthMode: ColumnWidthMode.fill,
@@ -310,7 +310,7 @@ class _DataTransmissionState extends State<DataTransmission> {
                           GridColumn(
                               columnName: 'id',
                               label: Container(
-                                padding: const EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.all(0.0),
                                 alignment: Alignment.center,
                                 color: const Color.fromRGBO(234, 236, 255, 1),
                                 child: const Text(
@@ -329,22 +329,22 @@ class _DataTransmissionState extends State<DataTransmission> {
                                     overflow: TextOverflow.ellipsis,
                                   ))),
                           GridColumn(
-                              columnName: 'pitch',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  color: const Color.fromRGBO(234, 236, 255, 1),
-                                  child: const Text('俯仰角'))),
-                          GridColumn(
-                              columnName: 'roll',
+                              columnName: 'length',
                               label: Container(
                                   padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
                                   color: const Color.fromRGBO(234, 236, 255, 1),
                                   child: const Text(
-                                    '翻滚角',
+                                    '钻杆长度',
                                     overflow: TextOverflow.ellipsis,
                                   ))),
+                          GridColumn(
+                              columnName: 'pitch',
+                              label: Container(
+                                  padding: const EdgeInsets.all(8.0),
+                                  alignment: Alignment.center,
+                                  color: const Color.fromRGBO(234, 236, 255, 1),
+                                  child: const Text('俯仰角（°）'))),
                           GridColumn(
                               columnName: 'heading',
                               label: Container(
@@ -352,7 +352,7 @@ class _DataTransmissionState extends State<DataTransmission> {
                                   alignment: Alignment.center,
                                   color: const Color.fromRGBO(234, 236, 255, 1),
                                   child: const Text(
-                                    '方位角/°',
+                                    '方位角（°）',
                                     overflow: TextOverflow.ellipsis,
                                   ))),
                         ],
@@ -382,8 +382,8 @@ class EmployeeDataSourceData extends DataGridSource {
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
               DataGridCell<String>(columnName: 'time', value: e.time),
+              DataGridCell<Object>(columnName: 'length', value: e.roll ?? ''),
               DataGridCell<num>(columnName: 'pitch', value: e.pitch),
-              DataGridCell<Object>(columnName: 'roll', value: e.roll ?? ''),
               DataGridCell<Object>(
                   columnName: 'heading', value: e.heading ?? ''),
             ]))

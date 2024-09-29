@@ -64,25 +64,26 @@ class _RepoOriginalState extends State<RepoOriginal> {
                         alignment: Alignment.center,
                         child: const Text('时间'))),
                 GridColumn(
+                    columnName: 'length',
+                    label: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        color: const Color.fromRGBO(234, 236, 255, 1),
+                        child: const Text(
+                          '钻杆长度',
+                          overflow: TextOverflow.ellipsis,
+                        ))),
+                GridColumn(
                     columnName: 'pitch',
                     label: Container(
                         padding: const EdgeInsets.all(8.0),
                         alignment: Alignment.center,
                         color: const Color.fromRGBO(234, 236, 255, 1),
                         child: const Text(
-                          '俯仰角',
+                          '俯仰角（°）',
                           overflow: TextOverflow.ellipsis,
                         ))),
-                GridColumn(
-                    columnName: 'roll',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '翻滚角（°）',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
+
                 GridColumn(
                     columnName: 'heading',
                     label: Container(
@@ -131,8 +132,9 @@ class EmployeeDataSource extends DataGridSource {
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
               DataGridCell<String>(columnName: 'time', value: e.time),
+      DataGridCell<num>(columnName: 'length', value: e.length),
+
               DataGridCell<num>(columnName: 'pitch', value: e.pitch),
-              DataGridCell<num>(columnName: 'roll', value: e.roll),
               DataGridCell<num>(columnName: 'heading', value: e.heading),
               DataGridCell<num>(
                   columnName: 'designPitch', value: e.designPitch),

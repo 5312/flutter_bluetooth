@@ -12,6 +12,7 @@ import 'package:fl_chart/fl_chart.dart';
 // 测点数据
 class RepoDetail extends StatefulWidget {
   final RepoModel row;
+
   const RepoDetail({Key? key, required this.row}) : super(key: key);
 
   @override
@@ -22,12 +23,15 @@ class _RepoDetailState extends State<RepoDetail> {
   List<DataListModel> employees = <DataListModel>[];
   late EmployeeDataSource employeeDataSource =
       EmployeeDataSource(employeeData: []);
+
   // 上下偏差
   late List<FlSpot> design;
   late List<FlSpot> actual;
+
   // 左右偏差
   late List<FlSpot> design2;
   late List<FlSpot> actual2;
+
   @override
   void initState() {
     super.initState();
@@ -153,6 +157,7 @@ class _RepoDetailState extends State<RepoDetail> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.row.name),
@@ -160,16 +165,17 @@ class _RepoDetailState extends State<RepoDetail> {
       body: ListView(
         children: [
           Container(
-            height: 300,
+            height: screenHeight * 0.5, // 占屏幕高度的40%,
             padding: const EdgeInsets.only(bottom: 30),
             child: SfDataGrid(
+              headerRowHeight: 40,
               source: employeeDataSource,
               columnWidthMode: ColumnWidthMode.fill,
               columns: <GridColumn>[
                 GridColumn(
                     columnName: 'id',
                     label: Container(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(0.0),
                         color: const Color.fromRGBO(234, 236, 255, 1),
                         alignment: Alignment.center,
                         child: const Text(
@@ -183,23 +189,23 @@ class _RepoDetailState extends State<RepoDetail> {
                         alignment: Alignment.center,
                         child: const Text('时间'))),
                 GridColumn(
+                    columnName: 'length',
+                    label: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        color: const Color.fromRGBO(234, 236, 255, 1),
+                        child: const Text(
+                          '钻杆长度',
+                          overflow: TextOverflow.ellipsis,
+                        ))),
+                GridColumn(
                     columnName: 'pitch',
                     label: Container(
                         padding: const EdgeInsets.all(8.0),
                         alignment: Alignment.center,
                         color: const Color.fromRGBO(234, 236, 255, 1),
                         child: const Text(
-                          '俯仰角',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-                GridColumn(
-                    columnName: 'roll',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '翻滚角（°）',
+                          '俯仰角（°）',
                           overflow: TextOverflow.ellipsis,
                         ))),
                 GridColumn(
@@ -215,7 +221,7 @@ class _RepoDetailState extends State<RepoDetail> {
               ],
             ),
           ),
-          const SizedBox(height: 10.0),
+          const SizedBox(height: 5.0),
           Row(
             children: [
               Expanded(
@@ -249,8 +255,8 @@ class EmployeeDataSource extends DataGridSource {
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
               DataGridCell<String>(columnName: 'time', value: e.time),
+              DataGridCell<num>(columnName: 'length', value: e.length),
               DataGridCell<num>(columnName: 'pitch', value: e.pitch),
-              DataGridCell<num>(columnName: 'roll', value: e.roll),
               DataGridCell<num>(columnName: 'heading', value: e.heading),
             ]))
         .toList();
