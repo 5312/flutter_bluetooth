@@ -95,7 +95,7 @@ class _ScanResultTileState extends State<ScanResultTile> {
       ),
       onPressed:
           (widget.result.advertisementData.connectable) ? widget.onTap : null,
-      child: isConnected ? const Text('打开') : const Text('连接'),
+      child: isConnected ? const Text('关闭') : const Text('连接'),
     );
   }
 

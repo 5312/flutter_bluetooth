@@ -271,7 +271,6 @@ class _DevicesStateState extends State<DevicesState> with RouteAware {
   @override
   void dispose() {
     super.dispose();
-    print('销毁');
     scanResultsSubscription?.cancel();
     scanResultsSubscription = null;
   }

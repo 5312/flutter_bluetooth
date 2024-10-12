@@ -173,11 +173,20 @@ class _TimeOutState extends State<TimeOut> {
                   ),
                   TextButton(
                     style: TextButton.styleFrom(backgroundColor: Colors.blue),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_controllerName.text != '' &&
                           _controllerPitch.text != '' &&
                           _controllerHeading.text != '') {
-                        setState(() async {
+                        List<RepoModel> list =
+                            await DatabaseHelper().getRepos();
+                        _repoId = list.length + 1;
+                        DatabaseHelper().insertRepo(RepoModel(
+                            id: _repoId,
+                            name: _nString,
+                            mnTime: DateTime.now().toString()));
+
+                        MyTime.setRepoId(_repoId);
+                        setState(() {
                           isSync = true;
                           // 矿区
                           _mineString = _selectedMine!.name;
@@ -205,15 +214,6 @@ class _TimeOutState extends State<TimeOut> {
                           MyTime.setHeading(_designHeading);
                           // repoid
                           //关闭对话框并保存repo
-                          List<RepoModel> list =
-                              await DatabaseHelper().getRepos();
-                          _repoId = list.length;
-                          DatabaseHelper().insertRepo(RepoModel(
-                              id: _repoId,
-                              name: _nString,
-                              mnTime: DateTime.now().toString()));
-
-                          MyTime.setRepoId(_repoId);
                         });
                         Navigator.of(context).pop();
                       } else {
@@ -493,13 +493,14 @@ class _TimeOutState extends State<TimeOut> {
     // todo 应获取数据库长度
     int id = employeeDataSource.rows.length + 1;
     // 最后一条数据
-    DataListModel endLen = employees[employees.length - 1];
+    List<DataListModel> endLen = await DatabaseHelper()
+        .getDataListByRepoId(_repoId); // employees[employees.length - 1];
     DataListModel rows = DataListModel(
       id: id,
       pitch: double.parse(_pitch),
       time: _time,
       // 长度累加
-      length: endLen.length + int.parse(_length),
+      length: (endLen.length + 1) * int.parse(_length),
     );
     employees.add(rows);
     await DatabaseHelper().insertDataList(DataListModel(
@@ -507,14 +508,13 @@ class _TimeOutState extends State<TimeOut> {
       pitch: double.parse(_pitch),
       time: _time,
       // 长度累加
-      length: endLen.length + int.parse(_length),
+      length:(endLen.length + 1) * int.parse(_length),
       repoId: _repoId,
       designPitch: double.parse(_designPitch),
       designHeading: double.parse(_designHeading),
     ));
 
     employeeDataSource = EmployeeDataSource(employeeData: employees);
-
     // 在数据更新后滚动到底部
     Future.delayed(Duration(milliseconds: 100), () {
       scrollController.scrollToRow(employeeDataSource.rows.length - 1);
@@ -612,7 +612,7 @@ class _TimeOutState extends State<TimeOut> {
                         width: 200,
                         child: Column(
                           children: [
-                            Text('俯仰角：$_pitch'),
+                            // Text('俯仰角：$_pitch'),
                             Text(
                                 '累计时间：${Analytical([]).formatTime(_currentTime)}'),
                             ElevatedButton(
@@ -692,7 +692,7 @@ class _TimeOutState extends State<TimeOut> {
                     Expanded(
                         flex: 1,
                         child: SfDataGrid(
-                          headerRowHeight:40,
+                          headerRowHeight: 40,
                           source: employeeDataSource,
                           controller: scrollController,
                           gridLinesVisibility: GridLinesVisibility.none,
@@ -762,7 +762,7 @@ class EmployeeDataSource extends DataGridSource {
     _employeeData = employeeData
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<num>(columnName: 'length', value: e.pitch),
+              DataGridCell<num>(columnName: 'length', value: e.length),
               DataGridCell<String>(columnName: 'time', value: e.time),
             ]))
         .toList();

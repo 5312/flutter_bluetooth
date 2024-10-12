@@ -382,7 +382,7 @@ class EmployeeDataSourceData extends DataGridSource {
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
               DataGridCell<String>(columnName: 'time', value: e.time),
-              DataGridCell<Object>(columnName: 'length', value: e.roll ?? ''),
+              DataGridCell<Object>(columnName: 'length', value: e.length ),
               DataGridCell<num>(columnName: 'pitch', value: e.pitch),
               DataGridCell<Object>(
                   columnName: 'heading', value: e.heading ?? ''),

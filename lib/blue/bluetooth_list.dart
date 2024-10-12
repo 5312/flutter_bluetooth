@@ -93,17 +93,19 @@ class _ScanScreenState extends State<ScanScreen> {
     Provider.of<BluetoothManager>(context, listen: false)
         .setCurrentDevice(device);
     // 导航至详细页面
-    MaterialPageRoute route = MaterialPageRoute(
-        builder: (context) => DeviceScreen(device: device),
-        settings: const RouteSettings(name: '/DeviceScreen'));
-    Navigator.of(context).push(route);
+    // MaterialPageRoute route = MaterialPageRoute(
+    //     builder: (context) => DeviceScreen(device: device),
+    //     settings: const RouteSettings(name: '/DeviceScreen'));
+    // Navigator.of(context).push(route);
   }
+
 
   Future onRefresh() {
     if (_isScanning == false) {
       FlutterBluePlus.startScan(
           timeout: const Duration(seconds: 15),
-          withServices: [Guid('0000FFE0-0000-1000-8000-00805F9B34FB')]);
+          withServices: [Guid('0000FFE0-0000-1000-8000-00805F9B34FB')]
+      );
     }
     if (mounted) {
       setState(() {});
@@ -121,7 +123,7 @@ class _ScanScreenState extends State<ScanScreen> {
     } else {
       return FloatingActionButton(
         onPressed: onScanPressed,
-        child: const Text("SCAN"),
+        child: const Text("扫描"),
       );
     }
   }
