@@ -60,7 +60,7 @@ class _RepoDetailState extends State<RepoDetail> {
 
   // 计算设计上下偏差曲线
   void calculateDesignCurve(List<DataListModel> list) {
-    design = list
+    List<FlSpot> design = list
         .map(
             (e) => FlSpot(e.calculateDesignPitchX(), e.calculateDesignPitchY()))
         .toList();

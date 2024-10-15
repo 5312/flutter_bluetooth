@@ -32,7 +32,7 @@ class _ProbeState extends State<Probe> {
   StreamSubscription<List<int>>? _lastValueSubscription;
 
   // 翻滚角
-  String _roll = '0';
+  String _pitch = '0';
   String _heading = '0';
 
   @override
@@ -94,10 +94,11 @@ class _ProbeState extends State<Probe> {
       List<String> hexArray = bytesToHexArray(value);
       if (hexArray[3] == 'f0') {
         Analytical analytical = Analytical(value);
-        String roll = analytical.getRoll();
+        // String roll = analytical.getRoll();
+        String pitch = analytical.getPitch();
         String heading = analytical.getHeading();
         setState(() {
-          _roll = roll;
+          _pitch = pitch;
           _heading = heading;
         });
       }
@@ -118,14 +119,14 @@ class _ProbeState extends State<Probe> {
       targetCharacteristic!
           .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
     }
-    _roll = '';
+    _pitch = '';
     _heading = '';
     super.dispose();
   }
 
   Widget rollText() {
     return Text(
-      "翻滚角：$_roll",
+      "俯仰角：$_pitch",
       textAlign: TextAlign.left,
       style: const TextStyle(
         color: Colors.black54,
@@ -152,7 +153,7 @@ class _ProbeState extends State<Probe> {
         id: id,
         pitch: null,
         length: 0,
-        roll: double.parse(_roll),
+        roll: double.parse(_pitch),
         heading: double.parse(_heading),
         repoId: null);
     _employees.add(rows);
@@ -229,11 +230,11 @@ class _ProbeState extends State<Probe> {
                             '序号',
                           ))),
                   GridColumn(
-                      columnName: 'roll',
+                      columnName: 'pitch',
                       label: Container(
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,
-                          child: const Text('翻滚角/°'))),
+                          child: const Text('俯仰角（°）'))),
                   GridColumn(
                       columnName: 'heading',
                       label: Container(
