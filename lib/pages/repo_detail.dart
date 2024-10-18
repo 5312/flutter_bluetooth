@@ -44,14 +44,27 @@ class _RepoDetailState extends State<RepoDetail> {
 
   Future<void> getList() async {
     List<DataListModel> list =
-        await DatabaseHelper().getDataListByRepoId(widget.row.id);
+        await DatabaseHelper().getDataListByRepoId(widget.row.id!);
+    list.insert(
+        0,
+        DataListModel(
+            id: 0,
+            length: 0,
+            time: "0",
+            pitch: 0,
+            roll: 0,
+            heading: 0,
+            repoId: 0,
+            designPitch: 0,
+            designHeading: 0));
 
     setState(() {
       employees = list;
       employeeDataSource = EmployeeDataSource(employeeData: employees);
       // 上下
       calculateDesignCurve(list);
-      calculateActualCurve(list);
+      calculateCoordinates(list);
+      // calculateActualCurve(list);
       // 左右
       calculateDesignCurve2(list);
       calculateActualCurve2(list);
@@ -60,104 +73,98 @@ class _RepoDetailState extends State<RepoDetail> {
 
   // 计算设计上下偏差曲线
   void calculateDesignCurve(List<DataListModel> list) {
-    List<FlSpot> design = list
-        .map(
-            (e) => FlSpot(e.calculateDesignPitchX(), e.calculateDesignPitchY()))
-        .toList();
-    // cList 中Y 值 每一个向前累加
-    design.insert(0, const FlSpot(0, 0));
-    for (int i = 1; i < design.length; i++) {
-      if (i == 0) {
-        design[i] = FlSpot(design[i].x + 0, design[i].y + 0);
-      } else {
-        design[i] = FlSpot(
-            design[i].x + design[i - 1].x, design[i].y + (design[i - 1].y));
+    List<Map<String, num>> designCurve = [];
+
+    for (var data in list) {
+      if (data.designPitch != null) {
+        // 计算X和Y坐标
+        num x = data.length * cos(data.designPitch!); // 角度转换为弧度
+        num y = data.length * sin(data.designPitch!);
+
+        designCurve.add({'X': x, 'Y': y});
       }
     }
+    design = convertToFlSpot(designCurve);
+  }
+
+  List<FlSpot> convertToFlSpot(List<Map<String, num>> designCurve) {
+    List<FlSpot> spots = [];
+
+    for (var point in designCurve) {
+      double x = point['X']!.toDouble(); // 将 num 转换为 double
+      double y = point['Y']!.toDouble();
+      spots.add(FlSpot(x, y));
+    }
+
+    return spots;
   }
 
   // 计算实际上下偏差曲线
-  void calculateActualCurve(List<DataListModel> list) {
-    for (int i = 0; i < list.length; i++) {
-      if (i == 0) {
-        list[i].pitch = list[i].designPitch! + list[i].pitch!;
-      } else {
-        list[i].pitch = list[i].pitch! + (list[i - 1].pitch!);
-      }
-    }
-    actual = list.map((e) {
-      // X=L x cos（（A1+A2）/2）） // /A1=实测俯仰角1（第一个点为设计角度），A2=实测俯仰角2
-      // Y=L x sin(（A1+A2）/2）
-      double radiansX = e.pitch! / 2;
-      double radiansY = e.pitch! / 2;
+  void calculateCoordinates(List<DataListModel> list) {
+    num previousPitch = 0; // 用来存储上一个数据点的 pitch 值
+    List<Map<String, num>> realCurve = [];
 
-      double x = e.length * cos(radiansX);
-      double y = e.length * sin(radiansY);
-      return FlSpot(x, y);
-    }).toList();
-    actual.insert(0, const FlSpot(0, 0));
-    // y 累加计算
-    for (int i = 0; i < actual.length; i++) {
-      if (i == 0) {
-        actual[i] = FlSpot(actual[i].x, actual[i].y + 0);
-      } else {
-        actual[i] = FlSpot(actual[i].x, actual[i].y + (actual[i - 1].y));
-      }
+    for (var data in list) {
+      num L = data.length;
+      num A1 = data.pitch ?? 0;
+      num A2 = A1 + previousPitch; // 当前 pitch 加上上一个数据点的 pitch
+
+      num X = L * cos((A1 + A2) / 2);
+      num Y = L * sin((A1 + A2) / 2);
+
+      previousPitch = A1; // 更新 previousPitch 为当前数据点的 pitch
+      realCurve.add({'X': X, 'Y': Y});
     }
+    actual = convertToFlSpot(realCurve);
   }
 
   // 计算设计左右偏差
   void calculateDesignCurve2(List<DataListModel> list) {
-    // Y=0，X=L x cos（A）
-    design2 =
-        list.map((e) => FlSpot(e.length * cos(e.designPitch!), 0)).toList();
-    design2.insert(0, const FlSpot(0, 0));
-    // y 累加计算
-    for (int i = 0; i < design2.length; i++) {
-      if (i == 0) {
-        design2[i] = FlSpot(design2[i].x, design2[i].y + 0);
-      } else {
-        design2[i] = FlSpot(design2[i].x, design2[i].y + (design2[i - 1].y));
-      }
+    List<Map<String, num>> designCurve = [];
+    for (var data in list) {
+      num L = data.length; // 钻杆长度
+      num A = data.designPitch ?? 0; // 设计俯仰角
+
+      num designX = L * cos(A); // 设计曲线的 X 坐标
+      num designY = 0; // 设计曲线的 Y 坐标始终为 0
+      designCurve.add({'X': designX, 'Y': designY});
     }
+    design2 = convertToFlSpot(designCurve);
   }
 
   // 计算实际左右偏差
   void calculateActualCurve2(List<DataListModel> list) {
-    // Y= -L x cos （（A1+A2）/2）x sin（（B1+B2）/2-B），X=L x cos（（A1+A2）/2））
-    // 计算A1 + A2 , B1 + B2
-    for (int i = 0; i < list.length; i++) {
-      if (i == 0) {
-        list[i].pitch = list[i].designPitch! + list[i].pitch!;
-        list[i].heading = list[i].designHeading! + list[i].heading!;
-      } else {
-        list[i].pitch = list[i].pitch! + (list[i - 1].pitch!);
-        list[i].heading = list[i].heading! + (list[i - 1].heading!);
-      }
-    }
-    actual2 = list.map((e) {
-      double radiansX = e.pitch! / 2;
+    num previousPitch = 0; // 上一个数据点的 pitch
+    num previousHeading = 0; // 上一个数据点的 heading
+    List<Map<String, num>> realCurve = [];
 
-      double radiansY = e.heading! / 2 - e.designHeading!;
+    for (var data in list) {
+      num L = data.length; // 钻杆长度
+      num A1 = data.pitch ?? 0; // 当前俯仰角
+      num A2 = A1 + previousPitch; // 当前俯仰角加上上一个数据点的俯仰角
 
-      double x = e.length * cos(radiansX);
-      double y = -e.length * cos(radiansX) * sin(radiansY);
-      return FlSpot(x, y);
-    }).toList();
-    actual2.insert(0, const FlSpot(0, 0));
-    // y 累加计算
-    for (int i = 0; i < actual2.length; i++) {
-      if (i == 0) {
-        actual2[i] = FlSpot(actual2[i].x, actual2[i].y + 0);
-      } else {
-        actual2[i] = FlSpot(actual2[i].x, actual2[i].y + (actual2[i - 1].y));
-      }
+      num B1 = data.heading ?? 0; // 当前方位角
+      num B2 = B1 + previousHeading; // 当前方位角加上上一个数据点的方位角
+
+      num B = data.designHeading ?? 0; // 设计方位角（你可以根据需求调整）
+
+      // 实际曲线的 X 和 Y
+      num actualX = L * cos((A1 + A2) / 2);
+      num actualY = -L * cos((A1 + A2) / 2) * sin((B1 + B2) / 2 - B);
+
+      previousPitch = A1; // 更新上一个 pitch
+      previousHeading = B1; // 更新上一个 heading
+      realCurve.add({'X': actualX, 'Y': actualY});
     }
+    actual2 = convertToFlSpot(realCurve);
   }
 
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
+    // print(design);
+    print(actual);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.row.name),
@@ -252,12 +259,14 @@ class EmployeeDataSource extends DataGridSource {
   /// Creates the employee data source class with required details.
   EmployeeDataSource({required List<DataListModel> employeeData}) {
     _employeeData = employeeData
+        .asMap() // 将列表转换为 Map，key 为 index
+        .entries // 获取键值对 (index, element)
         .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<String>(columnName: 'time', value: e.time),
-              DataGridCell<num>(columnName: 'length', value: e.length),
-              DataGridCell<num>(columnName: 'pitch', value: e.pitch),
-              DataGridCell<num>(columnName: 'heading', value: e.heading),
+              DataGridCell<int>(columnName: 'id', value: e.key + 1),
+              DataGridCell<String>(columnName: 'time', value: e.value.time),
+              DataGridCell<num>(columnName: 'length', value: e.value.length),
+              DataGridCell<num>(columnName: 'pitch', value: e.value.pitch),
+              DataGridCell<num>(columnName: 'heading', value: e.value.heading),
             ]))
         .toList();
   }

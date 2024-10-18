@@ -302,7 +302,7 @@ class _DataTransmissionState extends State<DataTransmission> {
                   Expanded(
                       flex: 1,
                       child: SfDataGrid(
-                        headerRowHeight:40,
+                        headerRowHeight: 40,
                         source: employeeDataSource,
                         gridLinesVisibility: GridLinesVisibility.none,
                         columnWidthMode: ColumnWidthMode.fill,
@@ -368,6 +368,8 @@ class _DataTransmissionState extends State<DataTransmission> {
     List<DataListModel> result =
         await DatabaseHelper().getDataListForRepoId(_repoId);
 
+    print(result.map((d) => d.toJson()).toList());
+
     setState(() {
       employees = result;
       employeeDataSource = EmployeeDataSourceData(dataModels: result);
@@ -379,13 +381,17 @@ class EmployeeDataSourceData extends DataGridSource {
   /// Creates the data source class with required details.
   EmployeeDataSourceData({required List<DataListModel> dataModels}) {
     _employeeData = dataModels
-        .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<String>(columnName: 'time', value: e.time),
-              DataGridCell<Object>(columnName: 'length', value: e.length ),
-              DataGridCell<num>(columnName: 'pitch', value: e.pitch),
+        .asMap() // 将列表转换为 Map，key 为 index
+        .entries // 获取键值对 (index, element)
+        .map<DataGridRow>((entry) => DataGridRow(cells: [
+              DataGridCell<int>(columnName: 'id', value: entry.key + 1),
+              DataGridCell<String>(columnName: 'time', value: entry.value.time),
               DataGridCell<Object>(
-                  columnName: 'heading', value: e.heading ?? ''),
+                  columnName: 'length', value: entry.value.length),
+              DataGridCell<Object>(
+                  columnName: 'pitch', value: entry.value.pitch ?? ''),
+              DataGridCell<Object>(
+                  columnName: 'heading', value: entry.value.heading ?? ''),
             ]))
         .toList();
   }

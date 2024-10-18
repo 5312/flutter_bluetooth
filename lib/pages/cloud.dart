@@ -37,7 +37,7 @@ class _CloudState extends State<Cloud> {
     // 将 List<RepoModel> 转换为 List<CloudModel>
     List<CloudModel> cloudModels = repoModels.map((repo) {
       return CloudModel(
-        repo.id,
+        repo.id!,
         repo.name,
         repo.mnTime,
         'unknown', // 提供默认值或从其他来源获取实际值

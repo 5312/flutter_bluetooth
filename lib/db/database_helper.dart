@@ -40,16 +40,16 @@ class DatabaseHelper {
   }
 
 // 插入DataListModel
-  Future<void> insertDataList(DataListModel dataList) async {
+  Future<int> insertDataList(DataListModel dataList) async {
     final db = await database;
-    final batch = db.batch();
-
-    batch.insert(
+    // final batch = db.batch();
+    int id = await db.insert(
       'data',
       dataList.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    await batch.commit(noResult: true);
+    return id;
+    // return await batch.commit(noResult: true);
   }
 
   Future<void> updateDataList(DataListModel dataList) async {
@@ -96,19 +96,19 @@ class DatabaseHelper {
   }
 
 // -----------------
-  Future<void> insertRepo(RepoModel repo) async {
+  Future<int> insertRepo(RepoModel repo) async {
     final db = await database;
-    await db.insert(
+   int id =  await db.insert(
       'repos',
       repo.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+   return id;
   }
 
   Future<List<RepoModel>> getRepos() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('repos');
-
     return List.generate(maps.length, (i) {
       return RepoModel.fromJson(maps[i]);
     });

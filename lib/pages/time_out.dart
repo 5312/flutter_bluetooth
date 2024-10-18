@@ -179,12 +179,12 @@ class _TimeOutState extends State<TimeOut> {
                           _controllerHeading.text != '') {
                         List<RepoModel> list =
                             await DatabaseHelper().getRepos();
-                        _repoId = list.length + 1;
-                        DatabaseHelper().insertRepo(RepoModel(
-                            id: _repoId,
-                            name: _nString,
+                        // _repoId = list.length + 1;
+                        int id = await DatabaseHelper().insertRepo(RepoModel(
+                            // id: _repoId,
+                            name: _controllerName.text,
                             mnTime: DateTime.now().toString()));
-
+                        _repoId = id;
                         MyTime.setRepoId(_repoId);
                         setState(() {
                           isSync = true;
@@ -479,7 +479,7 @@ class _TimeOutState extends State<TimeOut> {
       EasyLoading.dismiss();
       if (hexArray[3] == 'f0') {
         Analytical analytical = Analytical(value);
-        _time = analytical.dataTime();
+        // _time = analytical.dataTime();
         String pitch = analytical.getPitch();
         setState(() {
           _pitch = pitch;
@@ -490,31 +490,31 @@ class _TimeOutState extends State<TimeOut> {
 
   //定点测量
   Future<void> savePitch() async {
-    // todo 应获取数据库长度
-    int id = employeeDataSource.rows.length + 1;
     // 最后一条数据
     List<DataListModel> endLen = await DatabaseHelper()
         .getDataListByRepoId(_repoId); // employees[employees.length - 1];
-    DataListModel rows = DataListModel(
-      id: id,
-      pitch: double.parse(_pitch),
-      time: _time,
+
+    String _times = Analytical([]).formatTime(_currentTime);
+    int id = await DatabaseHelper().insertDataList(DataListModel(
+      time: _times,
       // 长度累加
       length: (endLen.length + 1) * int.parse(_length),
-    );
-    employees.add(rows);
-    await DatabaseHelper().insertDataList(DataListModel(
-      id: id,
-      pitch: double.parse(_pitch),
-      time: _time,
-      // 长度累加
-      length:(endLen.length + 1) * int.parse(_length),
       repoId: _repoId,
       designPitch: double.parse(_designPitch),
       designHeading: double.parse(_designHeading),
     ));
+    DataListModel rows = DataListModel(
+      id: id,
+      // pitch: null,
+      time: _times,
+      // 长度累加
+      length: (endLen.length + 1) * int.parse(_length),
+    );
 
-    employeeDataSource = EmployeeDataSource(employeeData: employees);
+    setState(() {
+      employees.add(rows);
+      employeeDataSource = EmployeeDataSource(employeeData: employees);
+    });
     // 在数据更新后滚动到底部
     Future.delayed(Duration(milliseconds: 100), () {
       scrollController.scrollToRow(employeeDataSource.rows.length - 1);
@@ -656,6 +656,7 @@ class _TimeOutState extends State<TimeOut> {
                                           : const Color.fromRGBO(
                                               147, 153, 177, 1))),
                               onPressed: () {
+                                // savePitch();
                                 if (isFixed) {
                                   savePitch();
                                 }
@@ -760,10 +761,13 @@ class EmployeeDataSource extends DataGridSource {
   /// Creates the employee data source class with required details.
   EmployeeDataSource({required List<DataListModel> employeeData}) {
     _employeeData = employeeData
-        .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<num>(columnName: 'length', value: e.length),
-              DataGridCell<String>(columnName: 'time', value: e.time),
+        .asMap() // 将列表转换为 Map，key 为 index
+        .entries // 获取键值对 (index, element)
+        .map<DataGridRow>((entry) => DataGridRow(cells: [
+              DataGridCell<int>(columnName: 'id', value: entry.key + 1),
+              DataGridCell<num>(
+                  columnName: 'length', value: entry.value.length),
+              DataGridCell<String>(columnName: 'time', value: entry.value.time),
             ]))
         .toList();
   }

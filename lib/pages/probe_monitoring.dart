@@ -50,6 +50,7 @@ class _ProbeState extends State<Probe> {
     });
   }
 
+
   // 读取指定服务及特征值
   void discoverServices(BluetoothDevice? onConnectDevice) async {
     if (onConnectDevice == null) {
@@ -163,10 +164,7 @@ class _ProbeState extends State<Probe> {
 
   @override
   Widget build(BuildContext context) {
-    if (!bluetooth.isConnected) {
-      Navigator.of(context).pop();
-      SmartDialog.showToast('请连接蓝牙');
-    }
+
     discoverServices(bluetooth.currentDevice);
     return Scaffold(
       appBar: const CustomAppBar('探管检测'),

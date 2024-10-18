@@ -7,6 +7,7 @@ import 'package:bluetooth_mini/db/database_helper.dart';
 // 测点数据
 class RepoOriginal extends StatefulWidget {
   final RepoModel row;
+
   const RepoOriginal({Key? key, required this.row}) : super(key: key);
 
   @override
@@ -26,7 +27,7 @@ class _RepoOriginalState extends State<RepoOriginal> {
 
   Future<void> GetList() async {
     List<DataListModel> list =
-        await DatabaseHelper().getDataListByRepoId(widget.row.id);
+        await DatabaseHelper().getDataListByRepoId(widget.row.id!);
 
     setState(() {
       employees = list;
@@ -83,7 +84,6 @@ class _RepoOriginalState extends State<RepoOriginal> {
                           '俯仰角（°）',
                           overflow: TextOverflow.ellipsis,
                         ))),
-
                 GridColumn(
                     columnName: 'heading',
                     label: Container(
@@ -129,17 +129,20 @@ class EmployeeDataSource extends DataGridSource {
   /// Creates the employee data source class with required details.
   EmployeeDataSource({required List<DataListModel> employeeData}) {
     _employeeData = employeeData
+        .asMap() // 将列表转换为 Map，key 为 index
+        .entries // 获取键值对 (index, element)
         .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<String>(columnName: 'time', value: e.time),
-      DataGridCell<num>(columnName: 'length', value: e.length),
-
-              DataGridCell<num>(columnName: 'pitch', value: e.pitch),
-              DataGridCell<num>(columnName: 'heading', value: e.heading),
+              DataGridCell<int>(columnName: 'id', value: e.key + 1),
+              DataGridCell<String>(columnName: 'time', value: e.value.time),
+              DataGridCell<num>(columnName: 'length', value: e.value.length),
+              DataGridCell<Object>(
+                  columnName: 'pitch', value: e.value.pitch ?? ''),
+              DataGridCell<Object>(
+                  columnName: 'heading', value: e.value.heading ?? ""),
               DataGridCell<num>(
-                  columnName: 'designPitch', value: e.designPitch),
+                  columnName: 'designPitch', value: e.value.designPitch),
               DataGridCell<num>(
-                  columnName: 'designHeading', value: e.designHeading),
+                  columnName: 'designHeading', value: e.value.designHeading),
             ]))
         .toList();
   }

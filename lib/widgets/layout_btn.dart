@@ -14,7 +14,6 @@ class _LayoutBtnState extends State<LayoutBtn> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _loadUserName();
   }

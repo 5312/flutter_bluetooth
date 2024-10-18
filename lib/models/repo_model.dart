@@ -5,15 +5,14 @@ class RepoModel {
   /// Creates the employee class with required details.
 
   /// Id of an employee.
-  final int id;
+  final int? id;
 
   final String name;
 
   final String mnTime;
-  // TODO
-  // 增加钻长钻孔等信息
 
-  RepoModel({required this.id, required this.name, required this.mnTime});
+
+  RepoModel({this.id, required this.name, required this.mnTime});
 
   Map<String, dynamic> toJson() {
     return {
@@ -71,7 +70,7 @@ class RepoDataSource extends DataGridSource {
                     ),
                     TextButton(
                       child: const Text('删除'),
-                      onPressed: () => onDelete(e.id),
+                      onPressed: () => onDelete(e.id!),
                     ),
                   ],
                 ),
