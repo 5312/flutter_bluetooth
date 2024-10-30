@@ -97,6 +97,7 @@ class _TimeOutState extends State<TimeOut> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (bluetooth.currentDevice == null) {
+        //
         Navigator.of(context).pop();
         SmartDialog.showToast('请连接蓝牙');
       } else {
@@ -124,35 +125,37 @@ class _TimeOutState extends State<TimeOut> {
               child: DialogKeyboard(
                 contentBody: ConstrainedBox(
                     constraints: const BoxConstraints(
-                      minWidth: 550, // 设置最大宽度
+                      minWidth: 550, // 设置最小宽度
                     ),
-                    child: Column(
-                      children: <Widget>[
-                        _buildRowMineSelect(state),
-                        _buildRowWorkSelect(state),
-                        _buildRowFactorySelect(state),
-                        _buildRowDrillSelect(state),
-                        MyForm(
-                          label: '设计俯仰角',
-                          suffixIcon: '',
-                          controller: _controllerPitch,
-                        ),
-                        MyForm(
-                          label: '设计方位角',
-                          suffixIcon: '',
-                          controller: _controllerHeading,
-                        ),
-                        MyForm(
-                          label: '钻杆长度',
-                          suffixIcon: 'm',
-                          controller: _controllerLen,
-                        ),
-                        MyForm(
-                          label: '检测名称',
-                          suffixIcon: '',
-                          controller: _controllerName,
-                        ),
-                      ],
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          _buildRowMineSelect(state),
+                          _buildRowWorkSelect(state),
+                          _buildRowFactorySelect(state),
+                          _buildRowDrillSelect(state),
+                          MyForm(
+                            label: '设计俯仰角',
+                            suffixIcon: '',
+                            controller: _controllerPitch,
+                          ),
+                          MyForm(
+                            label: '设计方位角',
+                            suffixIcon: '',
+                            controller: _controllerHeading,
+                          ),
+                          MyForm(
+                            label: '钻杆长度',
+                            suffixIcon: 'm',
+                            controller: _controllerLen,
+                          ),
+                          MyForm(
+                            label: '检测名称',
+                            suffixIcon: '',
+                            controller: _controllerName,
+                          ),
+                        ],
+                      ),
                     )),
                 title: const Text(
                   '添加矿区',
@@ -177,11 +180,10 @@ class _TimeOutState extends State<TimeOut> {
                       if (_controllerName.text != '' &&
                           _controllerPitch.text != '' &&
                           _controllerHeading.text != '') {
-                        List<RepoModel> list =
-                            await DatabaseHelper().getRepos();
-                        // _repoId = list.length + 1;
+                        print('长度');
+                        print(int.tryParse(_controllerLen.text));
                         int id = await DatabaseHelper().insertRepo(RepoModel(
-                            // id: _repoId,
+                            len: int.tryParse(_controllerLen.text)!,
                             name: _controllerName.text,
                             mnTime: DateTime.now().toString()));
                         _repoId = id;
@@ -383,7 +385,7 @@ class _TimeOutState extends State<TimeOut> {
         const SizedBox(
           width: 100,
           child: Text(
-            '钻厂:',
+            '钻孔:',
             style: TextStyle(fontSize: 12),
           ),
         ),
@@ -461,7 +463,7 @@ class _TimeOutState extends State<TimeOut> {
 
     // 写入数据到特征码 启动采集
     await c.write([0x68, 0x05, 0x00, 0x71, 0x01, 0x77], withoutResponse: false);
-
+    print('定时同步');
     EasyLoading.show(status: '正在同步中...');
     // 监听特征码的通知
     c.setNotifyValue(true);
@@ -497,8 +499,8 @@ class _TimeOutState extends State<TimeOut> {
     String _times = Analytical([]).formatTime(_currentTime);
     int id = await DatabaseHelper().insertDataList(DataListModel(
       time: _times,
-      // 长度累加
-      length: (endLen.length + 1) * int.parse(_length),
+      // 深度等于长度的累加
+      depth: (endLen.length + 1) * int.parse(_length),
       repoId: _repoId,
       designPitch: double.parse(_designPitch),
       designHeading: double.parse(_designHeading),
@@ -508,7 +510,7 @@ class _TimeOutState extends State<TimeOut> {
       // pitch: null,
       time: _times,
       // 长度累加
-      length: (endLen.length + 1) * int.parse(_length),
+      depth: (endLen.length + 1) * int.parse(_length),
     );
 
     setState(() {
@@ -523,6 +525,7 @@ class _TimeOutState extends State<TimeOut> {
 
   //删除末尾数据
   void delePop() {
+    print(employees.last.id);
     // 覆盖
     DatabaseHelper().deleteDataList(employees.last.id ?? 0);
     employees.removeLast();
@@ -582,158 +585,160 @@ class _TimeOutState extends State<TimeOut> {
           }
           showDeleteConfirmDialog1(context);
         },
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 10, bottom: 10, left: 30, right: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                // 可选：根据需要调整按钮间的间距
-                children: [
-                  Text('矿区：$_mineString'),
-                  Text('工作圈:$_workString'),
-                  Text('钻厂：$_factoryString'),
-                  Text('钻孔：$_drillingString'),
-                  Text('检测名称：$_nString'),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            Expanded(
-                flex: 1,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // 确保高度适应内容
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                    top: 10, bottom: 10, left: 30, right: 30),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // 可选：根据需要调整按钮间的间距
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: SizedBox(
-                        width: 200,
-                        child: Column(
-                          children: [
-                            // Text('俯仰角：$_pitch'),
-                            Text(
-                                '累计时间：${Analytical([]).formatTime(_currentTime)}'),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isSync
-                                    ? Colors.blueAccent
-                                    : const Color.fromRGBO(242, 243, 247, 1),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10)), // 设置圆角为10
-                                ),
+                    Text('矿区：$_mineString'),
+                    Text('工作圈:$_workString'),
+                    Text('钻厂：$_factoryString'),
+                    Text('钻孔：$_drillingString'),
+                    Text('检测名称：$_nString'),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: SizedBox(
+                      width: 200,
+                      child: Column(
+                        children: [
+                          // Text('俯仰角：$_pitch'),
+                          Text(
+                              '累计时间：${Analytical([]).formatTime(_currentTime)}'),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isSync
+                                  ? Colors.blueAccent
+                                  : const Color.fromRGBO(242, 243, 247, 1),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)), // 设置圆角为10
                               ),
-                              child: Text('定时同步',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: isSync
-                                          ? Colors.white
-                                          : const Color.fromRGBO(
-                                              147, 153, 177, 1))),
-                              onPressed: () async {
-                                if (isSync) {
-                                  discoverServices(bluetooth.currentDevice);
-                                }
-                              },
                             ),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isFixed
-                                    ? Colors.blueAccent
-                                    : const Color.fromRGBO(242, 243, 247, 1),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10)), // 设置圆角为10
-                                ),
+                            child: Text('定时同步',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: isSync
+                                        ? Colors.white
+                                        : const Color.fromRGBO(
+                                            147, 153, 177, 1))),
+                            onPressed: () async {
+                              if (isSync) {
+                                discoverServices(bluetooth.currentDevice);
+                              }
+                            },
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isFixed
+                                  ? Colors.blueAccent
+                                  : const Color.fromRGBO(242, 243, 247, 1),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)), // 设置圆角为10
                               ),
-                              child: Text('定点测量',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: isFixed
-                                          ? Colors.white
-                                          : const Color.fromRGBO(
-                                              147, 153, 177, 1))),
-                              onPressed: () {
-                                // savePitch();
-                                if (isFixed) {
-                                  savePitch();
-                                }
-                              },
                             ),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isPop
-                                    ? Colors.blueAccent
-                                    : const Color.fromRGBO(242, 243, 247, 1),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10)), // 设置圆角为10
-                                ),
+                            child: Text('定点测量',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: isFixed
+                                        ? Colors.white
+                                        : const Color.fromRGBO(
+                                            147, 153, 177, 1))),
+                            onPressed: () {
+                              // savePitch();
+                              if (isFixed) {
+                                savePitch();
+                              }
+                            },
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isPop
+                                  ? Colors.blueAccent
+                                  : const Color.fromRGBO(242, 243, 247, 1),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)), // 设置圆角为10
                               ),
-                              child: Text('删除末尾数据',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: isPop
-                                          ? Colors.white
-                                          : const Color.fromRGBO(
-                                              147, 153, 177, 1))),
-                              onPressed: () {
-                                //删除末尾数据
-                                if (isPop) {
-                                  delePop();
-                                }
-                              },
-                            )
-                          ],
-                        ),
+                            ),
+                            child: Text('删除末尾数据',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: isPop
+                                        ? Colors.white
+                                        : const Color.fromRGBO(
+                                            147, 153, 177, 1))),
+                            onPressed: () {
+                              //删除末尾数据
+                              if (isPop) {
+                                delePop();
+                              }
+                            },
+                          )
+                        ],
                       ),
                     ),
-                    Expanded(
-                        flex: 1,
-                        child: SfDataGrid(
-                          headerRowHeight: 40,
-                          source: employeeDataSource,
-                          controller: scrollController,
-                          gridLinesVisibility: GridLinesVisibility.none,
-                          columnWidthMode: ColumnWidthMode.fill,
-                          columns: <GridColumn>[
-                            GridColumn(
-                                columnName: 'id',
-                                label: Container(
-                                  padding: const EdgeInsets.all(0.0),
-                                  alignment: Alignment.center,
-                                  color: const Color.fromRGBO(234, 236, 255, 1),
-                                  child: const Text(
-                                    '序号',
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                )),
-                            GridColumn(
-                                columnName: 'length',
-                                label: Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    alignment: Alignment.center,
-                                    color:
-                                        const Color.fromRGBO(234, 236, 255, 1),
-                                    child: const Text('钻杆长度'))),
-                            GridColumn(
-                                columnName: 'time',
-                                label: Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    alignment: Alignment.center,
-                                    color:
-                                        const Color.fromRGBO(234, 236, 255, 1),
-                                    child: const Text(
-                                      '时间',
-                                      overflow: TextOverflow.ellipsis,
-                                    ))),
-                          ],
-                        ))
-                  ],
-                ))
-          ],
+                  ),
+                  Expanded(
+                    child: SfDataGrid(
+                      headerRowHeight: 40,
+                      source: employeeDataSource,
+                      controller: scrollController,
+                      gridLinesVisibility: GridLinesVisibility.none,
+                      columnWidthMode: ColumnWidthMode.fill,
+                      columns: <GridColumn>[
+                        GridColumn(
+                            columnName: 'id',
+                            label: Container(
+                              padding: const EdgeInsets.all(0.0),
+                              alignment: Alignment.center,
+                              color: const Color.fromRGBO(234, 236, 255, 1),
+                              child: const Text(
+                                '序号',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            )),
+                        GridColumn(
+                            columnName: 'depth',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                color: const Color.fromRGBO(234, 236, 255, 1),
+                                child: const Text('深度'))),
+                        GridColumn(
+                            columnName: 'time',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                color: const Color.fromRGBO(234, 236, 255, 1),
+                                child: const Text(
+                                  '时间',
+                                  overflow: TextOverflow.ellipsis,
+                                ))),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 6,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -765,8 +770,7 @@ class EmployeeDataSource extends DataGridSource {
         .entries // 获取键值对 (index, element)
         .map<DataGridRow>((entry) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: entry.key + 1),
-              DataGridCell<num>(
-                  columnName: 'length', value: entry.value.length),
+              DataGridCell<num>(columnName: 'depth', value: entry.value.depth),
               DataGridCell<String>(columnName: 'time', value: entry.value.time),
             ]))
         .toList();

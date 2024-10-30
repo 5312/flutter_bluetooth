@@ -65,13 +65,13 @@ class _RepoOriginalState extends State<RepoOriginal> {
                         alignment: Alignment.center,
                         child: const Text('时间'))),
                 GridColumn(
-                    columnName: 'length',
+                    columnName: 'depth',
                     label: Container(
                         padding: const EdgeInsets.all(8.0),
                         alignment: Alignment.center,
                         color: const Color.fromRGBO(234, 236, 255, 1),
                         child: const Text(
-                          '钻杆长度',
+                          '深度',
                           overflow: TextOverflow.ellipsis,
                         ))),
                 GridColumn(
@@ -134,7 +134,7 @@ class EmployeeDataSource extends DataGridSource {
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.key + 1),
               DataGridCell<String>(columnName: 'time', value: e.value.time),
-              DataGridCell<num>(columnName: 'length', value: e.value.length),
+              DataGridCell<num>(columnName: 'depth', value: e.value.depth),
               DataGridCell<Object>(
                   columnName: 'pitch', value: e.value.pitch ?? ''),
               DataGridCell<Object>(

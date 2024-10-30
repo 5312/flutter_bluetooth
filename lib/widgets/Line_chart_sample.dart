@@ -9,7 +9,7 @@ class LineChartSample9 extends StatefulWidget {
   final List<FlSpot> data;
   final List<FlSpot> data2;
 
-  const LineChartSample9({
+  const  LineChartSample9({
     Key? key,
     required this.data,
     required this.data2,

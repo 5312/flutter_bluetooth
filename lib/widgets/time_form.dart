@@ -39,6 +39,9 @@ class _MyFormState extends State<MyForm> {
               Expanded(
                 child: TextFormField(
                   controller: widget.controller,
+                  keyboardType: widget.label == '检测名称'
+                      ? TextInputType.text
+                      : TextInputType.number, // 限制输入为数字
                   decoration: InputDecoration(
                     hintText: '请输入${widget.label}',
                     suffixIcon: Padding(
@@ -58,8 +61,13 @@ class _MyFormState extends State<MyForm> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return '请输入一些内容';
+                    } else if (widget.label == '钻杆长度') {
+                      if (int.tryParse(value) == null) {
+                        return '请输入有效的数字';
+                      }
+                    } else {
+                      return null;
                     }
-                    return null;
                   },
                 ),
               ),

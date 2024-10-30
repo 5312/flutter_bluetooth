@@ -6,8 +6,8 @@ class DataListModel {
   int? id;
   String? time;
 
-  // 钻杆长度
-  num length;
+  // 深度
+  num depth;
 
   // （俯仰角）：描述物体绕横轴的旋转。可以理解为物体的“前后倾斜”。
   num? pitch;
@@ -28,7 +28,7 @@ class DataListModel {
 
   DataListModel({
     this.id,
-    required this.length,
+    required this.depth,
     this.time,
     this.pitch,
     this.roll,
@@ -42,7 +42,7 @@ class DataListModel {
     return {
       'id': id,
       'time': time,
-      'length': length,
+      'depth': depth,
       'pitch': pitch,
       'roll': roll,
       'heading': heading,
@@ -56,7 +56,7 @@ class DataListModel {
     return DataListModel(
       id: json['id'],
       time: json['time'],
-      length: json['length'],
+      depth: json['depth'],
       pitch: json['pitch'],
       roll: json['roll'],
       heading: json['heading'],

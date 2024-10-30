@@ -10,7 +10,7 @@ extension DataListModelExtensions on DataListModel {
   // 上下偏差设计曲线计算
   String calculateDesignPitch() {
     // num length, num pitchAngle
-    num l = length;
+    num l = 0; //length;
     num A = designPitch!;
     // 计算 X 和 Y
     double x = l * cos(A);
@@ -21,7 +21,7 @@ extension DataListModelExtensions on DataListModel {
   // 计算设计曲线上下偏差x
   double calculateDesignPitchX() {
     // num length, num pitchAngle
-    num l = length;
+    num l = 0; //length;
     num A = designPitch!;
     // 计算 X 和 Y
     double x = l * cos(A);
@@ -31,23 +31,23 @@ extension DataListModelExtensions on DataListModel {
   // 计算设计曲线上下偏差y
   double calculateDesignPitchY() {
     // num length, num pitchAngle
-    num l = length;
+    num l = 0; //length;
     num A = designPitch!;
     // 计算 X 和 Y
     double y = l * sin(A);
     return y;
   }
 
-  // 实际曲线
-  // Y=L x sin(（A1+A2）/2）, X=L x cos（（A1+A2）/2））
-  //A1=实测俯仰角1（第一个点为设计角度），A2=实测俯仰角2
-  // double actualX() {
-  //   // num length, num pitchAngle
-  //   num l = length;
-  //   num A1 = designPitch!;
-  //   num A2 = actualPitch!;
-  //   // 计算 X 和 Y
-  //   double x = l * cos((A1 + A2) / 2);
-  //   return x;
-  // }
+// 实际曲线
+// Y=L x sin(（A1+A2）/2）, X=L x cos（（A1+A2）/2））
+//A1=实测俯仰角1（第一个点为设计角度），A2=实测俯仰角2
+// double actualX() {
+//   // num length, num pitchAngle
+//   num l = length;
+//   num A1 = designPitch!;
+//   num A2 = actualPitch!;
+//   // 计算 X 和 Y
+//   double x = l * cos((A1 + A2) / 2);
+//   return x;
+// }
 }

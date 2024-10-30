@@ -30,10 +30,10 @@ class DatabaseHelper {
       version: 1,
       onCreate: (db, version) async {
         await db.execute(
-          "CREATE TABLE repos(id INTEGER PRIMARY KEY, name TEXT, mnTime TEXT)",
+          "CREATE TABLE repos(id INTEGER PRIMARY KEY, name TEXT, mnTime TEXT,len INTEGER)",
         );
         await db.execute(
-          "CREATE TABLE data(id INTEGER PRIMARY KEY, time TEXT, pitch REAL, roll REAL, heading REAL, length INTEGER, repoId INTEGER, designPitch REAL, designHeading REAL)",
+          "CREATE TABLE data(id INTEGER PRIMARY KEY, time TEXT, pitch REAL, roll REAL, heading REAL, depth INTEGER, repoId INTEGER, designPitch REAL, designHeading REAL)",
         );
       },
     );
@@ -113,7 +113,14 @@ class DatabaseHelper {
       return RepoModel.fromJson(maps[i]);
     });
   }
-
+  // repos 详情
+  Future<List<RepoModel>> getReposForId(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('repos',where:'id = ?',whereArgs: [id]);
+    return List.generate(maps.length, (i) {
+      return RepoModel.fromJson(maps[i]);
+    });
+  }
   Future<void> updateRepo(RepoModel repo) async {
     final db = await database;
     await db.update(
@@ -129,6 +136,13 @@ class DatabaseHelper {
     await db.delete(
       'repos',
       where: "id = ?",
+      whereArgs: [id],
+    );
+    await db.delete(
+      'data',
+      // Use a `where` clause to delete a specific dog.
+      where: 'repoId = ?',
+      // Pass the Dog's id as a whereArg to prevent SQL injection.
       whereArgs: [id],
     );
   }

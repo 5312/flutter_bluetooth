@@ -153,7 +153,7 @@ class _ProbeState extends State<Probe> {
     DataListModel rows = DataListModel(
         id: id,
         pitch: null,
-        length: 0,
+        depth: 0,
         roll: double.parse(_pitch),
         heading: double.parse(_heading),
         repoId: null);
@@ -258,7 +258,7 @@ class EmployeeDataSource extends DataGridSource {
     _employeeData = employeeData
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<Object>(columnName: 'roll', value: e.roll),
+              DataGridCell<Object>(columnName: 'pitch', value: e.pitch),
               DataGridCell<Object>(columnName: 'heading', value: e.heading),
             ]))
         .toList();

@@ -5,6 +5,7 @@ import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/db/my_setting.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:bluetooth_mini/db/interfaceDb.dart';
+import 'dart:math';
 import 'dart:convert';
 
 class Setting extends StatefulWidget {
@@ -196,6 +197,31 @@ class _SettingState extends State<Setting> {
     );
   }
 
+  Future<bool?> showDeleteConfirmDialog1(callback) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("提示"),
+          content: Text("您确定要删除当前文件吗?"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("取消"),
+              onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+            ),
+            TextButton(
+              child: Text("删除"),
+              onPressed: () async {
+                callback();
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -266,8 +292,9 @@ class _SettingState extends State<Setting> {
                         ),
                         onPressed: () {
                           setState(() {
-                            _miningArea.add(MyMine(
-                                _miningArea.length + 1, _controller.text));
+                            var random = Random();
+                            int id = random.nextInt(100);
+                            _miningArea.add(MyMine(id, _controller.text));
                             MySetting.setMine(_miningArea);
                           });
                           Navigator.of(context).pop();
@@ -275,12 +302,14 @@ class _SettingState extends State<Setting> {
                       ),
                     ],
                     onDele: (int itemId) {
-                      setState(() {
-                        selectedItem1 = null;
-                        _miningArea
-                            .removeWhere((element) => element.id == itemId);
-                        MySetting.setMine(_miningArea);
-                      });
+                      showDeleteConfirmDialog1(() => {
+                            setState(() {
+                              selectedItem1 = null;
+                              _miningArea.removeWhere(
+                                  (element) => element.id == itemId);
+                              MySetting.setMine(_miningArea);
+                            })
+                          });
                     },
                   ),
                 ),
@@ -322,8 +351,10 @@ class _SettingState extends State<Setting> {
                         onPressed: () {
                           setState(() {
                             if (selectedItem1 != null) {
-                              _work.add(MyWork(_work.length + 1, selectedItem1!,
-                                  _controller_work.text));
+                              var random = Random();
+                              int id = random.nextInt(100);
+                              _work.add(MyWork(
+                                  id, selectedItem1!, _controller_work.text));
                               MySetting.setWork(_work);
                             }
                           });
@@ -336,11 +367,14 @@ class _SettingState extends State<Setting> {
                       ),
                     ],
                     onDele: (int itemId) {
-                      setState(() {
-                        selectedItem2 = null;
-                        _work.removeWhere((element) => element.id == itemId);
-                        MySetting.setWork(_work);
-                      });
+                      showDeleteConfirmDialog1(() => {
+                            setState(() {
+                              selectedItem2 = null;
+                              _work.removeWhere(
+                                  (element) => element.id == itemId);
+                              MySetting.setWork(_work);
+                            })
+                          });
                     },
                     contentBody: ConstrainedBox(
                       constraints: const BoxConstraints(
@@ -348,7 +382,7 @@ class _SettingState extends State<Setting> {
                       ),
                       child: Column(
                         children: [
-                          _buildRowWorkSelect(),
+                          // _buildRowWorkSelect(),
                           Row(
                             children: [
                               const SizedBox(
@@ -409,8 +443,8 @@ class _SettingState extends State<Setting> {
                       ),
                       child: Column(
                         children: <Widget>[
-                          _buildRowWorkSelect(),
-                          _buildRowFactorySelect(),
+                          // _buildRowWorkSelect(),
+                          // _buildRowFactorySelect(),
                           Row(
                             children: [
                               const Text(
@@ -438,8 +472,10 @@ class _SettingState extends State<Setting> {
                         onPressed: () {
                           setState(() {
                             if (selectedItem2 != null) {
-                              _factory.add(MyFactory(_factory.length + 1,
-                                  selectedItem2!, _controller_factory.text));
+                              var random = Random();
+                              int id = random.nextInt(100);
+                              _factory.add(MyFactory(id, selectedItem2!,
+                                  _controller_factory.text));
                               MySetting.setFactory(_factory);
                             }
                           });
@@ -452,11 +488,14 @@ class _SettingState extends State<Setting> {
                       ),
                     ],
                     onDele: (int itemId) {
-                      setState(() {
-                        selectedItem3 = null;
-                        _factory.removeWhere((element) => element.id == itemId);
-                        MySetting.setFactory(_factory);
-                      });
+                      showDeleteConfirmDialog1(() => {
+                            setState(() {
+                              selectedItem3 = null;
+                              _factory.removeWhere(
+                                  (element) => element.id == itemId);
+                              MySetting.setFactory(_factory);
+                            })
+                          });
                     },
                   ),
                 ),
@@ -484,9 +523,9 @@ class _SettingState extends State<Setting> {
                       ),
                       child: Column(
                         children: <Widget>[
-                          _buildRowWorkSelect(),
-                          _buildRowFactorySelect(),
-                          _buildRowDrillSelect(),
+                          // _buildRowWorkSelect(),
+                          // _buildRowFactorySelect(),
+                          // _buildRowDrillSelect(),
                           Row(
                             children: [
                               const Text(
@@ -514,8 +553,10 @@ class _SettingState extends State<Setting> {
                         onPressed: () {
                           setState(() {
                             if (selectedItem3 != null) {
-                              _drilling.add(MyDrilling(_drilling.length + 1,
-                                  selectedItem3!, _controller_drilling.text));
+                              var random = Random();
+                              int id = random.nextInt(100);
+                              _drilling.add(MyDrilling(id, selectedItem3!,
+                                  _controller_drilling.text));
                               MySetting.setDrilling(_drilling);
                             }
                           });
@@ -528,11 +569,13 @@ class _SettingState extends State<Setting> {
                       ),
                     ],
                     onDele: (int itemId) {
-                      setState(() {
-                        _drilling
-                            .removeWhere((element) => element.id == itemId);
-                        MySetting.setDrilling(_drilling);
-                      });
+                      showDeleteConfirmDialog1(() => {
+                            setState(() {
+                              _drilling.removeWhere(
+                                  (element) => element.id == itemId);
+                              MySetting.setDrilling(_drilling);
+                            })
+                          });
                     },
                   ),
                 ),

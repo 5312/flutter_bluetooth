@@ -12,10 +12,6 @@ import 'package:bluetooth_mini/db/database_helper.dart';
 import 'dart:async';
 import '../utils/analytical.dart';
 
-// import 'package:bluetooth_mini/models/repo_model.dart';
-// import 'package:bluetooth_mini/models/data_model.dart';
-// import 'package:bluetooth_mini/utils/hex.dart';
-
 class DataTransmission extends StatefulWidget {
   const DataTransmission({Key? key}) : super(key: key);
 
@@ -127,7 +123,7 @@ class _DataTransmissionState extends State<DataTransmission> {
     await c.setNotifyValue(true);
     _lastValueSubscription = c.onValueReceived.listen((value) {
       EasyLoading.dismiss();
-
+      print('返回');
       _backList.addAll(value);
       // c.setNotifyValue(false);
     });
@@ -155,6 +151,7 @@ class _DataTransmissionState extends State<DataTransmission> {
           if (e.time == analytical.dataTime()) {
             e.roll = double.parse(analytical.getRoll());
             e.heading = double.parse(analytical.getHeading());
+            e.pitch = double.parse(analytical.getPitch());
             return e;
           }
           return e;
@@ -170,25 +167,7 @@ class _DataTransmissionState extends State<DataTransmission> {
   @override
   void dispose() {
     _lastValueSubscription?.cancel();
-    if (targetCharacteristic != null) {
-      // 停止采集
-      targetCharacteristic!.write([
-        0x68,
-        0x0C,
-        0x00,
-        0x73,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x81
-      ], withoutResponse: false);
-      targetCharacteristic!.setNotifyValue(false);
-    }
+
     targetCharacteristic = null;
     _lastValueSubscription = null;
     super.dispose();
@@ -329,13 +308,13 @@ class _DataTransmissionState extends State<DataTransmission> {
                                     overflow: TextOverflow.ellipsis,
                                   ))),
                           GridColumn(
-                              columnName: 'length',
+                              columnName: 'depth',
                               label: Container(
                                   padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.center,
                                   color: const Color.fromRGBO(234, 236, 255, 1),
                                   child: const Text(
-                                    '钻杆长度',
+                                    '深度',
                                     overflow: TextOverflow.ellipsis,
                                   ))),
                           GridColumn(
@@ -387,7 +366,7 @@ class EmployeeDataSourceData extends DataGridSource {
               DataGridCell<int>(columnName: 'id', value: entry.key + 1),
               DataGridCell<String>(columnName: 'time', value: entry.value.time),
               DataGridCell<Object>(
-                  columnName: 'length', value: entry.value.length),
+                  columnName: 'depth', value: entry.value.depth),
               DataGridCell<Object>(
                   columnName: 'pitch', value: entry.value.pitch ?? ''),
               DataGridCell<Object>(

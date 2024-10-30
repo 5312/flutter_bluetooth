@@ -11,14 +11,17 @@ class RepoModel {
 
   final String mnTime;
 
+  final int len;
 
-  RepoModel({this.id, required this.name, required this.mnTime});
+  RepoModel(
+      {this.id, required this.name, required this.mnTime, required this.len});
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
       'mnTime': mnTime,
+      'len': len,
     };
   }
 
@@ -27,6 +30,7 @@ class RepoModel {
       id: json['id'],
       name: json['name'],
       mnTime: json['mnTime'],
+      len: json['len'],
     );
   }
 }
