@@ -63,8 +63,8 @@ class _RepoDetailState extends State<RepoDetail> {
             roll: 0,
             heading: list[0].heading!,
             repoId: 0,
-            designPitch: 0,
-            designHeading: 0));
+            designPitch: list[0].designPitch,
+            designHeading: list[0].designHeading));
 
     setState(() {
       employees = list;
@@ -79,21 +79,27 @@ class _RepoDetailState extends State<RepoDetail> {
     });
   }
 
-  final  d = (num s) => Decimal.parse(s.toString());
-  final  dn = (String s) => Decimal.parse(s);
+  final d = (num s) => Decimal.parse(s.toString());
+  final dn = (String s) => Decimal.parse(s);
   final df = (num d) => num.parse(d.toStringAsFixed(4));
+  final df3 = (num d) => num.parse(d.toStringAsFixed(3));
+
   // 计算设计上下偏差曲线
   void calculateDesignCurve(List<DataListModel> list) {
     List<Map<String, num>> designCurve = [];
+    num preY = 0;
     for (var i = 0; i < list.length; i++) {
       var data = list[i];
       num L = i == 0 ? 0 : drill_pipe_length; // 6;
-      if (data.designPitch != null) {
-        // 计算X和Y坐标
-        num x = data.depth;
-        num y = L * sin(data.designPitch! * pi / 180);
-        designCurve.add({'X': x, 'Y': y});
-      }
+      num A = data.designPitch!; // 设计俯仰角
+      // 计算X和Y坐标
+      num x = data.depth;
+      Decimal nowY = d(L) * d(sin(A * pi / 180));
+      num dey = df(nowY.toDouble());
+      num y = dey + preY;
+
+      designCurve.add({'X': x, 'Y': y});
+      preY = y;
     }
     design = convertToFlSpot(designCurve);
   }
@@ -109,7 +115,8 @@ class _RepoDetailState extends State<RepoDetail> {
       num L = i == 0 ? 0 : drill_pipe_length; // 6;//data.length;
 
       num A1 = data.pitch ?? 0;
-      num A2 = (d(A1) + d(previousPitch)).toDouble(); // 当前 pitch 加上上一个数据点的 pitch
+      num A2 =
+          (d(A1) + d(previousPitch)).toDouble(); // 当前 pitch 加上上一个数据点的 pitch
 
       num X = data.depth;
       /////
@@ -145,36 +152,67 @@ class _RepoDetailState extends State<RepoDetail> {
 
   // 计算实际左右偏差
   void calculateActualCurve2(List<DataListModel> list) {
-    num previousPitch = list[0].pitch!; // 上一个数据点的 pitch
-    num previousHeading =
-        list[0].heading!; // (187.11 * pi / 180); // 上一个数据点的 heading
-    List<Map<String, num>> realCurve = [];
-    num preY = 0;
+    double previousPitch = list[0].designPitch!;
+    double previousHeading = list[0].heading!;
+
+    List<Map<String, double>> realCurve = [];
+    double preY = 0;
 
     for (var i = 0; i < list.length; i++) {
       var data = list[i];
-      // 杆长度
       num L = i == 0 ? 0 : drill_pipe_length;
-      num A1 = (data.pitch ?? 0); // 当前俯仰角
-      num A2 = A1 + previousPitch; // 当前俯仰角加上上一个数据点的俯仰角
-      // print(A2);
-      num B1 = (data.heading ?? 0); // 当前方位角
-      num B2 = B1 + previousHeading; // 当前方位角加上上一个数据点的方位角
+      double A1 = data.pitch ?? 0;
 
-      num B = (data.designHeading ?? 0); // 设计方位角（你可以根据需求调整）
+      // 当前俯仰角
+      Decimal A2 = d(A1) + d(previousPitch);
+      double B1 = data.heading!;
+      double B2 = B1 + previousHeading;
+      double B = data.designHeading!;
 
-      // 实际曲线的 X 和 Y
       num actualX = data.depth;
-      num actualY =
-          -L * cos(((A2) / 2) * pi / 180) * sin(((B2) / 2 - B) * pi / 180) +
-              preY;
 
-      previousPitch = A1; // 更新上一个 pitch
-      previousHeading = B1; // 更新上一个 heading
-      realCurve.add({'X': actualX, 'Y': actualY});
+      // 计算实际曲线的 Y
+      Decimal value1 = d(-L);
+      Decimal value2 = d(cos((A2.toDouble() / 2) * pi / 180));
+      Decimal value3 = d(sin((B2 / 2 - B) * pi / 180));
+
+      // 计算实际偏差
+      Decimal dey = value1 * value2 * value3;
+      double cy = dey.toDouble();
+
+      // 保留三位小数
+      Decimal value4 = d(preY);
+      Decimal ycheng = d(cy) + value4;
+
+      // 转换结果为 double，并保留三位小数
+      double actualY = ycheng.toDouble();
+      actualY = double.parse(actualY.toStringAsFixed(3));
+
+      realCurve.add({'X': actualX.toDouble(), 'Y': actualY});
+
+      // 更新状态
+      previousPitch = A1;
+      previousHeading = B1;
       preY = actualY;
     }
+
     actual2 = convertToFlSpot(realCurve);
+  }
+
+  String truncateToThreeDecimalPlaces(double value) {
+    // 将数字转换为字符串，并找到小数点的位置
+    String valueStr = value.toString();
+    int decimalIndex = valueStr.indexOf('.');
+
+    // 处理小数部分
+    String result;
+    if (decimalIndex != -1 && decimalIndex + 3 < valueStr.length) {
+      // 截取到小数点后三位，不进行四舍五入
+      result = valueStr.substring(0, decimalIndex + 4); // +4 包括小数点后3位
+    } else {
+      result = valueStr; // 没有小数部分或小数位数不足三位
+    }
+    return result;
   }
 
   List<FlSpot> convertToFlSpot(List<Map<String, num>> designCurve) {
@@ -192,11 +230,9 @@ class _RepoDetailState extends State<RepoDetail> {
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
-
-    print('上下');
-    print(actual);
     print('左右');
     print(actual2);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.row.name),
