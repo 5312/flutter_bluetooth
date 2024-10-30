@@ -168,83 +168,102 @@ class _ProbeState extends State<Probe> {
     discoverServices(bluetooth.currentDevice);
     return Scaffold(
       appBar: const CustomAppBar('探管检测'),
-      body: Column(
-        children: [
-          Padding(
-              padding: const EdgeInsets.only(top: 5, bottom: 5, right: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      // 可选：根据需要调整按钮间的间距
-                      children: [
-                        rollText(),
-                        const SizedBox(width: 10),
-                        headingText()
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end, // 可选：根据需要调整按钮间的间距
-                    children: [
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(10)), // 设置圆角为10
-                          ),
+      body:Container(
+        color: const Color.fromRGBO(238, 239, 241, 0.8),
+        child:  Container(
+          color: Colors.white,
+          margin: const EdgeInsets.only(
+            left: 10,
+            bottom: 10,
+            right: 10,
+            top: 10,
+          ),
+          child: Column(
+            children: [
+              Padding(
+                  padding: const EdgeInsets.only(top: 5, bottom: 5, right: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          // 可选：根据需要调整按钮间的间距
+                          children: [
+                            rollText(),
+                            const SizedBox(width: 10),
+                            headingText()
+                          ],
                         ),
-                        onPressed: _addEmployee,
-                        child: const Text('采集',
-                            style:
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end, // 可选：根据需要调整按钮间的间距
+                        children: [
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)), // 设置圆角为10
+                              ),
+                            ),
+                            onPressed: _addEmployee,
+                            child: const Text('采集',
+                                style:
                                 TextStyle(fontSize: 16, color: Colors.white)),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ],
-              )),
-          const SizedBox(
-            height: 16,
+                  )),
+              const SizedBox(
+                height: 16,
+              ),
+              Expanded(
+                  flex: 1,
+                  child: SfDataGrid(
+                    headerRowHeight: 40,
+                    source: _employeeDataSource,
+                    columnWidthMode: ColumnWidthMode.fill,
+                    columns: <GridColumn>[
+                      GridColumn(
+                          columnName: 'id',
+                          label: Container(
+                              padding: const EdgeInsets.all(0),
+                              alignment: Alignment.center,
+                              color: Colors.black12,
+                              // const Color.fromRGBO( 234, 236, 255, 1),
+                              child: const Text(
+                                '序号',
+                              ))),
+                      GridColumn(
+                          columnName: 'pitch',
+                          label: Container(
+                              padding: const EdgeInsets.all(0.0),
+                              alignment: Alignment.center,
+                              color: Colors.black12,
+                              // const Color.fromRGBO( 234, 236, 255, 1),
+                              child: const Text('俯仰角（°）'))),
+                      GridColumn(
+                          columnName: 'heading',
+                          label: Container(
+                              padding: const EdgeInsets.all(0.0),
+                              alignment: Alignment.center,
+                              color: Colors.black12,
+                              // const Color.fromRGBO( 234, 236, 255, 1),
+                              child: const Text(
+                                '方位角/°',
+                                overflow: TextOverflow.ellipsis,
+                              ))),
+                    ],
+                  ))
+            ],
           ),
-          Expanded(
-              flex: 1,
-              child: SfDataGrid(
-                source: _employeeDataSource,
-                columnWidthMode: ColumnWidthMode.fill,
-                columns: <GridColumn>[
-                  GridColumn(
-                      columnName: 'id',
-                      label: Container(
-                          padding: const EdgeInsets.all(16.0),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            '序号',
-                          ))),
-                  GridColumn(
-                      columnName: 'pitch',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text('俯仰角（°）'))),
-                  GridColumn(
-                      columnName: 'heading',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            '方位角/°',
-                            overflow: TextOverflow.ellipsis,
-                          ))),
-                ],
-              ))
-        ],
+        ),
       ),
     );
   }

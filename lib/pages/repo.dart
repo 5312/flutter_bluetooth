@@ -84,60 +84,71 @@ class _RepoState extends State<Repo> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar('数据报表'),
-      body: Column(
-        children: [
-          Expanded(
-              flex: 1,
-              child: SfDataGrid(
-                source: employeeDataSource,
-                headerRowHeight:40,
-                columnWidthMode: ColumnWidthMode.fill,
-                columns: <GridColumn>[
-                  GridColumn(
-                      columnName: 'id',
-                      label: Container(
-                          padding: const EdgeInsets.all(0.0),
+      body: Container(
+        color: const Color.fromRGBO(238, 239, 241, 0.8),
+        child: Container(
+          color: Colors.white,
+          margin: const EdgeInsets.only(
+            left: 10,
+            bottom: 5,
+            right: 10,
+            top: 10,
+          ),
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              Expanded(
+                  flex: 1,
+                  child: SfDataGrid(
+                    source: employeeDataSource,
+                    headerRowHeight: 40,
+                    columnWidthMode: ColumnWidthMode.fill,
+                    columns: <GridColumn>[
+                      GridColumn(
+                          columnName: 'id',
+                          label: Container(
+                              padding: const EdgeInsets.all(0.0),
+                              color: const Color.fromRGBO(234, 236, 255, 1),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                '序号',
+                              ))),
+                      GridColumn(
+                          columnName: 'name',
+                          label: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              color: const Color.fromRGBO(234, 236, 255, 1),
+                              alignment: Alignment.center,
+                              child: const Text('名称'))),
+                      GridColumn(
+                          columnName: 'mnTime',
+                          label: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              alignment: Alignment.center,
+                              color: const Color.fromRGBO(234, 236, 255, 1),
+                              child: const Text(
+                                '时间',
+                                overflow: TextOverflow.ellipsis,
+                              ))),
+                      GridColumn(
+                        columnName: 'actions',
+                        width: 300,
+                        label: Container(
+                          padding: const EdgeInsets.all(0),
                           color: const Color.fromRGBO(234, 236, 255, 1),
                           alignment: Alignment.center,
-                          child: const Text(
-                            '序号',
-                          ))),
-                  GridColumn(
-                      columnName: 'name',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          color: const Color.fromRGBO(234, 236, 255, 1),
-                          alignment: Alignment.center,
-                          child: const Text('名称'))),
-                  GridColumn(
-                      columnName: 'mnTime',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          color: const Color.fromRGBO(234, 236, 255, 1),
-                          child: const Text(
-                            '时间',
-                            overflow: TextOverflow.ellipsis,
-                          ))),
-                  GridColumn(
-                    columnName: 'actions',
-                    width: 300,
-                    label: Container(
-                      padding: const EdgeInsets.all(0),
-                      color: const Color.fromRGBO(234, 236, 255, 1),
-                      alignment: Alignment.center,
-                      child: const Text('操作'),
-                    ),
-                  ),
-                ],
-              ))
-        ],
+                          child: const Text('操作'),
+                        ),
+                      ),
+                    ],
+                  ))
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -57,120 +57,123 @@ class _LineChartSample9State extends State<LineChartSample9> {
   @override
   Widget build(BuildContext context) {
     //  widget.data 从头添加一组数据
+    return Container(
+     width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: 12,
+          bottom: 20,
+          right: 20,
+          top: 20,
+        ),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return LineChart(
+                LineChartData(
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 12,
-        bottom: 20,
-        right: 20,
-        top: 20,
-      ),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return LineChart(
-              LineChartData(
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
-                    maxContentWidth: 100,
-                    getTooltipColor: (touchedSpot) => Colors.black,
-                    getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((LineBarSpot touchedSpot) {
-                        final textStyle = TextStyle(
-                          color: touchedSpot.bar.gradient?.colors[0] ??
-                              touchedSpot.bar.color,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        );
-                        return LineTooltipItem(
-                          '${touchedSpot.x}, ${touchedSpot.y.toStringAsFixed(2)}',
-                          textStyle,
-                        );
-                      }).toList();
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      maxContentWidth: 100,
+                      getTooltipColor: (touchedSpot) => Colors.black,
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((LineBarSpot touchedSpot) {
+                          final textStyle = TextStyle(
+                            color: touchedSpot.bar.gradient?.colors[0] ??
+                                touchedSpot.bar.color,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          );
+                          return LineTooltipItem(
+                            '${touchedSpot.x}, ${touchedSpot.y.toStringAsFixed(2)}',
+                            textStyle,
+                          );
+                        }).toList();
+                      },
+                    ),
+                    handleBuiltInTouches: true,
+                    getTouchLineStart: (data, index) => 0,
+                  ),
+                  lineBarsData: [
+                    LineChartBarData(
+                      color: AppColors.contentColorPink,
+                      spots: widget.data,
+                      isCurved: true,
+                      isStrokeCapRound: true,
+                      barWidth: 3,
+                      belowBarData: BarAreaData(
+                        show: false,
+                      ),
+                      dotData: const FlDotData(show: false),
+                    ),
+                    LineChartBarData(
+                      color: AppColors.contentColorGreen,
+                      spots: widget.data2,
+                      isCurved: true,
+                      isStrokeCapRound: true,
+                      barWidth: 3,
+                      belowBarData: BarAreaData(
+                        show: false,
+                      ),
+                      dotData: const FlDotData(show: false),
+                    ),
+                  ],
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) =>
+                            leftTitleWidgets(value, meta, constraints.maxWidth),
+                        reservedSize: 56,
+                      ),
+                      drawBelowEverything: true,
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) =>
+                            bottomTitleWidgets(value, meta, constraints.maxWidth),
+                        reservedSize: 36,
+                        interval: 1,
+                      ),
+                      drawBelowEverything: true,
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  gridData: FlGridData(
+                    show: true,
+                    drawHorizontalLine: true,
+                    drawVerticalLine: true,
+                    horizontalInterval: 10,
+                    verticalInterval: 5,
+                    checkToShowHorizontalLine: (value) {
+                      return value.toInt() == 0;
+                    },
+                    getDrawingHorizontalLine: (_) => FlLine(
+                      color: AppColors.contentColorBlue.withOpacity(1),
+                      dashArray: [8, 2],
+                      strokeWidth: 0.8,
+                    ),
+                    getDrawingVerticalLine: (_) => FlLine(
+                      color: AppColors.contentColorYellow.withOpacity(1),
+                      dashArray: [8, 2],
+                      strokeWidth: 0.8,
+                    ),
+                    checkToShowVerticalLine: (value) {
+                      return value.toInt() == 0;
                     },
                   ),
-                  handleBuiltInTouches: true,
-                  getTouchLineStart: (data, index) => 0,
+                  borderData: FlBorderData(show: false),
                 ),
-                lineBarsData: [
-                  LineChartBarData(
-                    color: AppColors.contentColorPink,
-                    spots: widget.data,
-                    isCurved: true,
-                    isStrokeCapRound: true,
-                    barWidth: 3,
-                    belowBarData: BarAreaData(
-                      show: false,
-                    ),
-                    dotData: const FlDotData(show: false),
-                  ),
-                  LineChartBarData(
-                    color: AppColors.contentColorGreen,
-                    spots: widget.data2,
-                    isCurved: true,
-                    isStrokeCapRound: true,
-                    barWidth: 3,
-                    belowBarData: BarAreaData(
-                      show: false,
-                    ),
-                    dotData: const FlDotData(show: false),
-                  ),
-                ],
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) =>
-                          leftTitleWidgets(value, meta, constraints.maxWidth),
-                      reservedSize: 56,
-                    ),
-                    drawBelowEverything: true,
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) =>
-                          bottomTitleWidgets(value, meta, constraints.maxWidth),
-                      reservedSize: 36,
-                      interval: 1,
-                    ),
-                    drawBelowEverything: true,
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                ),
-                gridData: FlGridData(
-                  show: true,
-                  drawHorizontalLine: true,
-                  drawVerticalLine: true,
-                  horizontalInterval: 10,
-                  verticalInterval: 5,
-                  checkToShowHorizontalLine: (value) {
-                    return value.toInt() == 0;
-                  },
-                  getDrawingHorizontalLine: (_) => FlLine(
-                    color: AppColors.contentColorBlue.withOpacity(1),
-                    dashArray: [8, 2],
-                    strokeWidth: 0.8,
-                  ),
-                  getDrawingVerticalLine: (_) => FlLine(
-                    color: AppColors.contentColorYellow.withOpacity(1),
-                    dashArray: [8, 2],
-                    strokeWidth: 0.8,
-                  ),
-                  checkToShowVerticalLine: (value) {
-                    return value.toInt() == 0;
-                  },
-                ),
-                borderData: FlBorderData(show: false),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

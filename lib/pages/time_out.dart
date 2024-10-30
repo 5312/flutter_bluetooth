@@ -96,13 +96,12 @@ class _TimeOutState extends State<TimeOut> {
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (bluetooth.currentDevice == null) {
-        //
-        Navigator.of(context).pop();
-        SmartDialog.showToast('请连接蓝牙');
-      } else {
-        open();
-      }
+      // if (bluetooth.currentDevice == null) {
+      //   Navigator.of(context).pop();
+      //   SmartDialog.showToast('请连接蓝牙');
+      // } else {
+      //   open();
+      // }
     });
     scrollController = DataGridController();
   }
@@ -585,159 +584,184 @@ class _TimeOutState extends State<TimeOut> {
           }
           showDeleteConfirmDialog1(context);
         },
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // 确保高度适应内容
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                    top: 10, bottom: 10, left: 30, right: 30),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  // 可选：根据需要调整按钮间的间距
-                  children: [
-                    Text('矿区：$_mineString'),
-                    Text('工作圈:$_workString'),
-                    Text('钻厂：$_factoryString'),
-                    Text('钻孔：$_drillingString'),
-                    Text('检测名称：$_nString'),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: SizedBox(
-                      width: 200,
-                      child: Column(
-                        children: [
-                          // Text('俯仰角：$_pitch'),
-                          Text(
-                              '累计时间：${Analytical([]).formatTime(_currentTime)}'),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isSync
-                                  ? Colors.blueAccent
-                                  : const Color.fromRGBO(242, 243, 247, 1),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)), // 设置圆角为10
-                              ),
-                            ),
-                            child: Text('定时同步',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: isSync
-                                        ? Colors.white
-                                        : const Color.fromRGBO(
-                                            147, 153, 177, 1))),
-                            onPressed: () async {
-                              if (isSync) {
-                                discoverServices(bluetooth.currentDevice);
-                              }
-                            },
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isFixed
-                                  ? Colors.blueAccent
-                                  : const Color.fromRGBO(242, 243, 247, 1),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)), // 设置圆角为10
-                              ),
-                            ),
-                            child: Text('定点测量',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: isFixed
-                                        ? Colors.white
-                                        : const Color.fromRGBO(
-                                            147, 153, 177, 1))),
-                            onPressed: () {
-                              // savePitch();
-                              if (isFixed) {
-                                savePitch();
-                              }
-                            },
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isPop
-                                  ? Colors.blueAccent
-                                  : const Color.fromRGBO(242, 243, 247, 1),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)), // 设置圆角为10
-                              ),
-                            ),
-                            child: Text('删除末尾数据',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: isPop
-                                        ? Colors.white
-                                        : const Color.fromRGBO(
-                                            147, 153, 177, 1))),
-                            onPressed: () {
-                              //删除末尾数据
-                              if (isPop) {
-                                delePop();
-                              }
-                            },
-                          )
-                        ],
-                      ),
-                    ),
+        child: Container(
+          color: const Color.fromRGBO(238, 239, 241, 0.8),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // 确保高度适应内容
+              children: [
+                Container(
+                  color: Colors.white,
+                  margin: const EdgeInsets.only(
+                    left: 10,
+                    bottom: 10,
+                    right: 10,
+                    top: 10,
                   ),
-                  Expanded(
-                    child: SfDataGrid(
-                      headerRowHeight: 40,
-                      source: employeeDataSource,
-                      controller: scrollController,
-                      gridLinesVisibility: GridLinesVisibility.none,
-                      columnWidthMode: ColumnWidthMode.fill,
-                      columns: <GridColumn>[
-                        GridColumn(
-                            columnName: 'id',
-                            label: Container(
-                              padding: const EdgeInsets.all(0.0),
-                              alignment: Alignment.center,
-                              color: const Color.fromRGBO(234, 236, 255, 1),
-                              child: const Text(
-                                '序号',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            )),
-                        GridColumn(
-                            columnName: 'depth',
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                color: const Color.fromRGBO(234, 236, 255, 1),
-                                child: const Text('深度'))),
-                        GridColumn(
-                            columnName: 'time',
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                color: const Color.fromRGBO(234, 236, 255, 1),
-                                child: const Text(
-                                  '时间',
-                                  overflow: TextOverflow.ellipsis,
-                                ))),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        top: 10, bottom: 10, left: 30, right: 30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // 可选：根据需要调整按钮间的间距
+                      children: [
+                        Text('矿区：$_mineString'),
+                        Text('工作圈:$_workString'),
+                        Text('钻厂：$_factoryString'),
+                        Text('钻孔：$_drillingString'),
+                        Text('检测名称：$_nString'),
                       ],
                     ),
-                  )
-                ],
-              ),
-              const SizedBox(
-                height: 6,
-              ),
-            ],
+                  ),
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height - 130,
+                  child: Row(
+                    children: [
+                      Container(
+                        color: Colors.white,
+                        margin: const EdgeInsets.only(
+                          left: 10,
+                          bottom: 10,
+                        ),
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          children: [
+                            Text(
+                                '累计时间：${Analytical([]).formatTime(_currentTime)}'),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isSync
+                                    ? Colors.blueAccent
+                                    : const Color.fromRGBO(242, 243, 247, 1),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10)), // 设置圆角为10
+                                ),
+                              ),
+                              child: Text('定时同步',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: isSync
+                                          ? Colors.white
+                                          : const Color.fromRGBO(
+                                              147, 153, 177, 1))),
+                              onPressed: () async {
+                                if (isSync) {
+                                  discoverServices(bluetooth.currentDevice);
+                                }
+                              },
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isFixed
+                                    ? Colors.blueAccent
+                                    : const Color.fromRGBO(242, 243, 247, 1),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10)), // 设置圆角为10
+                                ),
+                              ),
+                              child: Text('定点测量',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: isFixed
+                                          ? Colors.white
+                                          : const Color.fromRGBO(
+                                              147, 153, 177, 1))),
+                              onPressed: () {
+                                // savePitch();
+                                if (isFixed) {
+                                  savePitch();
+                                }
+                              },
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isPop
+                                    ? Colors.blueAccent
+                                    : const Color.fromRGBO(242, 243, 247, 1),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10)), // 设置圆角为10
+                                ),
+                              ),
+                              child: Text('删除末尾数据',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: isPop
+                                          ? Colors.white
+                                          : const Color.fromRGBO(
+                                              147, 153, 177, 1))),
+                              onPressed: () {
+                                //删除末尾数据
+                                if (isPop) {
+                                  delePop();
+                                }
+                              },
+                            )
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Container(
+                          color: Colors.white,
+                          margin: const EdgeInsets.only(
+                              left: 10, right: 10, bottom: 10),
+                          child: SfDataGrid(
+                            headerRowHeight: 40,
+                            source: employeeDataSource,
+                            controller: scrollController,
+                            gridLinesVisibility: GridLinesVisibility.none,
+                            columnWidthMode: ColumnWidthMode.fill,
+                            columns: <GridColumn>[
+                              GridColumn(
+                                  columnName: 'id',
+                                  label: Container(
+                                    padding: const EdgeInsets.all(0.0),
+                                    alignment: Alignment.center,
+                                    color: Colors.black12,
+                                    // const Color.fromRGBO( 234, 236, 255, 1),
+                                    child: const Text(
+                                      '序号',
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  )),
+                              GridColumn(
+                                  columnName: 'depth',
+                                  label: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      alignment: Alignment.center,
+                                      color: Colors.black12,
+                                      // const Color.fromRGBO( 234, 236, 255, 1),
+                                      child: const Text('深度'))),
+                              GridColumn(
+                                  columnName: 'time',
+                                  label: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      alignment: Alignment.center,
+                                      color: Colors.black12,
+                                      // const Color.fromRGBO( 234, 236, 255, 1),
+                                      child: const Text(
+                                        '时间',
+                                        overflow: TextOverflow.ellipsis,
+                                      ))),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 6,
+                ),
+              ],
+            ),
           ),
         ),
       ),

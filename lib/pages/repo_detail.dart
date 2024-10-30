@@ -153,7 +153,7 @@ class _RepoDetailState extends State<RepoDetail> {
   // 计算实际左右偏差
   void calculateActualCurve2(List<DataListModel> list) {
     double previousPitch = list[0].designPitch!;
-    double previousHeading = list[0].heading!;
+    double previousHeading = list[0].designHeading!;
 
     List<Map<String, double>> realCurve = [];
     double preY = 0;
@@ -227,97 +227,134 @@ class _RepoDetailState extends State<RepoDetail> {
     return spots;
   }
 
+  Widget LeftRight() {
+    return Container(
+      color: Colors.white,
+      margin: const EdgeInsets.only(
+        left: 10,
+        bottom: 10,
+        right: 10,
+        top: 5,
+      ),
+      padding: const EdgeInsets.all(10),
+      height: 380,
+      // 占屏幕高度的40%,
+      child: Column(
+        children: [
+          const Text('左右偏差(左正右负)'),
+          // TODO 终孔上下偏差距离设计：最后一个点 实际- 设计
+          Expanded(child: LineChartSample9(data: design2, data2: actual2)),
+        ],
+      ),
+    );
+  }
+
+  Widget TopBottom() {
+    return Container(
+      color: Colors.white,
+      margin: const EdgeInsets.only(
+        left: 10,
+        bottom: 5,
+        right: 10,
+        top: 5,
+      ),
+      // 设置四周的外边距
+      padding: const EdgeInsets.all(10),
+      height: 350,
+      // 占屏幕高度的40%,
+      child: Column(
+        children: [
+          const Text('上下偏差（上正下负）'),
+          // TODO 终孔左右偏差距离设计：最后一个点 实际- 设计
+          Expanded(
+            child: LineChartSample9(data: design, data2: actual),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
-    print('左右');
-    print(actual2);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.row.name),
       ),
-      body: ListView(
-        children: [
-          Container(
-            height: screenHeight * 0.5, // 占屏幕高度的40%,
-            padding: const EdgeInsets.only(bottom: 30),
-            child: SfDataGrid(
-              headerRowHeight: 40,
-              source: employeeDataSource,
-              columnWidthMode: ColumnWidthMode.fill,
-              columns: <GridColumn>[
-                GridColumn(
-                    columnName: 'id',
-                    label: Container(
-                        padding: const EdgeInsets.all(0.0),
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          '序号',
-                        ))),
-                GridColumn(
-                    columnName: 'time',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        alignment: Alignment.center,
-                        child: const Text('时间'))),
-                GridColumn(
-                    columnName: 'depth',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '深度',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-                GridColumn(
-                    columnName: 'pitch',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '俯仰角（°）',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-                GridColumn(
-                    columnName: 'heading',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '方位角（°）',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-              ],
+      body: Container(
+        color: const Color.fromRGBO(238, 239, 241, 0.8),
+        child: ListView(
+          children: [
+            Container(
+              color: Colors.white,
+              height: screenHeight * 0.5,
+              margin: const EdgeInsets.only(
+                left: 10,
+                bottom: 5,
+                right: 10,
+                top: 10,
+              ),
+              padding: const EdgeInsets.all(10),
+              child: SfDataGrid(
+                headerRowHeight: 40,
+                source: employeeDataSource,
+                columnWidthMode: ColumnWidthMode.fill,
+                columns: <GridColumn>[
+                  GridColumn(
+                      columnName: 'id',
+                      label: Container(
+                          padding: const EdgeInsets.all(0.0),
+                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            '序号',
+                          ))),
+                  GridColumn(
+                      columnName: 'time',
+                      label: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          alignment: Alignment.center,
+                          child: const Text('时间'))),
+                  GridColumn(
+                      columnName: 'depth',
+                      label: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          alignment: Alignment.center,
+                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          child: const Text(
+                            '深度',
+                            overflow: TextOverflow.ellipsis,
+                          ))),
+                  GridColumn(
+                      columnName: 'pitch',
+                      label: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          alignment: Alignment.center,
+                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          child: const Text(
+                            '俯仰角（°）',
+                            overflow: TextOverflow.ellipsis,
+                          ))),
+                  GridColumn(
+                      columnName: 'heading',
+                      label: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          alignment: Alignment.center,
+                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          child: const Text(
+                            '方位角（°）',
+                            overflow: TextOverflow.ellipsis,
+                          ))),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 5.0),
-          Row(
-            children: [
-              Expanded(
-                  child: Column(
-                children: [
-                  const Text('上下偏差（上正下负）'),
-                  // TODO 终孔左右偏差距离设计：最后一个点 实际- 设计
-                  LineChartSample9(data: design, data2: actual)
-                ],
-              )),
-              Expanded(
-                  child: Column(
-                children: [
-                  const Text('左右偏差(左正右负)'),
-                  // TODO 终孔上下偏差距离设计：最后一个点 实际- 设计
-                  LineChartSample9(data: design2, data2: actual2)
-                ],
-              ))
-            ],
-          )
-        ],
+            // const SizedBox(height:5.0),
+            TopBottom(),
+            LeftRight(),
+          ],
+        ),
       ),
     );
   }

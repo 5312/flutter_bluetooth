@@ -33,13 +33,19 @@ class _HomePageState extends State<HomePage> {
     return ScaffoldMessenger(
         key: Snackbar.snackBarKeyB,
         child: Scaffold(
-          appBar: CustomAppBar('钻孔轨迹仪'),
+          appBar: const CustomAppBar('钻孔轨迹仪'),
           body: Container(
-            // color: const Color.fromRGBO(238, 239, 241, 0.8),
-            child: Padding(
-              padding:
-                  EdgeInsets.only(left: 33, right: 33, top: 20, bottom: 33),
-              child: Row(
+            color: const Color.fromRGBO(238, 239, 241, 0.8),
+            child: Container(
+              color: Colors.white,
+              margin: const EdgeInsets.only(
+                left: 10,
+                bottom: 10,
+                right: 10,
+                top: 10,
+              ),
+              padding: const EdgeInsets.all(10),
+              child: const Row(
                 children: <Widget>[
                   Expanded(
                     child: Column(

@@ -192,153 +192,180 @@ class _DataTransmissionState extends State<DataTransmission> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar('数据传输'),
-      body: Column(
-        children: [
-          Padding(
-            padding:
-                const EdgeInsets.only(top: 10, bottom: 10, left: 30, right: 30),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              // 可选：根据需要调整按钮间的间距
-              children: [
-                Text('矿区：$_mineString'),
-                Text('工作面：$_workString'),
-                Text('钻厂：$_factoryString'),
-                Text('钻孔：$_drillingString'),
-                Text('检测名称：$_name'),
-              ],
-            ),
+      body: Container(
+        color: const Color.fromRGBO(238, 239, 241, 0.8),
+        child: Container(
+          // color: Colors.white,
+          margin: const EdgeInsets.only(
+            left: 10,
+            bottom: 10,
+            right: 10,
+            top: 10,
           ),
-          const SizedBox(
-            height: 16,
-          ),
-          Expanded(
-              flex: 1,
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: SizedBox(
-                      width: 200,
-                      child: Column(
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blueAccent,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)), // 设置圆角为10
-                              ),
-                            ),
-                            child: const Text('探管取数',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white)),
-                            onPressed: () {
-                              discoverServices(bluetooth.currentDevice);
-                            },
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blueAccent,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)), // 设置圆角为10
-                              ),
-                            ),
-                            child: const Text('数据同步',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white)),
-                            onPressed: () {
-                              // 保存操作的逻辑
-                              getData(_backList);
-                            },
-                          ),
-                          orificeButton,
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blueAccent,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)), // 设置圆角为10
-                              ),
-                            ),
-                            child: const Text('数据保存',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white)),
-                            onPressed: () {
-                              // 将原始数据保存
-                              for (var element in employees) {
-                                element.repoId = _repoId;
-                                DatabaseHelper().updateDataList(element);
-                              }
-                              SmartDialog.showToast('数据保存成功');
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
+          // padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              Container(
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      top: 10, bottom: 10, left: 30, right: 30),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // 可选：根据需要调整按钮间的间距
+                    children: [
+                      Text('矿区：$_mineString'),
+                      Text('工作面：$_workString'),
+                      Text('钻厂：$_factoryString'),
+                      Text('钻孔：$_drillingString'),
+                      Text('检测名称：$_name'),
+                    ],
                   ),
-                  Expanded(
-                      flex: 1,
-                      child: SfDataGrid(
-                        headerRowHeight: 40,
-                        source: employeeDataSource,
-                        gridLinesVisibility: GridLinesVisibility.none,
-                        columnWidthMode: ColumnWidthMode.fill,
-                        columns: <GridColumn>[
-                          GridColumn(
-                              columnName: 'id',
-                              label: Container(
-                                padding: const EdgeInsets.all(0.0),
-                                alignment: Alignment.center,
-                                color: const Color.fromRGBO(234, 236, 255, 1),
-                                child: const Text(
-                                  '序号',
-                                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Expanded(
+                  flex: 1,
+                  child: Row(
+                    children: [
+                      Container(
+                        color: Colors.white,
+                        child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Column(
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blueAccent,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10)), // 设置圆角为10
+                                    ),
+                                  ),
+                                  child: const Text('探管取数',
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.white)),
+                                  onPressed: () {
+                                    discoverServices(bluetooth.currentDevice);
+                                  },
                                 ),
-                              )),
-                          GridColumn(
-                              columnName: 'time',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  color: const Color.fromRGBO(234, 236, 255, 1),
-                                  child: const Text(
-                                    '时间',
-                                    overflow: TextOverflow.ellipsis,
-                                  ))),
-                          GridColumn(
-                              columnName: 'depth',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  color: const Color.fromRGBO(234, 236, 255, 1),
-                                  child: const Text(
-                                    '深度',
-                                    overflow: TextOverflow.ellipsis,
-                                  ))),
-                          GridColumn(
-                              columnName: 'pitch',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  color: const Color.fromRGBO(234, 236, 255, 1),
-                                  child: const Text('俯仰角（°）'))),
-                          GridColumn(
-                              columnName: 'heading',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  color: const Color.fromRGBO(234, 236, 255, 1),
-                                  child: const Text(
-                                    '方位角（°）',
-                                    overflow: TextOverflow.ellipsis,
-                                  ))),
-                        ],
-                      ))
-                ],
-              ))
-        ],
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blueAccent,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10)), // 设置圆角为10
+                                    ),
+                                  ),
+                                  child: const Text('数据同步',
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.white)),
+                                  onPressed: () {
+                                    // 保存操作的逻辑
+                                    getData(_backList);
+                                  },
+                                ),
+                                orificeButton,
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blueAccent,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10)), // 设置圆角为10
+                                    ),
+                                  ),
+                                  child: const Text('数据保存',
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.white)),
+                                  onPressed: () {
+                                    // 将原始数据保存
+                                    for (var element in employees) {
+                                      element.repoId = _repoId;
+                                      DatabaseHelper().updateDataList(element);
+                                    }
+                                    SmartDialog.showToast('数据保存成功');
+                                  },
+                                ),
+                              ],
+                            )),
+                      ),
+                      Expanded(
+                          flex: 1,
+                          child: Container(
+                            color: Colors.white,
+                            margin: const EdgeInsets.only(
+                              left: 10,
+                              right: 10,
+                            ),
+                            child: SfDataGrid(
+                              headerRowHeight: 40,
+                              source: employeeDataSource,
+                              gridLinesVisibility: GridLinesVisibility.none,
+                              columnWidthMode: ColumnWidthMode.fill,
+                              columns: <GridColumn>[
+                                GridColumn(
+                                    columnName: 'id',
+                                    label: Container(
+                                      padding: const EdgeInsets.all(0.0),
+                                      alignment: Alignment.center,
+                                      color: Colors.black12,
+                                      // const Color.fromRGBO( 234, 236, 255, 1),
+                                      child: const Text(
+                                        '序号',
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    )),
+                                GridColumn(
+                                    columnName: 'time',
+                                    label: Container(
+                                        padding: const EdgeInsets.all(8.0),
+                                        alignment: Alignment.center,
+                                        color: Colors.black12,
+                                        // const Color.fromRGBO( 234, 236, 255, 1),
+                                        child: const Text(
+                                          '时间',
+                                          overflow: TextOverflow.ellipsis,
+                                        ))),
+                                GridColumn(
+                                    columnName: 'depth',
+                                    label: Container(
+                                        padding: const EdgeInsets.all(8.0),
+                                        alignment: Alignment.center,
+                                        color: Colors.black12,
+                                        // const Color.fromRGBO( 234, 236, 255, 1),
+                                        child: const Text(
+                                          '深度',
+                                          overflow: TextOverflow.ellipsis,
+                                        ))),
+                                GridColumn(
+                                    columnName: 'pitch',
+                                    label: Container(
+                                        padding: const EdgeInsets.all(8.0),
+                                        alignment: Alignment.center,
+                                        color: Colors.black12,
+                                        // const Color.fromRGBO( 234, 236, 255, 1),
+                                        child: const Text('俯仰角（°）'))),
+                                GridColumn(
+                                    columnName: 'heading',
+                                    label: Container(
+                                        padding: const EdgeInsets.all(8.0),
+                                        alignment: Alignment.center,
+                                        color: Colors.black12,
+                                        // const Color.fromRGBO( 234, 236, 255, 1),
+                                        child: const Text(
+                                          '方位角（°）',
+                                          overflow: TextOverflow.ellipsis,
+                                        ))),
+                              ],
+                            ),
+                          ))
+                    ],
+                  ))
+            ],
+          ),
+        ),
       ),
     );
   }
