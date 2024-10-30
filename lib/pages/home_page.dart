@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+// import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:bluetooth_mini/widgets/home_card.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';

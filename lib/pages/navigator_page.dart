@@ -36,7 +36,6 @@ class _NavigatorPageState extends State<NavigatorPage> {
       body: PopScope(
           canPop: false,
           onPopInvoked: (bool didPop) {
-            print(didPop);
             if (didPop) {
               return;
             } else {

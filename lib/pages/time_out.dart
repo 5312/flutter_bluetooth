@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:bluetooth_mini/db/database_helper.dart';
 import 'package:bluetooth_mini/db/my_setting.dart';
 import 'package:bluetooth_mini/db/my_time.dart';
 import 'package:bluetooth_mini/models/repo_model.dart';
 import 'package:bluetooth_mini/provider/bluetooth_provider.dart';
-import 'package:bluetooth_mini/utils/hex.dart';
+
+// import 'package:bluetooth_mini/utils/hex.dart';
 import 'package:bluetooth_mini/widgets/cus_appbar.dart';
 import 'package:bluetooth_mini/widgets/cus_dialog.dart';
 import 'package:bluetooth_mini/widgets/time_form.dart';
@@ -68,11 +68,13 @@ class _TimeOutState extends State<TimeOut> {
   String _factoryString = '';
   String _drillingString = '';
   String _nString = '';
-  String _pitch = '';
+
+  // String _pitch = '';
   String _designPitch = '';
   String _designHeading = '';
   String _length = '';
-  String _time = '';
+
+  // String _time = '';
   int _repoId = 0;
   Timer? _timer;
 
@@ -179,8 +181,6 @@ class _TimeOutState extends State<TimeOut> {
                       if (_controllerName.text != '' &&
                           _controllerPitch.text != '' &&
                           _controllerHeading.text != '') {
-                        print('长度');
-                        print(int.tryParse(_controllerLen.text));
                         int id = await DatabaseHelper().insertRepo(RepoModel(
                             len: int.tryParse(_controllerLen.text)!,
                             name: _controllerName.text,
@@ -462,7 +462,6 @@ class _TimeOutState extends State<TimeOut> {
 
     // 写入数据到特征码 启动采集
     await c.write([0x68, 0x05, 0x00, 0x71, 0x01, 0x77], withoutResponse: false);
-    print('定时同步');
     EasyLoading.show(status: '正在同步中...');
     // 监听特征码的通知
     c.setNotifyValue(true);
@@ -476,16 +475,16 @@ class _TimeOutState extends State<TimeOut> {
         iniTime = false;
       }
       // 转为16进制数据用来查看文档对照
-      List<String> hexArray = bytesToHexArray(value);
+      // List<String> hexArray = bytesToHexArray(value);
       EasyLoading.dismiss();
-      if (hexArray[3] == 'f0') {
-        Analytical analytical = Analytical(value);
-        // _time = analytical.dataTime();
-        String pitch = analytical.getPitch();
-        setState(() {
-          _pitch = pitch;
-        });
-      }
+      // if (hexArray[3] == 'f0') {
+      // Analytical analytical = Analytical(value);
+      // _time = analytical.dataTime();
+      // String pitch = analytical.getPitch();
+      // setState(() {
+      //   // _pitch = pitch;
+      // });
+      // }
     });
   }
 
@@ -517,14 +516,13 @@ class _TimeOutState extends State<TimeOut> {
       employeeDataSource = EmployeeDataSource(employeeData: employees);
     });
     // 在数据更新后滚动到底部
-    Future.delayed(Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       scrollController.scrollToRow(employeeDataSource.rows.length - 1);
     });
   }
 
   //删除末尾数据
   void delePop() {
-    print(employees.last.id);
     // 覆盖
     DatabaseHelper().deleteDataList(employees.last.id ?? 0);
     employees.removeLast();

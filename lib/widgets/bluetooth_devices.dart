@@ -147,7 +147,6 @@ class _DevicesStateState extends State<DevicesState> with RouteAware {
     StreamSubscription<List<int>>? lastValueSubscription;
     // 监听特征码的通知
     lastValueSubscription = characteristic.onValueReceived.listen((value) {
-      print('电量通知：$value');
       if (value[0] == 0x68 && value[1] == 0x14 && value[2] == 0x00) {
         // 电量
         if (mounted) {

@@ -65,8 +65,9 @@ class _MyFormState extends State<MyForm> {
                       if (int.tryParse(value) == null) {
                         return '请输入有效的数字';
                       }
-                    } else {
                       return null;
+                    } else {
+                      return '';
                     }
                   },
                 ),

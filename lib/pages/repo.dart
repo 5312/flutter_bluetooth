@@ -26,10 +26,10 @@ class _RepoState extends State<Repo> {
   @override
   void initState() {
     super.initState();
-    GetList();
+    getList();
   }
 
-  Future<void> GetList() async {
+  Future<void> getList() async {
     List<RepoModel> list = await DatabaseHelper().getRepos();
     setState(() {
       employees = list;
@@ -63,18 +63,18 @@ class _RepoState extends State<Repo> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("提示"),
-          content: Text("您确定要删除当前文件吗?"),
+          title: const Text("提示"),
+          content: const Text("您确定要删除当前文件吗?"),
           actions: <Widget>[
             TextButton(
-              child: Text("取消"),
+              child: const Text("取消"),
               onPressed: () => Navigator.of(context).pop(), // 关闭对话框
             ),
             TextButton(
-              child: Text("删除"),
+              child: const Text("删除"),
               onPressed: () async {
                 await DatabaseHelper().deleteRepo(id);
-                GetList();
+                getList();
                 Navigator.of(context).pop(true);
               },
             ),

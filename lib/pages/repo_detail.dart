@@ -6,7 +6,6 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
 import 'package:bluetooth_mini/widgets/Line_chart_sample.dart';
-import 'package:bluetooth_mini/models/data_list_extension.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:decimal/decimal.dart';
 
@@ -27,7 +26,7 @@ class _RepoDetailState extends State<RepoDetail> {
       EmployeeDataSource(employeeData: []);
 
   // 钻杆长度
-  int drill_pipe_length = 0;
+  int drillPipeLength = 0;
 
   // 上下偏差
   late List<FlSpot> design;
@@ -52,7 +51,7 @@ class _RepoDetailState extends State<RepoDetail> {
         await DatabaseHelper().getDataListByRepoId(widget.row.id!);
     List<RepoModel> repoItem =
         await DatabaseHelper().getReposForId(widget.row.id!);
-    drill_pipe_length = repoItem[0].len;
+    drillPipeLength = repoItem[0].len;
     list.insert(
         0,
         DataListModel(
@@ -90,7 +89,7 @@ class _RepoDetailState extends State<RepoDetail> {
     num preY = 0;
     for (var i = 0; i < list.length; i++) {
       var data = list[i];
-      num L = i == 0 ? 0 : drill_pipe_length; // 6;
+      num L = i == 0 ? 0 : drillPipeLength; // 6;
       num A = data.designPitch!; // 设计俯仰角
       // 计算X和Y坐标
       num x = data.depth;
@@ -112,7 +111,7 @@ class _RepoDetailState extends State<RepoDetail> {
     // for (var data in list) {
     for (var i = 0; i < list.length; i++) {
       var data = list[i];
-      num L = i == 0 ? 0 : drill_pipe_length; // 6;//data.length;
+      num L = i == 0 ? 0 : drillPipeLength; // 6;//data.length;
 
       num A1 = data.pitch ?? 0;
       num A2 =
@@ -120,9 +119,9 @@ class _RepoDetailState extends State<RepoDetail> {
 
       num X = data.depth;
       /////
-      num SinVal = (A2 / 2) * pi / 180;
+      num sinVal = (A2 / 2) * pi / 180;
 
-      Decimal nowY = d(L) * d(sin(SinVal));
+      Decimal nowY = d(L) * d(sin(sinVal));
 
       Decimal strY = dn(nowY.toString()) + dn(preY.toString());
       num Y = df(strY.toDouble());
@@ -139,10 +138,8 @@ class _RepoDetailState extends State<RepoDetail> {
     List<Map<String, num>> designCurve = [];
     for (var i = 0; i < list.length; i++) {
       var data = list[i];
-      num L = i == 0 ? 0 : drill_pipe_length;
-
-      num A = data.designPitch ?? 0; // 设计俯仰角
-
+      //num L = i == 0 ? 0 : drillPipeLength;
+      //num A = data.designPitch ?? 0; // 设计俯仰角
       num designX = data.depth; //* cos(A); // 设计曲线的 X 坐标
       num designY = 0; // 设计曲线的 Y 坐标始终为 0
       designCurve.add({'X': designX, 'Y': designY});
@@ -160,7 +157,7 @@ class _RepoDetailState extends State<RepoDetail> {
 
     for (var i = 0; i < list.length; i++) {
       var data = list[i];
-      num L = i == 0 ? 0 : drill_pipe_length;
+      num L = i == 0 ? 0 : drillPipeLength;
       double A1 = data.pitch ?? 0;
 
       // 当前俯仰角
@@ -227,7 +224,16 @@ class _RepoDetailState extends State<RepoDetail> {
     return spots;
   }
 
-  Widget LeftRight() {
+  Widget leftRight() {
+    // 最后一个点 实际 - 设计
+    String formattedN = '0';
+    if (actual2.isNotEmpty && design2.isNotEmpty) {
+      double acy = actual2[actual2.length - 1].y;
+      double desY = design2[design2.length - 1].y;
+      double n = acy - desY;
+      // 继续后续操作，比如格式化输出
+      formattedN = n.toStringAsFixed(2);
+    }
     return Container(
       color: Colors.white,
       margin: const EdgeInsets.only(
@@ -242,14 +248,26 @@ class _RepoDetailState extends State<RepoDetail> {
       child: Column(
         children: [
           const Text('左右偏差(左正右负)'),
-          // TODO 终孔上下偏差距离设计：最后一个点 实际- 设计
+          Text(
+            '终孔左右偏差距离设计：$formattedN',
+            style: const TextStyle(
+              color: Colors.red, // 字体颜色
+            ),
+          ),
           Expanded(child: LineChartSample9(data: design2, data2: actual2)),
         ],
       ),
     );
   }
 
-  Widget TopBottom() {
+  Widget topBottom() {
+    String formattedN = '0';
+    if (actual2.isNotEmpty && design2.isNotEmpty) {
+      double acy = actual[actual.length - 1].y;
+      double desY = design[design.length - 1].y;
+      double n = acy - desY;
+      formattedN = n.toStringAsFixed(2); // 保留两位小数
+    }
     return Container(
       color: Colors.white,
       margin: const EdgeInsets.only(
@@ -265,7 +283,12 @@ class _RepoDetailState extends State<RepoDetail> {
       child: Column(
         children: [
           const Text('上下偏差（上正下负）'),
-          // TODO 终孔左右偏差距离设计：最后一个点 实际- 设计
+          Text(
+            '终孔上下偏差距离设计：$formattedN',
+            style: const TextStyle(
+              color: Colors.red, // 字体颜色
+            ),
+          ),
           Expanded(
             child: LineChartSample9(data: design, data2: actual),
           ),
@@ -356,8 +379,8 @@ class _RepoDetailState extends State<RepoDetail> {
               ),
             ),
             // const SizedBox(height:5.0),
-            TopBottom(),
-            LeftRight(),
+            topBottom(),
+            leftRight(),
           ],
         ),
       ),

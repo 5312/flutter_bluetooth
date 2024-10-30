@@ -20,11 +20,11 @@ class _CloudState extends State<Cloud> {
 
   @override
   void initState() {
-    GetList();
+    getList();
     super.initState();
   }
 
-  Future<void> GetList() async {
+  Future<void> getList() async {
     List<RepoModel> list = await DatabaseHelper().getRepos();
 
     setState(() {

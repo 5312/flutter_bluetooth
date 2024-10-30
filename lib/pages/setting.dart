@@ -6,7 +6,6 @@ import 'package:bluetooth_mini/db/my_setting.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:bluetooth_mini/db/interfaceDb.dart';
 import 'dart:math';
-import 'dart:convert';
 
 class Setting extends StatefulWidget {
   const Setting({Key? key}) : super(key: key);
@@ -34,10 +33,13 @@ class _SettingState extends State<Setting> {
   int? selectedItem2;
   int? selectedItem3;
 
-  int? selectedIndex1 = null;
-  int? selectedIndex2 = null;
-  int? selectedIndex3 = null;
-  int? selectedIndex4 = null;
+  int? selectedIndex1;
+
+  int? selectedIndex2;
+
+  int? selectedIndex3;
+
+  int? selectedIndex4;
 
   @override
   void initState() {
@@ -57,8 +59,6 @@ class _SettingState extends State<Setting> {
 
   /// 矿区
   Widget _buildRowWorkSelect() {
-    print(_miningArea.map((item) => item.toJson()).toList());
-
     return Row(
       children: [
         const SizedBox(
@@ -202,15 +202,15 @@ class _SettingState extends State<Setting> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("提示"),
-          content: Text("您确定要删除当前文件吗?"),
+          title: const Text("提示"),
+          content: const Text("您确定要删除当前文件吗?"),
           actions: <Widget>[
             TextButton(
-              child: Text("取消"),
+              child: const Text("取消"),
               onPressed: () => Navigator.of(context).pop(), // 关闭对话框
             ),
             TextButton(
-              child: Text("删除"),
+              child: const Text("删除"),
               onPressed: () async {
                 callback();
                 Navigator.of(context).pop(true);

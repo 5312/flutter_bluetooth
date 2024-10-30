@@ -117,13 +117,11 @@ class _DataTransmissionState extends State<DataTransmission> {
       0x00,
       0x81
     ], withoutResponse: false);
-    print('探管取数');
     EasyLoading.show(status: '正在读取探管数据...');
     // 监听特征码的通知
     await c.setNotifyValue(true);
     _lastValueSubscription = c.onValueReceived.listen((value) {
       EasyLoading.dismiss();
-      print('返回');
       _backList.addAll(value);
       // c.setNotifyValue(false);
     });
@@ -145,7 +143,6 @@ class _DataTransmissionState extends State<DataTransmission> {
     for (var chunk in chunks) {
       EasyLoading.dismiss();
       Analytical analytical = Analytical(chunk);
-      print(chunk);
       if (chunk.length == 21) {
         List<DataListModel> r = employees.map((e) {
           if (e.time == analytical.dataTime()) {
@@ -374,7 +371,6 @@ class _DataTransmissionState extends State<DataTransmission> {
     List<DataListModel> result =
         await DatabaseHelper().getDataListForRepoId(_repoId);
 
-    print(result.map((d) => d.toJson()).toList());
 
     setState(() {
       employees = result;

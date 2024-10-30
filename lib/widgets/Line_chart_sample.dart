@@ -58,7 +58,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
   Widget build(BuildContext context) {
     //  widget.data 从头添加一组数据
     if (widget.data.isEmpty || widget.data2.isEmpty) {
-      return Center(child: Text('没有数据可显示'));
+      return const Center(child: Text('没有数据可显示'));
     }
     return SizedBox(
       width: double.infinity,
@@ -122,7 +122,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
                       belowBarData: BarAreaData(
                         show: false,
                       ),
-                      dotData: FlDotData(
+                      dotData: const FlDotData(
                         show: true, // 设置为 true 以显示点
                       ),
                     ),
