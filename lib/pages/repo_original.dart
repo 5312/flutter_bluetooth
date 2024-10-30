@@ -41,83 +41,103 @@ class _RepoOriginalState extends State<RepoOriginal> {
       appBar: AppBar(
         title: Text(widget.row.name),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SfDataGrid(
-              source: employeeDataSource,
-              columnWidthMode: ColumnWidthMode.fill,
-              columns: <GridColumn>[
-                GridColumn(
-                    columnName: 'id',
-                    label: Container(
-                        padding: const EdgeInsets.all(16.0),
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          '序号',
-                        ))),
-                GridColumn(
-                    columnName: 'time',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        alignment: Alignment.center,
-                        child: const Text('时间'))),
-                GridColumn(
-                    columnName: 'depth',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '深度',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-                GridColumn(
-                    columnName: 'pitch',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '俯仰角（°）',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-                GridColumn(
-                    columnName: 'heading',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '方位角（°）',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-                GridColumn(
-                    columnName: 'designPitch',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '设计俯仰角',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-                GridColumn(
-                    columnName: 'designHeading',
-                    label: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        color: const Color.fromRGBO(234, 236, 255, 1),
-                        child: const Text(
-                          '设计方位角',
-                          overflow: TextOverflow.ellipsis,
-                        ))),
-              ],
-            ),
+      body: Container(
+        color: const Color.fromRGBO(238, 239, 241, 0.8),
+        child:Container(
+          margin: const EdgeInsets.only(
+            left: 10,
+            bottom: 10,
+            right: 10,
+            top: 10,
           ),
-        ],
+          color: Colors.white,
+          padding: const EdgeInsets.all(5),
+          child:  Column(
+            children: [
+              Expanded(
+                child: SfDataGrid(
+                  source: employeeDataSource,
+                  columnWidthMode: ColumnWidthMode.fill,
+                  columns: <GridColumn>[
+                    GridColumn(
+                        columnName: 'id',
+                        label: Container(
+                            padding: const EdgeInsets.all(16.0),
+                            color: Colors.black12,
+                            // const Color.fromRGBO( 234, 236, 255, 1),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              '序号',
+                            ))),
+                    GridColumn(
+                        columnName: 'time',
+                        label: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            color: Colors.black12,
+                            // const Color.fromRGBO( 234, 236, 255, 1),
+                            alignment: Alignment.center,
+                            child: const Text('时间'))),
+                    GridColumn(
+                        columnName: 'depth',
+                        label: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            color: Colors.black12,
+                            // const Color.fromRGBO( 234, 236, 255, 1),
+                            child: const Text(
+                              '深度',
+                              overflow: TextOverflow.ellipsis,
+                            ))),
+                    GridColumn(
+                        columnName: 'pitch',
+                        label: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            color: Colors.black12,
+                            // const Color.fromRGBO( 234, 236, 255, 1),
+                            child: const Text(
+                              '俯仰角（°）',
+                              overflow: TextOverflow.ellipsis,
+                            ))),
+                    GridColumn(
+                        columnName: 'heading',
+                        label: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            color: Colors.black12,
+                            // const Color.fromRGBO( 234, 236, 255, 1),
+                            child: const Text(
+                              '方位角（°）',
+                              overflow: TextOverflow.ellipsis,
+                            ))),
+                    GridColumn(
+                        columnName: 'designPitch',
+                        label: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            color: Colors.black12,
+                            // const Color.fromRGBO( 234, 236, 255, 1),
+                            child: const Text(
+                              '设计俯仰角',
+                              overflow: TextOverflow.ellipsis,
+                            ))),
+                    GridColumn(
+                        columnName: 'designHeading',
+                        label: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            alignment: Alignment.center,
+                            color: Colors.black12,
+                            // const Color.fromRGBO( 234, 236, 255, 1),
+                            child: const Text(
+                              '设计方位角',
+                              overflow: TextOverflow.ellipsis,
+                            ))),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

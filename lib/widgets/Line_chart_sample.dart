@@ -9,7 +9,7 @@ class LineChartSample9 extends StatefulWidget {
   final List<FlSpot> data;
   final List<FlSpot> data2;
 
-  const  LineChartSample9({
+  const LineChartSample9({
     Key? key,
     required this.data,
     required this.data2,
@@ -57,8 +57,11 @@ class _LineChartSample9State extends State<LineChartSample9> {
   @override
   Widget build(BuildContext context) {
     //  widget.data 从头添加一组数据
-    return Container(
-     width: double.infinity,
+    if (widget.data.isEmpty || widget.data2.isEmpty) {
+      return Center(child: Text('没有数据可显示'));
+    }
+    return SizedBox(
+      width: double.infinity,
       child: Padding(
         padding: const EdgeInsets.only(
           left: 12,
@@ -72,7 +75,8 @@ class _LineChartSample9State extends State<LineChartSample9> {
             builder: (context, constraints) {
               return LineChart(
                 LineChartData(
-
+                  maxY: widget.data[widget.data.length - 1].y + 10,
+                  // 根据你的数据设置合适的值
                   lineTouchData: LineTouchData(
                     touchTooltipData: LineTouchTooltipData(
                       maxContentWidth: 100,
@@ -105,7 +109,9 @@ class _LineChartSample9State extends State<LineChartSample9> {
                       belowBarData: BarAreaData(
                         show: false,
                       ),
-                      dotData: const FlDotData(show: false),
+                      dotData: const FlDotData(
+                        show: true, // 设置为 true 以显示点
+                      ),
                     ),
                     LineChartBarData(
                       color: AppColors.contentColorGreen,
@@ -116,16 +122,23 @@ class _LineChartSample9State extends State<LineChartSample9> {
                       belowBarData: BarAreaData(
                         show: false,
                       ),
-                      dotData: const FlDotData(show: false),
+                      dotData: FlDotData(
+                        show: true, // 设置为 true 以显示点
+                      ),
                     ),
                   ],
                   titlesData: FlTitlesData(
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        getTitlesWidget: (value, meta) =>
-                            leftTitleWidgets(value, meta, constraints.maxWidth),
-                        reservedSize: 56,
+                        getTitlesWidget: (value, meta) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 1.0),
+                            // 增加底部填充
+                            child: Text(value.toStringAsFixed(2)), // 自定义格式
+                          );
+                        },
+                        reservedSize: 80,
                       ),
                       drawBelowEverything: true,
                     ),
@@ -135,8 +148,8 @@ class _LineChartSample9State extends State<LineChartSample9> {
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        getTitlesWidget: (value, meta) =>
-                            bottomTitleWidgets(value, meta, constraints.maxWidth),
+                        getTitlesWidget: (value, meta) => bottomTitleWidgets(
+                            value, meta, constraints.maxWidth),
                         reservedSize: 36,
                         interval: 1,
                       ),
@@ -169,7 +182,16 @@ class _LineChartSample9State extends State<LineChartSample9> {
                       return value.toInt() == 0;
                     },
                   ),
-                  borderData: FlBorderData(show: false),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: const Border(
+                      left: BorderSide(color: Colors.black),
+                      top: BorderSide(color: Colors.transparent),
+                      bottom: BorderSide(color: Colors.black),
+                      // BorderSide(color: AppColors.borderColor),
+                      right: BorderSide(color: AppColors.borderColor),
+                    ),
+                  ),
                 ),
               );
             },

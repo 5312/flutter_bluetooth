@@ -237,7 +237,7 @@ class _RepoDetailState extends State<RepoDetail> {
         top: 5,
       ),
       padding: const EdgeInsets.all(10),
-      height: 380,
+      height: 350,
       // 占屏幕高度的40%,
       child: Column(
         children: [
@@ -305,7 +305,8 @@ class _RepoDetailState extends State<RepoDetail> {
                       columnName: 'id',
                       label: Container(
                           padding: const EdgeInsets.all(0.0),
-                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          color: Colors.black12,
+                          // const Color.fromRGBO( 234, 236, 255, 1),
                           alignment: Alignment.center,
                           child: const Text(
                             '序号',
@@ -314,7 +315,8 @@ class _RepoDetailState extends State<RepoDetail> {
                       columnName: 'time',
                       label: Container(
                           padding: const EdgeInsets.all(8.0),
-                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          color: Colors.black12,
+                          // const Color.fromRGBO( 234, 236, 255, 1),
                           alignment: Alignment.center,
                           child: const Text('时间'))),
                   GridColumn(
@@ -322,7 +324,8 @@ class _RepoDetailState extends State<RepoDetail> {
                       label: Container(
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,
-                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          color: Colors.black12,
+                          // const Color.fromRGBO( 234, 236, 255, 1),
                           child: const Text(
                             '深度',
                             overflow: TextOverflow.ellipsis,
@@ -332,7 +335,8 @@ class _RepoDetailState extends State<RepoDetail> {
                       label: Container(
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,
-                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          color: Colors.black12,
+                          // const Color.fromRGBO( 234, 236, 255, 1),
                           child: const Text(
                             '俯仰角（°）',
                             overflow: TextOverflow.ellipsis,
@@ -342,7 +346,8 @@ class _RepoDetailState extends State<RepoDetail> {
                       label: Container(
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.center,
-                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          color: Colors.black12,
+                          // const Color.fromRGBO( 234, 236, 255, 1),
                           child: const Text(
                             '方位角（°）',
                             overflow: TextOverflow.ellipsis,

@@ -93,72 +93,85 @@ class _CloudState extends State<Cloud> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar('同步云端'),
-      body: Column(
-        children: [
-          Padding(
-            padding:
-                const EdgeInsets.only(top: 5, bottom: 5, right: 10, left: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              // 可选：根据需要调整按钮间的间距
-              children: [
-                Row(
+      body: Container(
+        color: const Color.fromRGBO(238, 239, 241, 0.8),
+        child: Container(
+          margin: const EdgeInsets.only(
+            left: 10,
+            bottom: 10,
+            right: 10,
+            top: 10,
+          ),
+          color: Colors.white,
+          padding: const EdgeInsets.all(5),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                    top: 5, bottom: 5, right: 10, left: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // 可选：根据需要调整按钮间的间距
                   children: [
-                    allButton,
-                    const SizedBox(
-                      width: 10,
+                    Row(
+                      children: [
+                        allButton,
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        batchButton,
+                      ],
                     ),
-                    batchButton,
+                    saveButton,
                   ],
                 ),
-                saveButton,
-              ],
-            ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Expanded(
+                  flex: 1,
+                  child: SfDataGrid(
+                    source: employeeDataSource,
+                    columnWidthMode: ColumnWidthMode.fill,
+                    columns: <GridColumn>[
+                      GridColumn(
+                          columnName: 'id',
+                          label: Container(
+                              padding: const EdgeInsets.all(16.0),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                '序号',
+                              ))),
+                      GridColumn(
+                          columnName: 'name',
+                          label: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              alignment: Alignment.center,
+                              child: const Text('名称'))),
+                      GridColumn(
+                          columnName: 'mnTime',
+                          label: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                '时间',
+                                overflow: TextOverflow.ellipsis,
+                              ))),
+                      GridColumn(
+                          columnName: 'state',
+                          label: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                '状态',
+                                overflow: TextOverflow.ellipsis,
+                              ))),
+                    ],
+                  ))
+            ],
           ),
-          const SizedBox(
-            height: 16,
-          ),
-          Expanded(
-              flex: 1,
-              child: SfDataGrid(
-                source: employeeDataSource,
-                columnWidthMode: ColumnWidthMode.fill,
-                columns: <GridColumn>[
-                  GridColumn(
-                      columnName: 'id',
-                      label: Container(
-                          padding: const EdgeInsets.all(16.0),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            '序号',
-                          ))),
-                  GridColumn(
-                      columnName: 'name',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text('名称'))),
-                  GridColumn(
-                      columnName: 'mnTime',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            '时间',
-                            overflow: TextOverflow.ellipsis,
-                          ))),
-                  GridColumn(
-                      columnName: 'state',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            '状态',
-                            overflow: TextOverflow.ellipsis,
-                          ))),
-                ],
-              ))
-        ],
+        ),
       ),
     );
   }

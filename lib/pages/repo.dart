@@ -94,7 +94,7 @@ class _RepoState extends State<Repo> {
           color: Colors.white,
           margin: const EdgeInsets.only(
             left: 10,
-            bottom: 5,
+            bottom: 10,
             right: 10,
             top: 10,
           ),
@@ -112,7 +112,8 @@ class _RepoState extends State<Repo> {
                           columnName: 'id',
                           label: Container(
                               padding: const EdgeInsets.all(0.0),
-                              color: const Color.fromRGBO(234, 236, 255, 1),
+                              color: Colors.black12,
+                              // const Color.fromRGBO( 234, 236, 255, 1),
                               alignment: Alignment.center,
                               child: const Text(
                                 '序号',
@@ -121,7 +122,8 @@ class _RepoState extends State<Repo> {
                           columnName: 'name',
                           label: Container(
                               padding: const EdgeInsets.all(8.0),
-                              color: const Color.fromRGBO(234, 236, 255, 1),
+                              color: Colors.black12,
+                              // const Color.fromRGBO( 234, 236, 255, 1),
                               alignment: Alignment.center,
                               child: const Text('名称'))),
                       GridColumn(
@@ -129,7 +131,8 @@ class _RepoState extends State<Repo> {
                           label: Container(
                               padding: const EdgeInsets.all(8.0),
                               alignment: Alignment.center,
-                              color: const Color.fromRGBO(234, 236, 255, 1),
+                              color: Colors.black12,
+                              // const Color.fromRGBO( 234, 236, 255, 1),
                               child: const Text(
                                 '时间',
                                 overflow: TextOverflow.ellipsis,
@@ -139,7 +142,8 @@ class _RepoState extends State<Repo> {
                         width: 300,
                         label: Container(
                           padding: const EdgeInsets.all(0),
-                          color: const Color.fromRGBO(234, 236, 255, 1),
+                          color: Colors.black12,
+                          // const Color.fromRGBO( 234, 236, 255, 1),
                           alignment: Alignment.center,
                           child: const Text('操作'),
                         ),
