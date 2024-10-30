@@ -57,146 +57,6 @@ class _SettingState extends State<Setting> {
     super.dispose();
   }
 
-  /// 矿区
-  Widget _buildRowWorkSelect() {
-    return Row(
-      children: [
-        const SizedBox(
-          width: 100,
-          child: Text(
-            '矿区名称:',
-            style: TextStyle(fontSize: 12),
-          ),
-        ),
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            value: _selectedMine,
-            hint: const Text('请选择一个选项'),
-            items: _miningArea.map((MyMine value) {
-              return DropdownMenuItem<String>(
-                value: value.name,
-                child: Text(value.name),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedMine = newValue;
-              });
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '请选择一个选项';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              contentPadding: EdgeInsets.only(
-                top: 0,
-                left: 10,
-                bottom: 0,
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  /// 工作面
-  Widget _buildRowFactorySelect() {
-    final showList = _work.where((i) => i.mineId == selectedItem1).toList();
-    return Row(
-      children: [
-        const SizedBox(
-          width: 100,
-          child: Text(
-            '工作面:',
-            style: TextStyle(fontSize: 12),
-          ),
-        ),
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            value: _selectedWork,
-            hint: const Text('请选择一个选项'),
-            items: showList.map((MyWork value) {
-              return DropdownMenuItem<String>(
-                value: value.name,
-                child: Text(value.name),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedWork = newValue;
-              });
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '请选择一个选项';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              contentPadding: EdgeInsets.only(
-                top: 0,
-                left: 10,
-                bottom: 0,
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  /// 钻厂
-  Widget _buildRowDrillSelect() {
-    final showList = _factory.where((i) => i.workId == selectedItem2).toList();
-    return Row(
-      children: [
-        const SizedBox(
-          width: 100,
-          child: Text(
-            '钻厂:',
-            style: TextStyle(fontSize: 12),
-          ),
-        ),
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            value: _selectedFactory,
-            hint: const Text('请选择一个选项'),
-            items: showList.map((MyFactory value) {
-              return DropdownMenuItem<String>(
-                value: value.name,
-                child: Text(value.name),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedFactory = newValue;
-              });
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '请选择一个选项';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              contentPadding: EdgeInsets.only(
-                top: 0,
-                left: 10,
-                bottom: 0,
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
   Future<bool?> showDeleteConfirmDialog1(callback) {
     return showDialog<bool>(
       context: context,
@@ -382,7 +242,6 @@ class _SettingState extends State<Setting> {
                       ),
                       child: Column(
                         children: [
-                          // _buildRowWorkSelect(),
                           Row(
                             children: [
                               const SizedBox(
@@ -443,8 +302,6 @@ class _SettingState extends State<Setting> {
                       ),
                       child: Column(
                         children: <Widget>[
-                          // _buildRowWorkSelect(),
-                          // _buildRowFactorySelect(),
                           Row(
                             children: [
                               const Text(
@@ -523,9 +380,6 @@ class _SettingState extends State<Setting> {
                       ),
                       child: Column(
                         children: <Widget>[
-                          // _buildRowWorkSelect(),
-                          // _buildRowFactorySelect(),
-                          // _buildRowDrillSelect(),
                           Row(
                             children: [
                               const Text(

@@ -43,34 +43,6 @@ class _NavigatorPageState extends State<NavigatorPage> {
             }
           },
           child: _pages[_currentIndex]),
-
-      // WillPopScope(
-      //   onWillPop: exitApp,
-      //   child: _pages[_currentIndex],
-      // ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //   currentIndex: _currentIndex,
-      //   type: BottomNavigationBarType.fixed,
-      //   selectedItemColor: _activeColor,
-      //   items: [
-      //     _bottomItem('首页', Icons.home_outlined),
-      //     _bottomItem('我的', Icons.person_outline),
-      //   ],
-      //   onTap: (index) {
-      //     setState(() {
-      //       _currentIndex = index;
-      //     });
-      //   },
-      // ),
-    );
-  }
-
-  // 底部 Item
-  BottomNavigationBarItem _bottomItem(String label, IconData icon) {
-    return BottomNavigationBarItem(
-      label: label,
-      icon: Icon(icon, color: _defaultColor),
-      activeIcon: Icon(icon, color: _activeColor),
     );
   }
 
