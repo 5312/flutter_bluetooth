@@ -152,9 +152,9 @@ class _ProbeState extends State<Probe> {
     int id = _employeeDataSource.rows.length + 1;
     DataListModel rows = DataListModel(
         id: id,
-        pitch: null,
+        pitch: double.parse(_pitch),
         depth: 0,
-        roll: double.parse(_pitch),
+        roll: null,
         heading: double.parse(_heading),
         repoId: null);
     _employees.add(rows);
