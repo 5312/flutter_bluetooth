@@ -117,7 +117,7 @@ class _DataTransmissionState extends State<DataTransmission> {
       0x00,
       0x81
     ], withoutResponse: false);
-    EasyLoading.show(status: '正在读取探管数据...');
+    EasyLoading.show(status: '正在等待设备返回...');
     // 监听特征码的通知
     await c.setNotifyValue(true);
     _lastValueSubscription = c.onValueReceived.listen((value) {
