@@ -20,8 +20,6 @@ import 'package:bluetooth_mini/db/interfaceDb.dart';
 import '../models/data_list_model.dart';
 import '../utils/analytical.dart';
 
-// import 'package:bluetooth_mini/models/time_model.dart';
-
 // 定时同步
 class TimeOut extends StatefulWidget {
   const TimeOut({Key? key}) : super(key: key);
@@ -181,10 +179,16 @@ class _TimeOutState extends State<TimeOut> {
                       if (_controllerName.text != '' &&
                           _controllerPitch.text != '' &&
                           _controllerHeading.text != '') {
+                        // 保存报表
                         int id = await DatabaseHelper().insertRepo(RepoModel(
-                            len: int.tryParse(_controllerLen.text)!,
-                            name: _controllerName.text,
-                            mnTime: DateTime.now().toString()));
+                          len: int.tryParse(_controllerLen.text)!,
+                          name: _controllerName.text,
+                          mnTime: DateTime.now().toString(),
+                          mine: _selectedMine!.name,
+                          work: _selectedWork!.name,
+                          factory: _selectedFactory!.name,
+                          drilling: _selectedDrilling!.name,
+                        ));
                         _repoId = id;
                         MyTime.setRepoId(_repoId);
                         setState(() {

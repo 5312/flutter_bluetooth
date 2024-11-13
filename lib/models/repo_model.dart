@@ -1,5 +1,8 @@
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:flutter/material.dart';
+import 'package:bluetooth_mini/db/database_helper.dart';
+import 'package:bluetooth_mini/utils/export_xml.dart';
+import 'package:bluetooth_mini/models/data_list_model.dart';
 
 class RepoModel {
   /// Creates the employee class with required details.
@@ -13,8 +16,18 @@ class RepoModel {
 
   final int len;
 
+  final String mine;
+  final String work;
+  final String factory;
+  final String drilling;
+
   RepoModel(
-      {this.id, required this.name, required this.mnTime, required this.len});
+      {this.id, required this.name, required this.mnTime, required this.len,
+        required this.mine,
+        required this.work,
+        required this.factory,
+        required this.drilling
+      });
 
   Map<String, dynamic> toJson() {
     return {
@@ -22,6 +35,11 @@ class RepoModel {
       'name': name,
       'mnTime': mnTime,
       'len': len,
+      'mine': mine,
+      'work': work,
+      'factory': factory,
+      'drilling': drilling,
+
     };
   }
 
@@ -31,6 +49,10 @@ class RepoModel {
       name: json['name'],
       mnTime: json['mnTime'],
       len: json['len'],
+      mine: json['mine'],
+      work: json['work'],
+      factory: json['factory'],
+      drilling: json['drilling'],
     );
   }
 }
@@ -45,6 +67,14 @@ class RepoDataSource extends DataGridSource {
 
   @override
   List<DataGridRow> get rows => _employeeData;
+
+  void onExport(int e) async {
+    List<DataListModel> list = await DatabaseHelper().getDataListByRepoId(e);
+    List<RepoModel> repoItem =
+    await DatabaseHelper().getReposForId(e);
+    ExportXmlPage ex = new ExportXmlPage(repoItem[0],list);
+    ex.exportXml();
+  }
 
   /// Creates the employee data source class with required details.
   RepoDataSource({
@@ -75,6 +105,10 @@ class RepoDataSource extends DataGridSource {
                     TextButton(
                       child: const Text('删除'),
                       onPressed: () => onDelete(e.id!),
+                    ),
+                    TextButton(
+                      child: const Text('导出'),
+                      onPressed: () => onExport(e.id!),
                     ),
                   ],
                 ),

@@ -30,7 +30,7 @@ class DatabaseHelper {
       version: 1,
       onCreate: (db, version) async {
         await db.execute(
-          "CREATE TABLE repos(id INTEGER PRIMARY KEY, name TEXT, mnTime TEXT,len INTEGER)",
+          "CREATE TABLE repos(id INTEGER PRIMARY KEY, name TEXT, mnTime TEXT,len INTEGER, mine TEXT, work TEXT, factory TEXT, drilling TEXT)",
         );
         await db.execute(
           "CREATE TABLE data(id INTEGER PRIMARY KEY, time TEXT, pitch REAL, roll REAL, heading REAL, depth INTEGER, repoId INTEGER, designPitch REAL, designHeading REAL)",
