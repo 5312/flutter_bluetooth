@@ -26,6 +26,14 @@ class _LineChartSample9State extends State<LineChartSample9> {
   }
 
   Widget bottomTitleWidgets(double value, TitleMeta meta, double chartWidth) {
+    // 动态判断是否显示
+    if (meta.min != null && meta.max != null) {
+      double range = meta.max! - meta.min!;
+      if (range > 10 && value % 2 != 0) {
+        // 如果范围较大，只显示偶数刻度
+        return const SizedBox.shrink();
+      }
+    }
     if (value % 1 != 0) {
       return Container();
     }
@@ -44,7 +52,6 @@ class _LineChartSample9State extends State<LineChartSample9> {
   Widget leftTitleWidgets(double value, TitleMeta meta, double chartWidth) {
     final style = TextStyle(
       color: AppColors.contentColorBlack,
-      // fontWeight: FontWeight.bold,
       fontSize: min(18, 5 * chartWidth / 300),
     );
     return SideTitleWidget(
@@ -54,12 +61,21 @@ class _LineChartSample9State extends State<LineChartSample9> {
     );
   }
 
+  /// 动态计算 maxY
+  double _getMaxY(List<FlSpot> data) {
+    var maxVal = data.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+    return maxVal;
+  }
+
   @override
   Widget build(BuildContext context) {
     //  widget.data 从头添加一组数据
     if (widget.data.isEmpty || widget.data2.isEmpty) {
       return const Center(child: Text('没有数据可显示'));
     }
+    print('min${widget.data[0]}');
+    print('min${widget.data[widget.data.length - 1]}');
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -80,8 +96,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
                   builder: (context, constraints) {
                     return LineChart(
                       LineChartData(
-                        maxY:
-                            widget.data[widget.data.length - 1].y.round() + 10,
+                        maxY: _getMaxY(widget.data2),
                         // 根据你的数据设置合适的值
                         lineTouchData: LineTouchData(
                           touchTooltipData: LineTouchTooltipData(
@@ -141,7 +156,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
                               getTitlesWidget: (value, meta) =>
                                   leftTitleWidgets(
                                       value, meta, constraints.maxWidth),
-                              reservedSize: 40,
+                              reservedSize: 100,
                             ),
                             drawBelowEverything: true,
                           ),
@@ -155,7 +170,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
                                   bottomTitleWidgets(
                                       value, meta, constraints.maxWidth),
                               reservedSize: 36,
-                              interval: 1,
+                              interval: 2,
                             ),
                             drawBelowEverything: true,
                           ),
@@ -167,24 +182,16 @@ class _LineChartSample9State extends State<LineChartSample9> {
                           show: true,
                           drawHorizontalLine: true,
                           drawVerticalLine: true,
-                          horizontalInterval: 10,
-                          verticalInterval: 5,
-                          checkToShowHorizontalLine: (value) {
-                            return value.toInt() == 0;
-                          },
-                          getDrawingHorizontalLine: (_) => FlLine(
-                            color: AppColors.contentColorBlue.withOpacity(1),
+                          getDrawingHorizontalLine: (_) => const FlLine(
+                            color: Colors.black26, //.withOpacity(1),
                             dashArray: [8, 2],
                             strokeWidth: 0.8,
                           ),
-                          getDrawingVerticalLine: (_) => FlLine(
-                            color: AppColors.contentColorYellow.withOpacity(1),
+                          getDrawingVerticalLine: (_) =>const FlLine(
+                            color: Colors.black26,
                             dashArray: [8, 2],
                             strokeWidth: 0.8,
                           ),
-                          checkToShowVerticalLine: (value) {
-                            return value.toInt() == 0;
-                          },
                         ),
                         borderData: FlBorderData(
                           show: true,
@@ -204,7 +211,6 @@ class _LineChartSample9State extends State<LineChartSample9> {
             ),
           ),
         ),
-
       ],
     );
   }

@@ -5,7 +5,7 @@ import 'package:bluetooth_mini/models/repo_model.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/models/data_list_extension.dart';
 import 'package:fl_chart/fl_chart.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 class ExportXmlPage {
   final RepoModel repoModelItem;
   final List<DataListModel> list;
@@ -28,14 +28,14 @@ class ExportXmlPage {
             designHeading: this.list[0].designHeading));
     ComputedXY computed = ComputedXY();
     List<FlSpot> design =
-        computed.calculateDesignCurve(this.list, this.repoModelItem.len);
+    computed.calculateDesignCurve(this.list, this.repoModelItem.len);
     List<FlSpot> actual =
-        computed.calculateCoordinates(this.list, this.repoModelItem.len);
+    computed.calculateCoordinates(this.list, this.repoModelItem.len);
     // 左右
     List<FlSpot> design2 =
-        computed.calculateDesignCurve2(this.list, this.repoModelItem.len);
+    computed.calculateDesignCurve2(this.list, this.repoModelItem.len);
     List<FlSpot> actual2 =
-        computed.calculateActualCurve2(this.list, this.repoModelItem.len);
+    computed.calculateActualCurve2(this.list, this.repoModelItem.len);
 
     final builder = xml.XmlBuilder();
     builder.processing(
@@ -68,17 +68,39 @@ class ExportXmlPage {
   }
 
   // 保存 XML 到用户选择的目录
-  Future<void> saveXmlToFile(String xmlContent) async {
-    // 通过文件选择器打开目录选择框
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+  Future<void> saveXmlToFile( String xmlContent) async {
+    try {
+      // 通过文件选择器打开目录选择框
+      String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
-    if (selectedDirectory != null) {
-      // 在用户选择的目录路径下创建并保存 XML 文件
-      final file = File('$selectedDirectory/output.xml');
-      await file.writeAsString(xmlContent);
-      print('XML 文件已保存到：${file.path}');
-    } else {
-      print('没有选择目录');
+      if (selectedDirectory != null) {
+        // 在用户选择的目录路径下创建并保存 XML 文件
+        final file = File('$selectedDirectory/output.xml');
+        await file.writeAsString(xmlContent);
+        // print('XML 文件已保存到：${file.path}');
+        // 显示保存成功的 Toast 消息
+        Fluttertoast.showToast(
+          msg: "XML 文件已成功保存到：${file.path}",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+        );
+      } else {
+        // 显示未选择目录的提示
+        Fluttertoast.showToast(
+          msg: "操作已取消：没有选择目录。",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+      }
+    } catch (e) {
+      print(e);
+      // 捕获任何保存过程中出现的异常并提示错误信息
+      // 捕获保存过程中出现的异常并显示错误提示
+      Fluttertoast.showToast(
+        msg: "保存失败：$e",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+      );
     }
   }
 
@@ -86,9 +108,6 @@ class ExportXmlPage {
     // 生成 XML 数据
     String xmlContent = generateXml();
     saveXmlToFile(xmlContent);
-    // // 弹出提示
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(content: Text('XML 文件已导出')),
-    // );
+
   }
 }
