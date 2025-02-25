@@ -139,7 +139,6 @@ class _DevicesStateState extends State<DevicesState> with RouteAware {
   // 发送命令
   Future<void> sendCommand(
       BluetoothCharacteristic characteristic, List<int> command) async {
-    EasyLoading.show(status: '正在读取电量...');
     // 写入数据到特征码 查询电量命令
     await characteristic.write(command, withoutResponse: false);
     // 监听特征码的通知
