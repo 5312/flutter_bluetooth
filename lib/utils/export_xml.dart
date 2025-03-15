@@ -6,6 +6,7 @@ import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/models/data_list_extension.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
 class ExportXmlPage {
   final RepoModel repoModelItem;
   final List<DataListModel> list;
@@ -14,42 +15,42 @@ class ExportXmlPage {
 
   // 示例：生成 XML 数据
   String generateXml() {
-    this.list.insert(
+    list.insert(
         0,
         DataListModel(
             id: 0,
             depth: 0,
             time: "0",
-            pitch: this.list[0].pitch!,
+            pitch: list[0].pitch!,
             roll: 0,
-            heading: this.list[0].heading!,
+            heading: list[0].heading!,
             repoId: 0,
-            designPitch: this.list[0].designPitch,
-            designHeading: this.list[0].designHeading));
+            designPitch: list[0].designPitch,
+            designHeading: list[0].designHeading));
     ComputedXY computed = ComputedXY();
     List<FlSpot> design =
-    computed.calculateDesignCurve(this.list, this.repoModelItem.len);
+        computed.calculateDesignCurve(list, repoModelItem.len);
     List<FlSpot> actual =
-    computed.calculateCoordinates(this.list, this.repoModelItem.len);
+        computed.calculateCoordinates(list, repoModelItem.len);
     // 左右
     List<FlSpot> design2 =
-    computed.calculateDesignCurve2(this.list, this.repoModelItem.len);
+        computed.calculateDesignCurve2(list, repoModelItem.len);
     List<FlSpot> actual2 =
-    computed.calculateActualCurve2(this.list, this.repoModelItem.len);
+        computed.calculateActualCurve2(list, repoModelItem.len);
 
     final builder = xml.XmlBuilder();
     builder.processing(
         'xml', 'version="1.0" encoding="UTF-8" standalone="yes"'); // 添加 XML 声明
     builder.element('钻孔数据总表', nest: () {
       builder.element('钻孔信息', nest: () {
-        builder.element('矿区', nest: this.repoModelItem.mine);
-        builder.element('工作面', nest: this.repoModelItem.work);
-        builder.element('钻场', nest: this.repoModelItem.factory);
-        builder.element('钻孔', nest: this.repoModelItem.drilling);
+        builder.element('矿区', nest: repoModelItem.mine);
+        builder.element('工作面', nest: repoModelItem.work);
+        builder.element('钻场', nest: repoModelItem.factory);
+        builder.element('钻孔', nest: repoModelItem.drilling);
       });
       builder.element('钻孔数据信息', nest: () {
         // 遍历 list 并生成 data 元素
-        this.list?.asMap().forEach((index, DataListModel data) {
+        list.asMap().forEach((index, DataListModel data) {
           builder.element('data', nest: () {
             builder.element('序号', nest: index + 1 ?? '');
             builder.element('时间', nest: data.time ?? '');
@@ -68,7 +69,7 @@ class ExportXmlPage {
   }
 
   // 保存 XML 到用户选择的目录
-  Future<void> saveXmlToFile( String xmlContent) async {
+  Future<void> saveXmlToFile(String xmlContent) async {
     try {
       // 通过文件选择器打开目录选择框
       String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
@@ -108,6 +109,5 @@ class ExportXmlPage {
     // 生成 XML 数据
     String xmlContent = generateXml();
     saveXmlToFile(xmlContent);
-
   }
 }

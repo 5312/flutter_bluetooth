@@ -22,12 +22,14 @@ class RepoModel {
   final String drilling;
 
   RepoModel(
-      {this.id, required this.name, required this.mnTime, required this.len,
-        required this.mine,
-        required this.work,
-        required this.factory,
-        required this.drilling
-      });
+      {this.id,
+      required this.name,
+      required this.mnTime,
+      required this.len,
+      required this.mine,
+      required this.work,
+      required this.factory,
+      required this.drilling});
 
   Map<String, dynamic> toJson() {
     return {
@@ -39,7 +41,6 @@ class RepoModel {
       'work': work,
       'factory': factory,
       'drilling': drilling,
-
     };
   }
 
@@ -70,9 +71,8 @@ class RepoDataSource extends DataGridSource {
 
   void onExport(int e) async {
     List<DataListModel> list = await DatabaseHelper().getDataListByRepoId(e);
-    List<RepoModel> repoItem =
-    await DatabaseHelper().getReposForId(e);
-    ExportXmlPage ex = new ExportXmlPage(repoItem[0],list);
+    List<RepoModel> repoItem = await DatabaseHelper().getReposForId(e);
+    ExportXmlPage ex = ExportXmlPage(repoItem[0], list);
     ex.exportXml();
   }
 

@@ -27,8 +27,8 @@ class _LineChartSample9State extends State<LineChartSample9> {
 
   Widget bottomTitleWidgets(double value, TitleMeta meta, double chartWidth) {
     // 动态判断是否显示
-    if (meta.min != null && meta.max != null) {
-      double range = meta.max! - meta.min!;
+    if (meta.max != null) {
+      double range = meta.max - meta.min;
       if (range > 10 && value % 2 != 0) {
         // 如果范围较大，只显示偶数刻度
         return const SizedBox.shrink();
@@ -187,7 +187,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
                             dashArray: [8, 2],
                             strokeWidth: 0.8,
                           ),
-                          getDrawingVerticalLine: (_) =>const FlLine(
+                          getDrawingVerticalLine: (_) => const FlLine(
                             color: Colors.black26,
                             dashArray: [8, 2],
                             strokeWidth: 0.8,
@@ -217,6 +217,8 @@ class _LineChartSample9State extends State<LineChartSample9> {
 }
 
 class LegendWidget extends StatelessWidget {
+  const LegendWidget({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -235,7 +237,8 @@ class LegendItem extends StatelessWidget {
   final Color color;
   final String text;
 
-  LegendItem({required this.color, required this.text});
+  const LegendItem({Key? key, required this.color, required this.text})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -244,7 +247,7 @@ class LegendItem extends StatelessWidget {
       child: Row(
         children: [
           Container(width: 16, height: 16, color: color),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Text(text),
         ],
       ),

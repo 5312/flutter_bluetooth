@@ -498,9 +498,9 @@ class _TimeOutState extends State<TimeOut> {
     List<DataListModel> endLen = await DatabaseHelper()
         .getDataListByRepoId(_repoId); // employees[employees.length - 1];
 
-    String _times = Analytical([]).formatTime(_currentTime);
+    String times = Analytical([]).formatTime(_currentTime);
     int id = await DatabaseHelper().insertDataList(DataListModel(
-      time: _times,
+      time: times,
       // 深度等于长度的累加
       depth: (endLen.length + 1) * int.parse(_length),
       repoId: _repoId,
@@ -510,7 +510,7 @@ class _TimeOutState extends State<TimeOut> {
     DataListModel rows = DataListModel(
       id: id,
       // pitch: null,
-      time: _times,
+      time: times,
       // 长度累加
       depth: (endLen.length + 1) * int.parse(_length),
     );
