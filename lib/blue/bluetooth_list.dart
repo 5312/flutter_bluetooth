@@ -54,22 +54,72 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
+  Future<void> onConnectPressed(BluetoothDevice device) async {
+    try {
+      await device.connectAndUpdateStream().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('连接超时');
+        },
+      );
+      
+      if (mounted) {
+        // 更改provider状态
+        Provider.of<BluetoothManager>(context, listen: false)
+            .setCurrentDevice(device);
+            
+        Snackbar.show(ABC.c, "连接成功", success: true);
+        
+        // 停止扫描
+        await FlutterBluePlus.stopScan();
+        
+        // 返回上一页
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      }
+    } catch (e) {
+      if (e is FlutterBluePlusException &&
+          e.code == FbpErrorCode.connectionCanceled.index) {
+        return; // 忽略用户取消的连接
+      }
+      
+      if (mounted) {
+        Snackbar.show(ABC.c, prettyException("连接失败:", e), success: false);
+      }
+      
+      // 如果是超时错误，尝试重新连接
+      if (e is TimeoutException && mounted) {
+        Snackbar.show(ABC.c, "正在重试连接...", success: true);
+        await Future.delayed(const Duration(seconds: 2));
+        return onConnectPressed(device);
+      }
+    }
+  }
+
   Future onScanPressed() async {
     try {
       List<Guid> withServices = [Guid("0000FFE0-0000-1000-8000-00805F9B34FB")];
       _systemDevices = await FlutterBluePlus.systemDevices(withServices);
     } catch (e) {
-      Snackbar.show(ABC.b, prettyException("获取系统设备错误:", e), success: false);
+      if (mounted) {
+        Snackbar.show(ABC.b, prettyException("获取系统设备错误:", e), success: false);
+      }
+      return;
     }
+    
     try {
       // 15秒后停止扫描
       await FlutterBluePlus.startScan(
-          timeout: const Duration(seconds: 15),
-          withServices: [Guid('0000FFE0-0000-1000-8000-00805F9B34FB')]);
+        timeout: const Duration(seconds: 15),
+        withServices: [Guid('0000FFE0-0000-1000-8000-00805F9B34FB')]
+      );
     } catch (e) {
-      Snackbar.show(ABC.b, prettyException("Start Scan Error:", e),
-          success: false);
+      if (mounted) {
+        Snackbar.show(ABC.b, prettyException("扫描失败:", e), success: false);
+      }
     }
+    
     if (mounted) {
       setState(() {});
     }
@@ -77,29 +127,13 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Future onStopPressed() async {
     try {
-      FlutterBluePlus.stopScan();
+      await FlutterBluePlus.stopScan();
     } catch (e) {
-      Snackbar.show(ABC.b, prettyException("Stop Scan Error:", e),
-          success: false);
+      if (mounted) {
+        Snackbar.show(ABC.b, prettyException("停止扫描失败:", e), success: false);
+      }
     }
   }
-
-  // 连接设备
-  void onConnectPressed(BluetoothDevice device) {
-    device.connectAndUpdateStream().catchError((e) {
-      Snackbar.show(ABC.c, prettyException("Connect Error:", e),
-          success: false);
-    });
-    // 更改provider 状态
-    Provider.of<BluetoothManager>(context, listen: false)
-        .setCurrentDevice(device);
-    // 导航至详细页面
-    // MaterialPageRoute route = MaterialPageRoute(
-    //     builder: (context) => DeviceScreen(device: device),
-    //     settings: const RouteSettings(name: '/DeviceScreen'));
-    // Navigator.of(context).push(route);
-  }
-
 
   Future onRefresh() {
     if (_isScanning == false) {

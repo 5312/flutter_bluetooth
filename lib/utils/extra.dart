@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'utils.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -31,26 +32,26 @@ extension Extra on BluetoothDevice {
   }
 
   // 连接
-  // connect & update stream
   Future<void> connectAndUpdateStream() async {
     _cstream.add(true);
     try {
-      await connect(mtu: null);
+      await connect();
+      _cstream.add(false);
     } catch (e) {
       _cstream.add(false);
       rethrow;
     }
   }
 
-  // 断开
-  // disconnect & update stream
+  // 断开连接
   Future<void> disconnectAndUpdateStream({bool queue = true}) async {
     _dstream.add(true);
-
     try {
-      await disconnect(queue: queue);
-    } finally {
+      await disconnect();
       _dstream.add(false);
+    } catch (e) {
+      _dstream.add(false);
+      rethrow;
     }
   }
 }

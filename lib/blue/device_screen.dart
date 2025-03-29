@@ -91,14 +91,31 @@ class _DeviceScreenState extends State<DeviceScreen> {
   // 连接
   Future onConnectPressed() async {
     try {
-      await widget.device.connectAndUpdateStream();
-      Snackbar.show(ABC.c, "连接成功", success: true);
+      await widget.device.connectAndUpdateStream().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('连接超时');
+        },
+      );
+      if (mounted) {
+        Snackbar.show(ABC.c, "连接成功", success: true);
+      }
     } catch (e) {
       if (e is FlutterBluePlusException &&
           e.code == FbpErrorCode.connectionCanceled.index) {
-        // ignore connections canceled by the user
-      } else {
+        // 忽略用户取消的连接
+        return;
+      }
+      
+      if (mounted) {
         Snackbar.show(ABC.c, prettyException("连接失败:", e), success: false);
+      }
+      
+      // 如果是超时错误，尝试重新连接
+      if (e is TimeoutException && mounted) {
+        Snackbar.show(ABC.c, "正在重试连接...", success: true);
+        await Future.delayed(const Duration(seconds: 2));
+        return onConnectPressed();
       }
     }
   }
@@ -107,9 +124,13 @@ class _DeviceScreenState extends State<DeviceScreen> {
   Future onCancelPressed() async {
     try {
       await widget.device.disconnectAndUpdateStream(queue: false);
-      Snackbar.show(ABC.c, "取消连接", success: true);
+      if (mounted) {
+        Snackbar.show(ABC.c, "已取消连接", success: true);
+      }
     } catch (e) {
-      Snackbar.show(ABC.c, prettyException("取消失败:", e), success: false);
+      if (mounted) {
+        Snackbar.show(ABC.c, prettyException("取消失败:", e), success: false);
+      }
     }
   }
 
@@ -117,10 +138,13 @@ class _DeviceScreenState extends State<DeviceScreen> {
   Future onDisconnectPressed() async {
     try {
       await widget.device.disconnectAndUpdateStream();
-      Snackbar.show(ABC.c, "Disconnect: Success", success: true);
+      if (mounted) {
+        Snackbar.show(ABC.c, "已断开连接", success: true);
+      }
     } catch (e) {
-      Snackbar.show(ABC.c, prettyException("Disconnect Error:", e),
-          success: false);
+      if (mounted) {
+        Snackbar.show(ABC.c, prettyException("断开连接失败:", e), success: false);
+      }
     }
   }
 
