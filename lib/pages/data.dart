@@ -32,7 +32,7 @@ class _DataTransmissionState extends State<DataTransmission> {
   String _drillingString = '';
   String _name = '';
   int _repoId = 0;
-  final List<int> _backList = [];
+  final List<List<int>> _backList = [];
 
   // 选中特征码
   BluetoothCharacteristic? targetCharacteristic;
@@ -122,25 +122,17 @@ class _DataTransmissionState extends State<DataTransmission> {
     await c.setNotifyValue(true);
     _lastValueSubscription = c.onValueReceived.listen((value) {
       EasyLoading.dismiss();
-      _backList.addAll(value);
-      // c.setNotifyValue(false);
+      _backList.add(value);
+      print('value: $value');
+      // 每次接收到数据后立即同步
+      getData(_backList);
     });
   }
 
-  void getData(List<int> originalArray) {
-    if (originalArray.length < 9) return;
-    // 去掉前导部分
-    List<int> trimmedArray = originalArray.sublist(9); // 去掉前 9 个元素
-
-    // 分割数组，每段 21 个元素
-    List<List<int>> chunks = [];
-    for (int i = 0; i < trimmedArray.length; i += 21) {
-      int end = (i + 21 < trimmedArray.length) ? i + 21 : trimmedArray.length;
-      chunks.add(trimmedArray.sublist(i, end));
-    }
-
+  void getData(List<List<int>> originalArray) {
+    print('originalArray: $originalArray');
     // 打印每一段
-    for (var chunk in chunks) {
+    for (var chunk in originalArray) {
       EasyLoading.dismiss();
       Analytical analytical = Analytical(chunk);
       if (chunk.length == 21) {
@@ -246,22 +238,6 @@ class _DataTransmissionState extends State<DataTransmission> {
                                           fontSize: 16, color: Colors.white)),
                                   onPressed: () {
                                     discoverServices(bluetooth.currentDevice);
-                                  },
-                                ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blueAccent,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10)), // 设置圆角为10
-                                    ),
-                                  ),
-                                  child: const Text('数据同步',
-                                      style: TextStyle(
-                                          fontSize: 16, color: Colors.white)),
-                                  onPressed: () {
-                                    // 保存操作的逻辑
-                                    getData(_backList);
                                   },
                                 ),
                                 orificeButton,
