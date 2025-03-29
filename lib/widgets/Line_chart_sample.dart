@@ -29,30 +29,40 @@ class _LineChartSample9State extends State<LineChartSample9> {
     // 动态判断是否显示
     if (meta.max != null) {
       double range = meta.max - meta.min;
-      if (range > 10 && value % 2 != 0) {
-        // 如果范围较大，只显示偶数刻度
+      // 根据数据范围动态调整显示间隔
+      double interval = (range / 10).ceil().toDouble(); // 将范围分成约10个区间
+      if (value % interval != 0) {
         return const SizedBox.shrink();
       }
     }
-    if (value % 1 != 0) {
-      return Container();
-    }
+    
     final style = TextStyle(
       color: AppColors.contentColorBlue,
       fontWeight: FontWeight.bold,
-      fontSize: min(18, 5 * chartWidth / 300),
+      fontSize: min(16, 4 * chartWidth / 300), // 减小字体大小
     );
     return SideTitleWidget(
       axisSide: meta.axisSide,
       space: 16,
+      angle: 45, // 旋转标签以节省空间
       child: Text(meta.formattedValue, style: style),
     );
   }
 
   Widget leftTitleWidgets(double value, TitleMeta meta, double chartWidth) {
+    // 动态判断是否显示
+    if (meta.max != null) {
+      double range = meta.max - meta.min;
+      // 根据数据范围动态调整显示间隔
+      double interval = (range / 8).ceil().toDouble(); // 将范围分成约8个区间
+      if (value % interval != 0) {
+        return const SizedBox.shrink();
+      }
+    }
+    
     final style = TextStyle(
       color: AppColors.contentColorBlack,
-      fontSize: min(18, 5 * chartWidth / 300),
+      fontSize: min(16, 4 * chartWidth / 300), // 减小字体大小
     );
     return SideTitleWidget(
       axisSide: meta.axisSide,
@@ -177,8 +187,8 @@ class _LineChartSample9State extends State<LineChartSample9> {
                               getTitlesWidget: (value, meta) =>
                                   bottomTitleWidgets(
                                       value, meta, constraints.maxWidth),
-                              reservedSize: 36,
-                              interval: 2,
+                              reservedSize: 45, // 增加保留空间以适应旋转的标签
+                              interval: 1.0,
                             ),
                             drawBelowEverything: true,
                           ),
