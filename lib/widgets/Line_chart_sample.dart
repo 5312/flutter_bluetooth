@@ -57,7 +57,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
     return SideTitleWidget(
       axisSide: meta.axisSide,
       space: 16,
-      child: Text(meta.formattedValue, style: style),
+      child: Text(value.toStringAsFixed(1), style: style),
     );
   }
 
@@ -65,6 +65,12 @@ class _LineChartSample9State extends State<LineChartSample9> {
   double _getMaxY(List<FlSpot> data) {
     var maxVal = data.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
     return maxVal;
+  }
+
+  /// 动态计算 minY
+  double _getMinY(List<FlSpot> data) {
+    var minVal = data.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
+    return minVal;
   }
 
   @override
@@ -96,7 +102,8 @@ class _LineChartSample9State extends State<LineChartSample9> {
                   builder: (context, constraints) {
                     return LineChart(
                       LineChartData(
-                        maxY: _getMaxY(widget.data2),
+                        maxY: ((_getMaxY([...widget.data, ...widget.data2]) * 1.1) / 1.0).ceil() * 1.0,
+                        minY: ((_getMinY([...widget.data, ...widget.data2]) * 1.1) / 1.0).floor() * 1.0,
                         // 根据你的数据设置合适的值
                         lineTouchData: LineTouchData(
                           touchTooltipData: LineTouchTooltipData(
@@ -157,6 +164,7 @@ class _LineChartSample9State extends State<LineChartSample9> {
                                   leftTitleWidgets(
                                       value, meta, constraints.maxWidth),
                               reservedSize: 100,
+                              interval: 1.0,
                             ),
                             drawBelowEverything: true,
                           ),

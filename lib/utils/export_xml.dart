@@ -6,6 +6,7 @@ import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/models/data_list_extension.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ExportXmlPage {
   final RepoModel repoModelItem;
@@ -68,21 +69,67 @@ class ExportXmlPage {
     return document.toString(); // 转换为字符串
   }
 
+  // 请求存储权限
+  Future<bool> _requestStoragePermission() async {
+    if (Platform.isAndroid) {
+      if (await Permission.storage.request().isGranted) {
+        return true;
+      }
+      // 对于 Android 10 及以上版本
+      if (await Permission.manageExternalStorage.request().isGranted) {
+        return true;
+      }
+      return false;
+    }
+    return true; // 在iOS上默认返回true
+  }
+
   // 保存 XML 到用户选择的目录
   Future<void> saveXmlToFile(String xmlContent) async {
     try {
+      print("检查存储权限...");
+      bool hasPermission = await _requestStoragePermission();
+      if (!hasPermission) {
+        SmartDialog.showToast("无法获取存储权限，请在系统设置中授予权限");
+        return;
+      }
+
+      print("开始选择保存目录...");
       String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+      print("选择的目录: $selectedDirectory");
 
       if (selectedDirectory != null) {
         final file = File('$selectedDirectory/output.xml');
+        print("准备写入文件: ${file.path}");
+        
+        // 检查目录是否存在
+        if (!await Directory(selectedDirectory).exists()) {
+          print("目录不存在，尝试创建目录");
+          await Directory(selectedDirectory).create(recursive: true);
+        }
+        
+        // 检查文件是否可写
+        try {
+          await file.writeAsString('test');
+          await file.delete();
+        } catch (e) {
+          print("文件写入测试失败: $e");
+          SmartDialog.showToast("无法写入到选择的目录，请检查权限或选择其他目录");
+          return;
+        }
+        
+        // 写入实际内容
         await file.writeAsString(xmlContent);
+        print("文件写入成功");
         SmartDialog.showToast("XML 文件已成功保存到：${file.path}");
       } else {
+        print("用户取消了目录选择");
         SmartDialog.showToast("操作已取消：没有选择目录。");
       }
-    } catch (e) {
-      print(e);
-      SmartDialog.showToast("保存失败：$e");
+    } catch (e, stackTrace) {
+      print("保存文件时发生错误: $e");
+      print("错误堆栈: $stackTrace");
+      SmartDialog.showToast("保存失败：${e.toString()}");
     }
   }
 

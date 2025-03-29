@@ -7,7 +7,6 @@ import 'package:bluetooth_mini/widgets/Line_chart_sample.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:bluetooth_mini/models/data_list_extension.dart';
 
-//
 // 测点数据
 class RepoDetail extends StatefulWidget {
   final RepoModel row;
@@ -151,6 +150,7 @@ class _RepoDetailState extends State<RepoDetail> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
