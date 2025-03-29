@@ -5,7 +5,7 @@ import 'package:bluetooth_mini/models/repo_model.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 import 'package:bluetooth_mini/models/data_list_extension.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class ExportXmlPage {
   final RepoModel repoModelItem;
@@ -71,37 +71,18 @@ class ExportXmlPage {
   // 保存 XML 到用户选择的目录
   Future<void> saveXmlToFile(String xmlContent) async {
     try {
-      // 通过文件选择器打开目录选择框
       String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
       if (selectedDirectory != null) {
-        // 在用户选择的目录路径下创建并保存 XML 文件
         final file = File('$selectedDirectory/output.xml');
         await file.writeAsString(xmlContent);
-        // print('XML 文件已保存到：${file.path}');
-        // 显示保存成功的 Toast 消息
-        Fluttertoast.showToast(
-          msg: "XML 文件已成功保存到：${file.path}",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-        );
+        SmartDialog.showToast("XML 文件已成功保存到：${file.path}");
       } else {
-        // 显示未选择目录的提示
-        Fluttertoast.showToast(
-          msg: "操作已取消：没有选择目录。",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
+        SmartDialog.showToast("操作已取消：没有选择目录。");
       }
     } catch (e) {
       print(e);
-      // 捕获任何保存过程中出现的异常并提示错误信息
-      // 捕获保存过程中出现的异常并显示错误提示
-      Fluttertoast.showToast(
-        msg: "保存失败：$e",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-      );
+      SmartDialog.showToast("保存失败：$e");
     }
   }
 
