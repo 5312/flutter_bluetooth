@@ -1,7 +1,7 @@
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:flutter/material.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
-import 'package:bluetooth_mini/utils/export_xml.dart';
+import 'package:bluetooth_mini/utils/export_pdf.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
 
 class RepoModel {
@@ -69,11 +69,12 @@ class RepoDataSource extends DataGridSource {
   @override
   List<DataGridRow> get rows => _employeeData;
 
+
   void onExport(int e) async {
     List<DataListModel> list = await DatabaseHelper().getDataListByRepoId(e);
     List<RepoModel> repoItem = await DatabaseHelper().getReposForId(e);
-    ExportXmlPage ex = ExportXmlPage(repoItem[0], list);
-    ex.exportXml();
+    ExportPdfPage ex = ExportPdfPage(repoItem[0], list);
+    ex.exportPdf();
   }
 
   /// Creates the employee data source class with required details.
