@@ -21,40 +21,44 @@ class _MyFormState extends State<MyForm> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         SizedBox(
-          height: 40,
+          height: 30, // 进一步减小高度
           child: Row(
             children: <Widget>[
               SizedBox(
-                width: 90,
+                width: 70, // 减小标签宽度
                 child: Text(
                   '${widget.label} :',
-                  style: const TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 11), // 减小标签字体
                 ),
               ),
               const SizedBox(
-                width: 10,
+                width: 2, // 减小间距
               ),
               Expanded(
                 child: TextFormField(
                   controller: widget.controller,
+                  style: const TextStyle(fontSize: 12), // 减小字体大小
                   keyboardType: widget.label == '检测名称'
                       ? TextInputType.text
                       : TextInputType.number, // 限制输入为数字
                   decoration: InputDecoration(
+                    isDense: true, // 使表单更紧凑
                     hintText: '请输入${widget.label}',
+                    hintStyle: const TextStyle(fontSize: 11), // 减小提示文字大小
                     suffixIcon: Padding(
-                      padding: const EdgeInsets.only(top: 5),
+                      padding: const EdgeInsets.only(top: 2), // 减小上间距
                       // 为后缀文本添加右侧内边距
                       child: Text(widget.suffixIcon,
-                          style: const TextStyle(fontSize: 15)),
+                          style: const TextStyle(fontSize: 11)), // 减小后缀字体大小
                     ), // 后缀文本
                     //border: const OutlineInputBorder(),
                     contentPadding: const EdgeInsets.only(
                       top: 0,
-                      left: 10,
-                      right: 10,
+                      left: 5, // 减小左间距
+                      right: 5, // 减小右间距
                       bottom: 0,
                     ), // 调整内部间距
                   ),
@@ -76,7 +80,7 @@ class _MyFormState extends State<MyForm> {
           ),
         ),
         const SizedBox(
-          height: 10,
+          height: 2, // 进一步减小底部间距
         )
       ],
     );

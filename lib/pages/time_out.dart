@@ -30,19 +30,15 @@ class TimeOut extends StatefulWidget {
 
 class _TimeOutState extends State<TimeOut> {
   late BluetoothManager bluetooth;
-
   List<DataListModel> employees = <DataListModel>[];
   late EmployeeDataSource employeeDataSource;
-
   final TextEditingController _controllerLen = TextEditingController();
   final TextEditingController _controllerName = TextEditingController();
   final TextEditingController _controllerPitch = TextEditingController();
   final TextEditingController _controllerHeading = TextEditingController();
-
   bool isSync = false;
   bool isFixed = false;
   bool isPop = false;
-
   // 选中特征码
   BluetoothCharacteristic? targetCharacteristic;
 
@@ -123,111 +119,163 @@ class _TimeOutState extends State<TimeOut> {
               },
               child: DialogKeyboard(
                 contentBody: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minWidth: 550, // 设置最小宽度
-                    ),
-                    child: SingleChildScrollView(
+                  constraints: const BoxConstraints(
+                    minWidth: 480, // 再减小最小宽度
+                    maxWidth: 520, // 减小最大宽度
+                    maxHeight: 230, // 减小最大高度
+                  ),
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(), // 禁止滚动
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          _buildRowMineSelect(state),
-                          _buildRowWorkSelect(state),
-                          _buildRowFactorySelect(state),
-                          _buildRowDrillSelect(state),
-                          MyForm(
-                            label: '设计俯仰角',
-                            suffixIcon: '',
-                            controller: _controllerPitch,
+                          Row(
+                            children: [
+                              Expanded(child: _buildRowMineSelect(state)),
+                              const SizedBox(width: 5), // 减小水平间距
+                              Expanded(child: _buildRowWorkSelect(state)),
+                            ],
                           ),
-                          MyForm(
-                            label: '设计方位角',
-                            suffixIcon: '',
-                            controller: _controllerHeading,
+                          const SizedBox(height: 3), // 减小垂直间距
+                          Row(
+                            children: [
+                              Expanded(child: _buildRowFactorySelect(state)),
+                              const SizedBox(width: 5), // 减小水平间距
+                              Expanded(child: _buildRowDrillSelect(state)),
+                            ],
                           ),
-                          MyForm(
-                            label: '钻杆长度',
-                            suffixIcon: 'm',
-                            controller: _controllerLen,
+                          const SizedBox(height: 3), // 减小垂直间距
+                          Row(
+                            children: [
+                              Expanded(
+                                child: MyForm(
+                                  label: '设计俯仰角',
+                                  suffixIcon: '',
+                                  controller: _controllerPitch,
+                                ),
+                              ),
+                              const SizedBox(width: 5), // 减小水平间距
+                              Expanded(
+                                child: MyForm(
+                                  label: '设计方位角',
+                                  suffixIcon: '',
+                                  controller: _controllerHeading,
+                                ),
+                              ),
+                            ],
                           ),
-                          MyForm(
-                            label: '检测名称',
-                            suffixIcon: '',
-                            controller: _controllerName,
+                          const SizedBox(height: 3), // 减小垂直间距
+                          Row(
+                            children: [
+                              Expanded(
+                                child: MyForm(
+                                  label: '钻杆长度',
+                                  suffixIcon: 'm',
+                                  controller: _controllerLen,
+                                ),
+                              ),
+                              const SizedBox(width: 5), // 减小水平间距
+                              Expanded(
+                                child: MyForm(
+                                  label: '检测名称',
+                                  suffixIcon: '',
+                                  controller: _controllerName,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    )),
-                title: const Text(
-                  '添加矿区',
-                  style: TextStyle(fontSize: 14),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    style:
-                        TextButton.styleFrom(backgroundColor: Colors.black12),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      '取消',
-                      style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  TextButton(
-                    style: TextButton.styleFrom(backgroundColor: Colors.blue),
-                    onPressed: () async {
-                      if (_controllerName.text != '' &&
-                          _controllerPitch.text != '' &&
-                          _controllerHeading.text != '') {
-                        // 保存报表
-                        int id = await DatabaseHelper().insertRepo(RepoModel(
-                          len: int.tryParse(_controllerLen.text)!,
-                          name: _controllerName.text,
-                          mnTime: DateTime.now().toString(),
-                          mine: _selectedMine!.name,
-                          work: _selectedWork!.name,
-                          factory: _selectedFactory!.name,
-                          drilling: _selectedDrilling!.name,
-                        ));
-                        _repoId = id;
-                        MyTime.setRepoId(_repoId);
-                        setState(() {
-                          isSync = true;
-                          // 矿区
-                          _mineString = _selectedMine!.name;
-                          MyTime.setMine(_mineString);
-                          // 工作面
-                          _workString = _selectedWork!.name;
-                          MyTime.setWork(_workString);
-                          // 钻厂
-                          _factoryString = _selectedFactory!.name;
-                          MyTime.setFactory(_factoryString);
-                          // 钻孔
-                          _drillingString = _selectedDrilling!.name;
-                          MyTime.setDirlling(_drillingString);
-                          // 钻杆长度
-                          _length = _controllerLen.text;
-                          MyTime.setLength(_length);
-                          // 检测名称
-                          _nString = _controllerName.text;
-                          MyTime.setMonName(_nString);
-                          // 设计俯仰角
-                          _designPitch = _controllerPitch.text;
-                          MyTime.setPitch(_designPitch);
-                          // 设计方位角
-                          _designHeading = _controllerHeading.text;
-                          MyTime.setHeading(_designHeading);
-                          // repoid
-                          //关闭对话框并保存repo
-                        });
+                ),
+                // title:const Text(
+                //   '添加矿区',
+                //   style: TextStyle(fontSize: 13), // 减小标题字体
+                // ),
+                actions: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 5), // 向上移动按钮
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.black12,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), // 进一步减小按钮内边距
+                        minimumSize: const Size(50, 25), // 更小的按钮尺寸
+                      ),
+                      onPressed: () {
                         Navigator.of(context).pop();
-                      } else {
-                        SmartDialog.showToast('请填写信息');
-                      }
-                    },
-                    child: const Text(
-                      '下一步',
-                      style: TextStyle(color: Colors.white),
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        '取消',
+                        style: TextStyle(color: Colors.white, fontSize: 12), // 减小按钮字体
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 5), // 向上移动按钮
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), // 进一步减小按钮内边距
+                        minimumSize: const Size(50, 25), // 更小的按钮尺寸
+                      ),
+                      onPressed: () async {
+                        if (_controllerName.text != '' &&
+                            _controllerPitch.text != '' &&
+                            _controllerHeading.text != '') {
+                          // 保存报表
+                          int id = await DatabaseHelper().insertRepo(RepoModel(
+                            len: int.tryParse(_controllerLen.text)!,
+                            name: _controllerName.text,
+                            mnTime: DateTime.now().toString(),
+                            mine: _selectedMine!.name,
+                            work: _selectedWork!.name,
+                            factory: _selectedFactory!.name,
+                            drilling: _selectedDrilling!.name,
+                          ));
+                          _repoId = id;
+                          MyTime.setRepoId(_repoId);
+                          setState(() {
+                            isSync = true;
+                            // 矿区
+                            _mineString = _selectedMine!.name;
+                            MyTime.setMine(_mineString);
+                            // 工作面
+                            _workString = _selectedWork!.name;
+                            MyTime.setWork(_workString);
+                            // 钻厂
+                            _factoryString = _selectedFactory!.name;
+                            MyTime.setFactory(_factoryString);
+                            // 钻孔
+                            _drillingString = _selectedDrilling!.name;
+                            MyTime.setDirlling(_drillingString);
+                            // 钻杆长度
+                            _length = _controllerLen.text;
+                            MyTime.setLength(_length);
+                            // 检测名称
+                            _nString = _controllerName.text;
+                            MyTime.setMonName(_nString);
+                            // 设计俯仰角
+                            _designPitch = _controllerPitch.text;
+                            MyTime.setPitch(_designPitch);
+                            // 设计方位角
+                            _designHeading = _controllerHeading.text;
+                            MyTime.setHeading(_designHeading);
+                            // repoid
+                            //关闭对话框并保存repo
+                          });
+                          Navigator.of(context).pop();
+                        } else {
+                          SmartDialog.showToast('请填写信息');
+                        }
+                      },
+                      child: const Text(
+                        '下一步',
+                        style: TextStyle(color: Colors.white, fontSize: 12), // 减小按钮字体
+                      ),
                     ),
                   ),
                 ],
@@ -239,46 +287,44 @@ class _TimeOutState extends State<TimeOut> {
 
   /// 矿区
   Widget _buildRowMineSelect(StateSetter state) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          width: 100,
-          child: Text(
-            '矿区名称:',
-            style: TextStyle(fontSize: 12),
-          ),
+        const Text(
+          '矿区名称:',
+          style: TextStyle(fontSize: 12),
         ),
-        Expanded(
-          child: DropdownButtonFormField<MyMine>(
-            value: _selectedMine,
-            hint: const Text('请选择一个选项'),
-            items: _miningArea.map((MyMine value) {
-              return DropdownMenuItem<MyMine>(
-                value: value,
-                child: Text(value.name),
-              );
-            }).toList(),
-            onChanged: (MyMine? newValue) {
-              state(() {
-                _selectedMine = newValue;
-              });
-            },
-            validator: (value) {
-              if (value == null) {
-                return '请选择一个选项';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              contentPadding: EdgeInsets.only(
-                top: 0,
-                left: 10,
-                bottom: 0,
-              ),
+        const SizedBox(height: 2),
+        DropdownButtonFormField<MyMine>(
+          value: _selectedMine,
+          hint: const Text('请选择一个选项'),
+          isDense: true, // 使下拉框更紧凑
+          items: _miningArea.map((MyMine value) {
+            return DropdownMenuItem<MyMine>(
+              value: value,
+              child: Text(value.name),
+            );
+          }).toList(),
+          onChanged: (MyMine? newValue) {
+            state(() {
+              _selectedMine = newValue;
+            });
+          },
+          validator: (value) {
+            if (value == null) {
+              return '请选择一个选项';
+            }
+            return null;
+          },
+          decoration: const InputDecoration(
+            border: UnderlineInputBorder(),
+            contentPadding: EdgeInsets.only(
+              top: 0,
+              left: 10,
+              bottom: 0,
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -287,46 +333,44 @@ class _TimeOutState extends State<TimeOut> {
   Widget _buildRowWorkSelect(StateSetter state) {
     List<MyWork> showList =
         _work.where((i) => i.mineId == _selectedMine?.id).toList();
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          width: 100,
-          child: Text(
-            '工作面:',
-            style: TextStyle(fontSize: 12),
-          ),
+        const Text(
+          '工作面:',
+          style: TextStyle(fontSize: 12),
         ),
-        Expanded(
-          child: DropdownButtonFormField<MyWork>(
-            value: _selectedWork,
-            hint: const Text('请选择一个选项'),
-            items: showList.map((MyWork value) {
-              return DropdownMenuItem<MyWork>(
-                value: value,
-                child: Text(value.name),
-              );
-            }).toList(),
-            onChanged: (MyWork? newValue) {
-              state(() {
-                _selectedWork = newValue;
-              });
-            },
-            validator: (value) {
-              if (value == null) {
-                return '请选择一个选项';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              contentPadding: EdgeInsets.only(
-                top: 0,
-                left: 10,
-                bottom: 0,
-              ),
+        const SizedBox(height: 2),
+        DropdownButtonFormField<MyWork>(
+          value: _selectedWork,
+          hint: const Text('请选择一个选项'),
+          isDense: true, // 使下拉框更紧凑
+          items: showList.map((MyWork value) {
+            return DropdownMenuItem<MyWork>(
+              value: value,
+              child: Text(value.name),
+            );
+          }).toList(),
+          onChanged: (MyWork? newValue) {
+            state(() {
+              _selectedWork = newValue;
+            });
+          },
+          validator: (value) {
+            if (value == null) {
+              return '请选择一个选项';
+            }
+            return null;
+          },
+          decoration: const InputDecoration(
+            border: UnderlineInputBorder(),
+            contentPadding: EdgeInsets.only(
+              top: 0,
+              left: 10,
+              bottom: 0,
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -335,46 +379,44 @@ class _TimeOutState extends State<TimeOut> {
   Widget _buildRowFactorySelect(StateSetter state) {
     List<MyFactory> showList =
         _factory.where((i) => i.workId == _selectedWork?.id).toList();
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          width: 100,
-          child: Text(
-            '钻厂:',
-            style: TextStyle(fontSize: 12),
-          ),
+        const Text(
+          '钻厂:',
+          style: TextStyle(fontSize: 12),
         ),
-        Expanded(
-          child: DropdownButtonFormField<MyFactory>(
-            value: _selectedFactory,
-            hint: const Text('请选择一个选项'),
-            items: showList.map((MyFactory value) {
-              return DropdownMenuItem<MyFactory>(
-                value: value,
-                child: Text(value.name),
-              );
-            }).toList(),
-            onChanged: (MyFactory? newValue) {
-              state(() {
-                _selectedFactory = newValue;
-              });
-            },
-            validator: (value) {
-              if (value == null) {
-                return '请选择一个选项';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              contentPadding: EdgeInsets.only(
-                top: 0,
-                left: 10,
-                bottom: 0,
-              ),
+        const SizedBox(height: 2),
+        DropdownButtonFormField<MyFactory>(
+          value: _selectedFactory,
+          hint: const Text('请选择一个选项'),
+          isDense: true, // 使下拉框更紧凑
+          items: showList.map((MyFactory value) {
+            return DropdownMenuItem<MyFactory>(
+              value: value,
+              child: Text(value.name),
+            );
+          }).toList(),
+          onChanged: (MyFactory? newValue) {
+            state(() {
+              _selectedFactory = newValue;
+            });
+          },
+          validator: (value) {
+            if (value == null) {
+              return '请选择一个选项';
+            }
+            return null;
+          },
+          decoration: const InputDecoration(
+            border: UnderlineInputBorder(),
+            contentPadding: EdgeInsets.only(
+              top: 0,
+              left: 10,
+              bottom: 0,
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -383,46 +425,44 @@ class _TimeOutState extends State<TimeOut> {
   Widget _buildRowDrillSelect(StateSetter state) {
     List<MyDrilling> showList =
         _drilling.where((i) => i.factoryId == _selectedFactory?.id).toList();
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          width: 100,
-          child: Text(
-            '钻孔:',
-            style: TextStyle(fontSize: 12),
-          ),
+        const Text(
+          '钻孔:',
+          style: TextStyle(fontSize: 12),
         ),
-        Expanded(
-          child: DropdownButtonFormField<MyDrilling>(
-            value: _selectedDrilling,
-            hint: const Text('请选择一个选项'),
-            items: showList.map((MyDrilling value) {
-              return DropdownMenuItem<MyDrilling>(
-                value: value,
-                child: Text(value.name),
-              );
-            }).toList(),
-            onChanged: (MyDrilling? newValue) {
-              state(() {
-                _selectedDrilling = newValue;
-              });
-            },
-            validator: (value) {
-              if (value == null) {
-                return '请选择一个选项';
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              contentPadding: EdgeInsets.only(
-                top: 0,
-                left: 10,
-                bottom: 0,
-              ),
+        const SizedBox(height: 2),
+        DropdownButtonFormField<MyDrilling>(
+          value: _selectedDrilling,
+          hint: const Text('请选择一个选项'),
+          isDense: true, // 使下拉框更紧凑
+          items: showList.map((MyDrilling value) {
+            return DropdownMenuItem<MyDrilling>(
+              value: value,
+              child: Text(value.name),
+            );
+          }).toList(),
+          onChanged: (MyDrilling? newValue) {
+            state(() {
+              _selectedDrilling = newValue;
+            });
+          },
+          validator: (value) {
+            if (value == null) {
+              return '请选择一个选项';
+            }
+            return null;
+          },
+          decoration: const InputDecoration(
+            border: UnderlineInputBorder(),
+            contentPadding: EdgeInsets.only(
+              top: 0,
+              left: 10,
+              bottom: 0,
             ),
           ),
-        )
+        ),
       ],
     );
   }
