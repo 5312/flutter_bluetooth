@@ -65,7 +65,6 @@ class RepoDataSource extends DataGridSource {
   final void Function(RepoModel) onDetail; // 详情按钮回调
   final void Function(RepoModel) onOrigin; // 原始数据按钮回调
   List<DataGridRow> _employeeData = [];
-
   @override
   List<DataGridRow> get rows => _employeeData;
 
@@ -107,9 +106,12 @@ class RepoDataSource extends DataGridSource {
                       child: const Text('删除'),
                       onPressed: () => onDelete(e.id!),
                     ),
-                    TextButton(
-                      child: const Text('导出'),
-                      onPressed: () => onExport(e.id!),
+                    SizedBox(
+                      width: 90, // 增加按钮宽度
+                      child: TextButton(
+                        child: const Text('导出PDF'),
+                        onPressed: () => onExport(e.id!),
+                      ),
                     ),
                   ],
                 ),

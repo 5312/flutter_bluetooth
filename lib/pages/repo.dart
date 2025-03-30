@@ -110,6 +110,7 @@ class _RepoState extends State<Repo> {
                     columns: <GridColumn>[
                       GridColumn(
                           columnName: 'id',
+                          width: 50,
                           label: Container(
                               padding: const EdgeInsets.all(0.0),
                               color: Colors.black12,
@@ -120,6 +121,7 @@ class _RepoState extends State<Repo> {
                               ))),
                       GridColumn(
                           columnName: 'name',
+                          width: 100,
                           label: Container(
                               padding: const EdgeInsets.all(8.0),
                               color: Colors.black12,
@@ -139,7 +141,7 @@ class _RepoState extends State<Repo> {
                               ))),
                       GridColumn(
                         columnName: 'actions',
-                        width: 300,
+                        width: 350,
                         label: Container(
                           padding: const EdgeInsets.all(0),
                           color: Colors.black12,

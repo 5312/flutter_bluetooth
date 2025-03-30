@@ -128,7 +128,6 @@ class _DataTransmissionState extends State<DataTransmission> {
       getData(_backList);
     });
   }
-
   void getData(List<List<int>> originalArray) {
     print('originalArray: $originalArray');
     // 打印每一段
@@ -152,6 +151,7 @@ class _DataTransmissionState extends State<DataTransmission> {
       }
     }
   }
+  
 
   @override
   void dispose() {

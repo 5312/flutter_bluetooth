@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'dart:math';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:file_picker/file_picker.dart';
@@ -108,18 +111,16 @@ class ExportPdfPage {
             
             pw.SizedBox(height: 20),
             
-            // 钻孔数据表格
-            pw.Header(level: 1, text: '钻孔数据信息'),
+            // 钻孔数据表格 - 测点数据表格
+            pw.Header(level: 1, text: '测点数据信息'),
             pw.Table(
               border: pw.TableBorder.all(),
               columnWidths: {
-                0: const pw.FlexColumnWidth(1),
-                1: const pw.FlexColumnWidth(2),
+                0: const pw.FlexColumnWidth(0.6),
+                1: const pw.FlexColumnWidth(2.5),
                 2: const pw.FlexColumnWidth(1),
-                3: const pw.FlexColumnWidth(1),
-                4: const pw.FlexColumnWidth(1),
-                5: const pw.FlexColumnWidth(1),
-                6: const pw.FlexColumnWidth(1),
+                3: const pw.FlexColumnWidth(1.5),
+                4: const pw.FlexColumnWidth(1.5),
               },
               children: [
                 // 表头
@@ -129,10 +130,8 @@ class ExportPdfPage {
                     pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('序号')),
                     pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('时间')),
                     pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('深度')),
-                    pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('倾角')),
-                    pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('方位角')),
-                    pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('左右偏差')),
-                    pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('上下偏差')),
+                    pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('俯仰角（°）')),
+                    pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('方位角（°）')),
                   ],
                 ),
                 // 数据行
@@ -144,15 +143,33 @@ class ExportPdfPage {
                       pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('${list[index].depth}')),
                       pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('${list[index].pitch}')),
                       pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('${list[index].heading}')),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('${index < actual2.length ? actual2[index].y.toStringAsFixed(2) : ""}')),
-                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('${index < actual.length ? actual[index].y.toStringAsFixed(2) : ""}')),
                     ],
                   );
                 }),
               ],
             ),
             
-            // 可以在这里添加图表或其他信息（简化版本）
+            pw.SizedBox(height: 30),
+            
+            // 上下偏差图表
+            pw.Header(level: 2, text: '上下偏差（上正下负）'),
+            // 终孔偏差信息
+            pw.Paragraph(
+              text: '终孔上下偏差距离设计：${(actual.last.y - design.last.y).toStringAsFixed(2)}',
+              style: const pw.TextStyle(color: PdfColors.red, fontSize: 12),
+            ),
+            _buildLineChart(design, actual),
+            
+            pw.SizedBox(height: 20),
+            
+            // 左右偏差图表
+            pw.Header(level: 2, text: '左右偏差（左正右负）'),
+            pw.Paragraph(
+              text: '终孔左右偏差距离设计：${(actual2.last.y - design2.last.y).toStringAsFixed(2)}',
+              style: const pw.TextStyle(color: PdfColors.red, fontSize: 12),
+            ),
+            _buildLineChart(design2, actual2),
+            
             pw.SizedBox(height: 30),
             pw.Paragraph(
               text: '生成时间: ${DateTime.now().toString()}',
@@ -168,6 +185,70 @@ class ExportPdfPage {
     );
 
     return pdf;
+  }
+  
+  // 构建线性图表
+  pw.Widget _buildLineChart(List<FlSpot> designData, List<FlSpot> actualData) {
+    // 查找最大和最小值，确定图表范围
+    final allPoints = [...designData, ...actualData];
+    final maxY = allPoints.map((spot) => spot.y).reduce((a, b) => a > b ? a : b) * 1.1;
+    final minY = allPoints.map((spot) => spot.y).reduce((a, b) => a < b ? a : b) * 1.1;
+    
+    // 设置图表的横轴数据点数
+    final xAxisPoints = designData.length;
+    
+    // 构建图表
+    return pw.Container(
+      height: 200,
+      child: pw.Chart(
+        grid: pw.CartesianGrid(
+          xAxis: pw.FixedAxis.fromStrings(
+            List.generate(xAxisPoints, (index) => '${designData[index].x.toInt()}'),
+            marginStart: 30,
+            marginEnd: 30,
+            // 如果数据点太多，则只显示部分标签
+            textStyle: pw.TextStyle(fontSize: 6),
+          ),
+          yAxis: pw.FixedAxis(
+            [minY.floor(), 0, maxY.ceil()],
+            format: (v) => v.toStringAsFixed(1),
+            divisions: true,
+          ),
+        ),
+        datasets: [
+          // 设计曲线
+          pw.LineDataSet(
+            legend: '设计曲线',
+            drawPoints: true,
+            isCurved: true,
+            pointSize: 1,
+            color: PdfColors.pink,
+            data: List.generate(
+              designData.length, 
+              (index) => pw.LineChartValue(
+                index.toDouble(), 
+                designData[index].y
+              )
+            ),
+          ),
+          // 实际曲线
+          pw.LineDataSet(
+            legend: '实际曲线',
+            drawPoints: true,
+            isCurved: true,
+            pointSize: 1,
+            color: PdfColors.green,
+            data: List.generate(
+              actualData.length, 
+              (index) => pw.LineChartValue(
+                index.toDouble(), 
+                actualData[index].y
+              )
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // 请求存储权限
