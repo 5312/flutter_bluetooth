@@ -40,6 +40,7 @@ dependencies:
   # PDF生成和打印
   pdf: ^3.10.7
   printing: ^5.12.0
+  http: ^1.3.0
 dev_dependencies:
   flutter_lints: ^4.0.0
   flutter_test:
@@ -54,9 +55,15 @@ flutter:
   assets:
     - assets/images/login/
     - assets/images/home/
+    - assets/fonts/
+    - assets/fonts/NotoSansSC-VariableFont_wght.ttf
+    - assets/fonts/QingNiaoHuaGuangJianMeiHei-2.ttf
   # 自定义字体图标（该脚手架没有用这个，用的是 Flutter 自带的默认 Icons）
   # 使用教程 https://book.flutterchina.club/chapter3/img_and_icon.html#_3-3-2-icon
   fonts:
     - family: iconfont
       fonts:
         - asset: assets/icons/iconfont.ttf
+    - family: NotoSansSC
+      fonts:
+        - asset: assets/fonts/NotoSansSC-VariableFont_wght.ttf

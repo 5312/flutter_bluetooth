@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:bluetooth_mini/db/database_helper.dart';
 import 'package:bluetooth_mini/utils/export_pdf.dart';
 import 'package:bluetooth_mini/models/data_list_model.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class RepoModel {
   /// Creates the employee class with required details.
@@ -70,10 +71,28 @@ class RepoDataSource extends DataGridSource {
 
 
   void onExport(int e) async {
-    List<DataListModel> list = await DatabaseHelper().getDataListByRepoId(e);
-    List<RepoModel> repoItem = await DatabaseHelper().getReposForId(e);
-    ExportPdfPage ex = ExportPdfPage(repoItem[0], list);
-    ex.exportPdf();
+    try {
+      print("开始导出PDF，ID: $e");
+      List<DataListModel> list = await DatabaseHelper().getDataListByRepoId(e);
+      print("获取到数据点列表，数量: ${list.length}");
+      
+      List<RepoModel> repoItem = await DatabaseHelper().getReposForId(e);
+      print("获取仓库数据: ${repoItem.length} 项");
+      
+      if (repoItem.isEmpty) {
+        print("错误：未找到相关仓库数据");
+        SmartDialog.showToast("错误：未找到相关数据");
+        return;
+      }
+      
+      ExportPdfPage ex = ExportPdfPage(repoItem[0], list);
+      print("开始导出PDF");
+      ex.exportPdf();
+    } catch (e, stackTrace) {
+      print("导出PDF时出错: $e");
+      print("错误堆栈: $stackTrace");
+      SmartDialog.showToast("导出PDF时出错: ${e.toString()}");
+    }
   }
 
   /// Creates the employee data source class with required details.

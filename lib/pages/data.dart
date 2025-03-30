@@ -122,7 +122,6 @@ class _DataTransmissionState extends State<DataTransmission> {
       SmartDialog.showToast('获取设备服务出错: $e');
     }
   }
-
   // 发送命令
   Future<void> handleSync(BluetoothCharacteristic c) async {
     // 写入数据到特征码 启动采集
@@ -156,7 +155,6 @@ class _DataTransmissionState extends State<DataTransmission> {
           _lastValueSubscription?.cancel();
         }
       });
-      
       // 监听特征码的通知
       await c.setNotifyValue(true);
       _lastValueSubscription = c.onValueReceived.listen((value) {
