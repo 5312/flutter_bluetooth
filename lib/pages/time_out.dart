@@ -240,6 +240,8 @@ class _TimeOutState extends State<TimeOut> {
                           MyTime.setRepoId(_repoId);
                           setState(() {
                             isSync = true;
+                            isFixed = false;
+                            isPop = false;
                             // 矿区
                             _mineString = _selectedMine!.name;
                             MyTime.setMine(_mineString);
@@ -515,20 +517,12 @@ class _TimeOutState extends State<TimeOut> {
       isPop = true;
       // 第一次返回才开始计数
       if (iniTime) {
+        // 启动本地计时器，从0开始计时
+        _currentTime = 0;
         backTime();
         iniTime = false;
       }
-      // 转为16进制数据用来查看文档对照
-      // List<String> hexArray = bytesToHexArray(value);
       EasyLoading.dismiss();
-      // if (hexArray[3] == 'f0') {
-      // Analytical analytical = Analytical(value);
-      // _time = analytical.dataTime();
-      // String pitch = analytical.getPitch();
-      // setState(() {
-      //   // _pitch = pitch;
-      // });
-      // }
     });
   }
 
@@ -573,13 +567,25 @@ class _TimeOutState extends State<TimeOut> {
     employeeDataSource = EmployeeDataSource(employeeData: employees);
   }
 
-  // 启动成功后倒计时
+  // 启动成功后倒计时，使用更精确的计时方式
   void backTime() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    // 取消已有的计时器
+    _timer?.cancel();
+    
+    // 记录启动计时的时间点
+    final DateTime startTime = DateTime.now();
+    
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (mounted) {
+        // 计算从启动到现在的精确秒数
+        final int elapsedSeconds = DateTime.now().difference(startTime).inSeconds;
+        
         setState(() {
-          _currentTime += 1;
+          // 直接使用计算出的秒数而不是增量方式，避免累积误差
+          _currentTime = elapsedSeconds;
         });
+      } else {
+        timer.cancel();
       }
     });
   }
@@ -673,7 +679,12 @@ class _TimeOutState extends State<TimeOut> {
                         child: Column(
                           children: [
                             Text(
-                                '累计时间：${Analytical([]).formatTime(_currentTime)}'),
+                                '累计时间：${Analytical([]).formatTime(_currentTime)}',
+                                style: const TextStyle(
+                                  fontSize: 18, 
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue
+                                )),
                             const SizedBox(
                               height: 20,
                             ),
@@ -835,16 +846,13 @@ class _TimeOutState extends State<TimeOut> {
 
   @override
   void dispose() {
+    // 取消蓝牙特征值通知订阅
     _lastValueSubscription?.cancel();
-    if (targetCharacteristic != null) {
-      targetCharacteristic!.setNotifyValue(false);
-// 停止采集
-      targetCharacteristic!
-          .write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
-    }
+    
 
-    // 停止定时器
+    // 停止计时器
     _timer?.cancel();
+    
     super.dispose();
   }
 }
