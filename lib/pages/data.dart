@@ -26,6 +26,9 @@ class _DataTransmissionState extends State<DataTransmission> {
   late EmployeeDataSourceData employeeDataSource =
       EmployeeDataSourceData(dataModels: []);
 
+  // 添加表格控制器
+  final DataGridController _dataGridController = DataGridController();
+
   String _mineString = '';
   String _workString = '';
   String _factoryString = '';
@@ -193,7 +196,23 @@ class _DataTransmissionState extends State<DataTransmission> {
           setState(() {
             employees = r;
             employeeDataSource = EmployeeDataSourceData(dataModels: r);
+            
+            // 查找当前更新的数据在列表中的索引
+            int updatedRowIndex = -1;
+            for (int i = 0; i < employees.length; i++) {
+              if (employees[i].time == analytical.dataTime()) {
+                updatedRowIndex = i;
+                break;
+              }
+            }
+            // 如果找到了被更新的行，滚动到该行
+            if (updatedRowIndex != -1) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _dataGridController.scrollToRow(updatedRowIndex.toDouble(), canAnimate: true);
+              });
+            }
           });
+          
           // 检查是否已经收到了最后一条数据
           bool isLastDataReceived = false;
           if (employees.isNotEmpty) {
@@ -405,6 +424,7 @@ class _DataTransmissionState extends State<DataTransmission> {
                             child: SfDataGrid(
                               headerRowHeight: 40,
                               source: employeeDataSource,
+                              controller: _dataGridController,
                               gridLinesVisibility: GridLinesVisibility.none,
                               columnWidthMode: ColumnWidthMode.fill,
                               columns: <GridColumn>[

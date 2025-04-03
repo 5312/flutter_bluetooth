@@ -571,10 +571,8 @@ class _TimeOutState extends State<TimeOut> {
   void backTime() {
     // 取消已有的计时器
     _timer?.cancel();
-    
     // 记录启动计时的时间点
     final DateTime startTime = DateTime.now();
-    
     _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (mounted) {
         // 计算从启动到现在的精确秒数
@@ -681,8 +679,7 @@ class _TimeOutState extends State<TimeOut> {
                             Text(
                                 '累计时间：${Analytical([]).formatTime(_currentTime)}',
                                 style: const TextStyle(
-                                  fontSize: 18, 
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14, 
                                   color: Colors.blue
                                 )),
                             const SizedBox(
