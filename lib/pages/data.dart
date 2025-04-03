@@ -143,7 +143,6 @@ class _DataTransmissionState extends State<DataTransmission> {
       ], withoutResponse: false);
       
       EasyLoading.show(status: '正在等待设备返回...');
-      
       // 创建一个超时标志
       bool hasReceivedData = false;
       
@@ -161,24 +160,24 @@ class _DataTransmissionState extends State<DataTransmission> {
         hasReceivedData = true;
         _backList.add(value);
         print('value: $value');
+        // 收到第一条数据时，更新加载提示文字
+        if (_backList.length == 1) {
+          EasyLoading.dismiss();
+          EasyLoading.show(status: '正在接收数据...');
+        }
         // 每次接收到数据后立即同步
         getData(_backList);
-      }, onError: (error) {
-        EasyLoading.dismiss();
-        SmartDialog.showToast('数据接收出错: $error');
-      }, onDone: () {
-        EasyLoading.dismiss();
       });
     } catch (e) {
       EasyLoading.dismiss();
       SmartDialog.showToast('发送命令失败: $e');
     }
   }
+  
   void getData(List<List<int>> originalArray) {
     print('originalArray: $originalArray');
     // 打印每一段
     for (var chunk in originalArray) {
-      // 这里不需要再次dismiss，因为已经在接收监听中处理了
       try {
         Analytical analytical = Analytical(chunk);
         if (chunk.length == 21) {
@@ -195,6 +194,24 @@ class _DataTransmissionState extends State<DataTransmission> {
             employees = r;
             employeeDataSource = EmployeeDataSourceData(dataModels: r);
           });
+          // 检查是否已经收到了最后一条数据
+          bool isLastDataReceived = false;
+          if (employees.isNotEmpty) {
+            // 获取employee列表中最后一条数据的时间
+            final lastDataTime = employees.last.roll;
+            // 检查是否与当前解析的数据时间匹配
+            if (employees.last.heading!= null && employees.last.pitch !=null) {
+              isLastDataReceived = true;
+            }
+          }
+          // 如果是最后一条数据，关闭弹窗
+          if (isLastDataReceived) {
+            EasyLoading.dismiss();
+            SmartDialog.showToast('数据接收完成');
+            // 取消订阅，停止监听
+            _lastValueSubscription?.cancel();
+            _lastValueSubscription = null;
+          }
         }
       } catch (e) {
         SmartDialog.showToast('数据解析错误: $e');
