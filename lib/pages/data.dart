@@ -56,12 +56,12 @@ class _DataTransmissionState extends State<DataTransmission> {
     // 先弹窗
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (bluetooth.currentDevice == null) {
-    //     Navigator.of(context).pop();
-    //     SmartDialog.showToast('请连接蓝牙');
-    //   }
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (bluetooth.currentDevice == null) {
+        Navigator.of(context).pop();
+        SmartDialog.showToast('请连接蓝牙');
+      }
+    });
     super.initState();
   }
 
