@@ -56,12 +56,12 @@ class _DataTransmissionState extends State<DataTransmission> {
     // 先弹窗
     bluetooth = Provider.of<BluetoothManager>(context, listen: false);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (bluetooth.currentDevice == null) {
-        Navigator.of(context).pop();
-        SmartDialog.showToast('请连接蓝牙');
-      }
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (bluetooth.currentDevice == null) {
+    //     Navigator.of(context).pop();
+    //     SmartDialog.showToast('请连接蓝牙');
+    //   }
+    // });
     super.initState();
   }
 
@@ -129,25 +129,64 @@ class _DataTransmissionState extends State<DataTransmission> {
   Future<void> handleSync(BluetoothCharacteristic c) async {
     // 写入数据到特征码 启动采集
     try {
-      await c.write([
-        0x68,
-        0x0C,
-        0x00,
-        0x73,
-        0x02,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x81
-      ], withoutResponse: false);
+      // 发送停止采集命令
+      await c.write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
       
-      EasyLoading.show(status: '正在等待设备返回...');
+      // 设置监听特征码的通知
+      await c.setNotifyValue(true);
+      
+      EasyLoading.show(status: '开始读取数据...');
+      
       // 创建一个超时标志
       bool hasReceivedData = false;
+      
+      // 开始逐条获取数据
+      if (employees.isEmpty) {
+        SmartDialog.showToast('表格中没有时间数据，无法获取');
+        EasyLoading.dismiss();
+        return;
+      }
+      
+      // 监听接收的数据
+      _lastValueSubscription = c.onValueReceived.listen((value) {
+        hasReceivedData = true;
+        _backList.add(value);
+        print('接收到数据: $value');
+        
+        // 解析当前接收到的数据
+        getData(_backList);
+      });
+      
+      // 按照表格中的时间数据逐条获取
+      for (int i = 0; i < employees.length; i++) {
+        // 获取表格中的时间数据作为索引
+        final seconds = int.tryParse(employees[i].time ?? '0') ?? 0;
+        
+        // 准备读取命令，使用3字节表示索引，高字节在前
+        final byte1 = (seconds >> 16) & 0xFF;
+        final byte2 = (seconds >> 8) & 0xFF;
+        final byte3 = seconds & 0xFF;
+        
+        // 发送取数命令
+        List<int> readCommand = [
+          0x68, 0x0C, 0x00, 0x72, 
+          byte1, byte2, byte3
+        ];
+        
+        // 计算校验和 - 简单累加最后一个字节
+        int checksum = 0;
+        for (int j = 0; j < readCommand.length; j++) {
+          checksum += readCommand[j];
+        }
+        readCommand.add(checksum & 0xFF);
+        
+        await c.write(readCommand, withoutResponse: false);
+        
+        // 等待一小段时间，避免命令发送过快
+        await Future.delayed(const Duration(milliseconds: 200));
+        
+        EasyLoading.show(status: '正在读取第 ${i+1}/${employees.length} 条数据...');
+      }
       
       // 设置超时处理
       Future.delayed(const Duration(seconds: 10), () {
@@ -155,22 +194,12 @@ class _DataTransmissionState extends State<DataTransmission> {
           EasyLoading.dismiss();
           SmartDialog.showToast('设备响应超时，请重试');
           _lastValueSubscription?.cancel();
-        }
-      });
-      // 监听特征码的通知
-      await c.setNotifyValue(true);
-      _lastValueSubscription = c.onValueReceived.listen((value) {
-        hasReceivedData = true;
-        _backList.add(value);
-        print('value: $value');
-        // 收到第一条数据时，更新加载提示文字
-        if (_backList.length == 1) {
+        } else {
           EasyLoading.dismiss();
-          EasyLoading.show(status: '正在接收数据...');
+          SmartDialog.showToast('数据读取完成');
         }
-        // 每次接收到数据后立即同步
-        getData(_backList);
       });
+      
     } catch (e) {
       EasyLoading.dismiss();
       SmartDialog.showToast('发送命令失败: $e');
@@ -178,21 +207,29 @@ class _DataTransmissionState extends State<DataTransmission> {
   }
   
   void getData(List<List<int>> originalArray) {
-    print('originalArray: $originalArray');
     // 打印每一段
     for (var chunk in originalArray) {
       try {
-        Analytical analytical = Analytical(chunk);
         if (chunk.length == 21) {
+          Analytical analytical = Analytical(chunk);
+          String dataTime = analytical.dataTime();
+          String roll = analytical.getRoll();
+          String heading = analytical.getHeading();
+          String pitch = analytical.getPitch();
+          
+          print('解析数据: 时间=$dataTime, roll=$roll, heading=$heading, pitch=$pitch');
+          
+          // 更新表格中对应时间的数据
           List<DataListModel> r = employees.map((e) {
-            if (e.time == analytical.dataTime()) {
-              e.roll = double.parse(analytical.getRoll());
-              e.heading = double.parse(analytical.getHeading());
-              e.pitch = double.parse(analytical.getPitch());
+            if (e.time == dataTime) {
+              e.roll = double.parse(roll);
+              e.heading = double.parse(heading);
+              e.pitch = double.parse(pitch);
               return e;
             }
             return e;
           }).toList();
+          
           setState(() {
             employees = r;
             employeeDataSource = EmployeeDataSourceData(dataModels: r);
@@ -200,11 +237,12 @@ class _DataTransmissionState extends State<DataTransmission> {
             // 查找当前更新的数据在列表中的索引
             int updatedRowIndex = -1;
             for (int i = 0; i < employees.length; i++) {
-              if (employees[i].time == analytical.dataTime()) {
+              if (employees[i].time == dataTime) {
                 updatedRowIndex = i;
                 break;
               }
             }
+            
             // 如果找到了被更新的行，滚动到该行
             if (updatedRowIndex != -1) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -212,25 +250,6 @@ class _DataTransmissionState extends State<DataTransmission> {
               });
             }
           });
-          
-          // 检查是否已经收到了最后一条数据
-          bool isLastDataReceived = false;
-          if (employees.isNotEmpty) {
-            // 获取employee列表中最后一条数据的时间
-            final lastDataTime = employees.last.roll;
-            // 检查是否与当前解析的数据时间匹配
-            if (employees.last.heading!= null && employees.last.pitch !=null) {
-              isLastDataReceived = true;
-            }
-          }
-          // 如果是最后一条数据，关闭弹窗
-          if (isLastDataReceived) {
-            EasyLoading.dismiss();
-            SmartDialog.showToast('数据接收完成');
-            // 取消订阅，停止监听
-            _lastValueSubscription?.cancel();
-            _lastValueSubscription = null;
-          }
         }
       } catch (e) {
         SmartDialog.showToast('数据解析错误: $e');
@@ -389,7 +408,7 @@ class _DataTransmissionState extends State<DataTransmission> {
                                     discoverServices(bluetooth.currentDevice);
                                   },
                                 ),
-                                orificeButton,
+                                // orificeButton,
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.blueAccent,

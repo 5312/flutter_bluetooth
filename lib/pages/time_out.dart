@@ -501,7 +501,6 @@ class _TimeOutState extends State<TimeOut> {
       }
     }
   }
-
   // 启动连接
   Future<void> handleSync(BluetoothCharacteristic c) async {
     bool iniTime = true;
