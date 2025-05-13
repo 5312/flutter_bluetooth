@@ -38,19 +38,23 @@ class PcCommunicationService {
   
   // 设置PC服务器
   void setServer(Map<String, dynamic> serverData) {
-    final String name = serverData['name'] ?? 'DrillTrack Server';
+    // 获取服务器名称，确保中文能正确显示
+    final String serverName = serverData['name'] != null && serverData['name'].toString().trim().isNotEmpty
+        ? serverData['name'].toString()
+        : '钻孔轨迹仪数据处理系统';
+    
     final String ipAddress = serverData['ip'];
     final int httpPort = serverData['http_port'] ?? 8080;
     final int discoveryPort = serverData['discovery_port'] ?? 9090;
     
     _currentServer = DrillTrackServer(
-      name: name,
+      name: serverName,
       ipAddress: ipAddress,
       httpPort: httpPort,
       discoveryPort: discoveryPort,
     );
     
-    debugPrint('设置DrillTrack服务器: ${_currentServer.toString()}');
+    debugPrint('设置钻孔轨迹仪数据处理系统服务器: ${_currentServer.toString()}');
   }
   
   // 获取当前服务器
