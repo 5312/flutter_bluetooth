@@ -46,7 +46,7 @@ class _DataTransmissionState extends State<DataTransmission>
     StreamSubscription<List<int>>? _lastValueSubscription;
 
     @override
-    void initState() 
+    void initState()
     {
         _mineString = MyTime.getMine() ?? '';
         _workString = MyTime.getWork() ?? '';
@@ -61,7 +61,7 @@ class _DataTransmissionState extends State<DataTransmission>
 
         WidgetsBinding.instance.addPostFrameCallback((_)
             {
-                if (bluetooth.currentDevice == null) 
+                if (bluetooth.currentDevice == null)
                 {
                     Navigator.of(context).pop();
                     SmartDialog.showToast('请连接蓝牙');
@@ -72,19 +72,19 @@ class _DataTransmissionState extends State<DataTransmission>
     }
 
     // foreach 读取特征值
-    void readServiceFunction(service) 
+    void readServiceFunction(service)
     {
         // 具名函数的内容
-        if (service.uuid.toString() == 'ffe0') 
+        if (service.uuid.toString() == 'ffe0')
         {
             // Reads all characteristics
             var characteristics = service.characteristics;
             for (BluetoothCharacteristic c in characteristics)
             {
-                if (c.uuid.toString() == 'ffe1') 
+                if (c.uuid.toString() == 'ffe1')
                 {
                     // 例如读取特征码的值
-                    if (mounted) 
+                    if (mounted)
                     {
                         setState(()
                             {
@@ -104,12 +104,12 @@ class _DataTransmissionState extends State<DataTransmission>
     // 读取指定服务及特征值
     void discoverServices(BluetoothDevice? onConnectdevice) async
     {
-        if (onConnectdevice == null) 
+        if (onConnectdevice == null)
         {
             SmartDialog.showToast('未连接设备');
             return;
         }
-        if (!onConnectdevice.isConnected) 
+        if (!onConnectdevice.isConnected)
         {
             SmartDialog.showToast('请连接设备后再试！');
             return;
@@ -130,7 +130,7 @@ class _DataTransmissionState extends State<DataTransmission>
             bool foundTargetService = false;
             services.forEach((service)
                 {
-                    if (service.uuid.toString() == 'ffe0') 
+                    if (service.uuid.toString() == 'ffe0')
                     {
                         foundTargetService = true;
                         readServiceFunction(service);
@@ -138,7 +138,7 @@ class _DataTransmissionState extends State<DataTransmission>
                 }
             );
 
-            if (!foundTargetService) 
+            if (!foundTargetService)
             {
                 EasyLoading.dismiss();
                 SmartDialog.showToast('未找到目标服务，请检查设备');
@@ -151,92 +151,155 @@ class _DataTransmissionState extends State<DataTransmission>
         }
     }
     // 发送命令
-    Future<void> handleSync(BluetoothCharacteristic c) async
+    Future<void> handleSync1(BluetoothCharacteristic c) async
     {
         // 写入数据到特征码 启动采集
         try
         {
-            // 发送停止采集命令
             await c.write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
 
-            // 设置监听特征码的通知
-            await c.setNotifyValue(true);
+            await c.write([
+                    0x68,
+                    0x0C,
+                    0x00,
+                    0x73,
+                    0x02,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x81
+                ], withoutResponse: false);
 
-            EasyLoading.show(status: '开始读取数据...');
-
+            EasyLoading.show(status: '正在等待设备返回...');
             // 创建一个超时标志
             bool hasReceivedData = false;
-            // 开始逐条获取数据
-            if (employees.isEmpty) 
-            {
-                SmartDialog.showToast('表格中没有时间数据，无法获取');
-                EasyLoading.dismiss();
-                return;
-            }
-            // 监听接收的数据
-            _lastValueSubscription = c.onValueReceived.listen((value)
-                {
-                    hasReceivedData = true;
-                    // _backList.add(value);
-                    print('接收到数据: $value');
-                    // 解析当前接收到的数据
-                    setTableData(value);
-                    EasyLoading.dismiss();
-                }
-            );
-            // 按照表格中的时间数据逐条获取
-            for (int i = 0; i < employees.length; i++)
-            {
-                // 获取表格中的时间数据作为索引
-                final seconds = int.tryParse(employees[i].time ?? '0') ?? 0;
-
-                // 准备读取命令，使用3字节表示索引，高字节在前
-                final byte1 = (seconds >> 16) & 0xFF;
-                final byte2 = (seconds >> 8) & 0xFF;
-                final byte3 = seconds & 0xFF;
-
-                // 发送取数命令
-                List<int> readCommand = [
-                    0x68, 0x0C, 0x00, 0x72,
-                    byte1, byte2, byte3
-                ];
-
-                // 计算校验和 - 简单累加最后一个字节
-                int checksum = 0;
-                for (int j = 0; j < readCommand.length; j++)
-                {
-                    checksum += readCommand[j];
-                }
-                readCommand.add(checksum & 0xFF);
-
-                await c.write(readCommand, withoutResponse: false);
-
-                // 等待一小段时间，避免命令发送过快
-                await Future.delayed(const Duration(milliseconds: 200));
-
-                EasyLoading.show(status: '正在读取第 ${i + 1}/${employees.length} 条数据...');
-                if(i == employees.length -1){
-                  EasyLoading.dismiss();
-                }
-            }
 
             // 设置超时处理
             Future.delayed(const Duration(seconds: 10), ()
                 {
-                    if (!hasReceivedData) 
+                    if (!hasReceivedData)
                     {
                         EasyLoading.dismiss();
                         SmartDialog.showToast('设备响应超时，请重试');
                         _lastValueSubscription?.cancel();
                     }
-                    else 
+                }
+            );
+            // 监听特征码的通知
+            await c.setNotifyValue(true);
+            _lastValueSubscription = c.onValueReceived.listen((value)
+                {
+                    hasReceivedData = true;
+                    _backList.add(value);
+                    print('value: $value');
+                    // 收到第一条数据时，更新加载提示文字
+                    if (_backList.length == 1)
                     {
                         EasyLoading.dismiss();
-                        SmartDialog.showToast('数据读取完成');
+                        EasyLoading.show(status: '正在接收数据...');
+                    }
+                    // 每次接收到数据后立即同步
+                    getData(_backList);
+                }
+            );
+        }
+        catch (e)
+        {
+            EasyLoading.dismiss();
+            SmartDialog.showToast('发送命令失败: $e');
+        }
+    }
+    // 发送命令
+    Future<void> handleSync(BluetoothCharacteristic c) async
+    {
+        if (employees.isEmpty)
+        {
+            SmartDialog.showToast('表格中没有时间数据，无法获取');
+            EasyLoading.dismiss();
+            return;
+        }
+
+        try
+        {
+            // 发送停止采集命令
+            await c.write([0x68, 0x05, 0x00, 0x71, 0x00, 0x76], withoutResponse: false);
+
+            int currentIndex = 0;
+
+            Future<void> sendNextCommand() async
+            {
+                if (currentIndex >= employees.length)
+                {
+                    // 全部完成
+                    await _lastValueSubscription?.cancel();
+                    _lastValueSubscription = null;
+                    EasyLoading.dismiss();
+                    SmartDialog.showToast('数据读取完成');
+                    return;
+                }
+                String timeStr = employees[currentIndex].time ?? '00:00:00';
+                List<String> parts = timeStr.split(':');
+                int seconds = 0;
+                if (parts.length == 3)
+                {
+                    int hour = int.tryParse(parts[0]) ?? 0;
+                    int minute = int.tryParse(parts[1]) ?? 0;
+                    int second = int.tryParse(parts[2]) ?? 0;
+                    seconds = hour * 3600 + minute * 60 + second;
+                }
+                print('第' + seconds.toString() + '秒');
+
+                int byte1 = 0x00;  // 第1字节固定0
+                int byte2 = (seconds >> 8) & 0xFF;  // 取高8位
+                int byte3 = seconds & 0xFF;         // 取低8位
+                List<int> readCommand = [0x68, 0x0C, 0x00, 0x72, byte1, byte2, byte3];
+                int checksum = readCommand.reduce((a, b) => a + b) & 0xFF;
+                readCommand.add(checksum);
+                // 打印调试（十六进制）
+                print(readCommand);
+                print('发送命令（十六进制）：' + readCommand.map((e) => e.toRadixString(16).padLeft(2, '0')).join(' '));
+                // await c.write(readCommand, withoutResponse: false); 命令失效暂时禁用
+                await c.write([
+                        0x68,
+                        0x0C,
+                        0x00,
+                        0x73,
+                        0x02,
+                        0x00,
+                        0x00,
+                        0x00,
+                        0x00,
+                        0x00,
+                        0x00,
+                        0x00,
+                        0x81
+                    ], withoutResponse: false);
+                EasyLoading.show(status: '正在读取第 ${currentIndex + 1}/${employees.length} 条数据...');
+            }
+            await c.setNotifyValue(true);
+            _lastValueSubscription = c.onValueReceived.listen((value) async
+                {
+                    setTableData(value);
+                    currentIndex++;
+                    if (currentIndex < employees.length)
+                    {
+                        // await sendNextCommand();
+                    }
+                    else
+                    {
+                        // await _lastValueSubscription?.cancel();
+                        _lastValueSubscription = null;
+                        EasyLoading.dismiss();
                     }
                 }
             );
 
+            // 启动第一次
+            await sendNextCommand();
         }
         catch (e)
         {
@@ -245,9 +308,7 @@ class _DataTransmissionState extends State<DataTransmission>
         }
     }
 
-
-
-    void setTableData(List<int> deviceBack) 
+    void setTableData(List<int> deviceBack)
     {
         Analytical analytical = Analytical(deviceBack);
         String dataTime = analytical.dataTime();
@@ -258,7 +319,7 @@ class _DataTransmissionState extends State<DataTransmission>
         // 更新表格中对应时间的数据
         List<DataListModel> r = employees.map((e)
             {
-                if (e.time == dataTime) 
+                if (e.time == dataTime)
                 {
                     e.roll = double.parse(roll);
                     e.heading = double.parse(heading);
@@ -278,7 +339,7 @@ class _DataTransmissionState extends State<DataTransmission>
                 int updatedRowIndex = -1;
                 for (int i = 0; i < employees.length; i++)
                 {
-                    if (employees[i].time == dataTime) 
+                    if (employees[i].time == dataTime)
                     {
                         updatedRowIndex = i;
                         break;
@@ -286,7 +347,7 @@ class _DataTransmissionState extends State<DataTransmission>
                 }
 
                 // 如果找到了被更新的行，滚动到该行
-                if (updatedRowIndex != -1) 
+                if (updatedRowIndex != -1)
                 {
                     WidgetsBinding.instance.addPostFrameCallback((_)
                         {
@@ -297,22 +358,88 @@ class _DataTransmissionState extends State<DataTransmission>
             }
         );
     }
-    // 废弃
     void getData(List<List<int>> originalArray)
     {
-      // 打印每一段
-      for (var chunk in originalArray) {
-          try {
-              if (chunk.length == 21) {
-                  setTableData(chunk);
-              }
-          } catch (e) {
-              SmartDialog.showToast('数据解析错误: $e');
-          }
-      }
+        print('originalArray: $originalArray');
+        // 打印每一段
+        for (var chunk in originalArray)
+        {
+            try
+            {
+                Analytical analytical = Analytical(chunk);
+                if (chunk.length == 21)
+                {
+                    List<DataListModel> r = employees.map((e)
+                        {
+                            if (e.time == analytical.dataTime())
+                            {
+                                e.roll = double.parse(analytical.getRoll());
+                                e.heading = double.parse(analytical.getHeading());
+                                e.pitch = double.parse(analytical.getPitch());
+                                return e;
+                            }
+                            return e;
+                        }
+                    ).toList();
+                    setState(()
+                        {
+                            employees = r;
+                            employeeDataSource = EmployeeDataSourceData(dataModels: r);
+
+                            // 查找当前更新的数据在列表中的索引
+                            int updatedRowIndex = -1;
+                            for (int i = 0; i < employees.length; i++)
+                            {
+                                if (employees[i].time == analytical.dataTime())
+                                {
+                                    updatedRowIndex = i;
+                                    break;
+                                }
+                            }
+                            // 如果找到了被更新的行，滚动到该行
+                            if (updatedRowIndex != -1)
+                            {
+                                WidgetsBinding.instance.addPostFrameCallback((_)
+                                    {
+                                        _dataGridController.scrollToRow(updatedRowIndex.toDouble(), canAnimate: true);
+                                    }
+                                );
+                            }
+                        }
+                    );
+
+                    // 检查是否已经收到了最后一条数据
+                    bool isLastDataReceived = false;
+                    if (employees.isNotEmpty)
+                    {
+                        // 获取employee列表中最后一条数据的时间
+                        final lastDataTime = employees.last.roll;
+                        // 检查是否与当前解析的数据时间匹配
+                        if (employees.last.heading != null && employees.last.pitch != null)
+                        {
+                            isLastDataReceived = true;
+                        }
+                    }
+                    // 如果是最后一条数据，关闭弹窗
+                    if (isLastDataReceived)
+                    {
+                        EasyLoading.dismiss();
+                        SmartDialog.showToast('数据接收完成');
+                        // 取消订阅，停止监听
+                        _lastValueSubscription?.cancel();
+                        _lastValueSubscription = null;
+                    }
+                }
+            }
+            catch (e)
+            {
+                SmartDialog.showToast('数据解析错误: $e');
+            }
+        }
     }
+
     @override
-    void dispose() 
+    void dispose()
     {
         _lastValueSubscription?.cancel();
 
@@ -334,7 +461,7 @@ class _DataTransmissionState extends State<DataTransmission>
         onPressed: ()
         {
             // 检查蓝牙连接状态
-            if (bluetooth.currentDevice == null || !bluetooth.isConnected) 
+            if (bluetooth.currentDevice == null || !bluetooth.isConnected)
             {
                 SmartDialog.showToast('请先连接蓝牙设备');
                 return;
@@ -371,7 +498,7 @@ class _DataTransmissionState extends State<DataTransmission>
     // 执行孔口校正操作
     Future<void> _performOrificeCorrection() async
     {
-        if (targetCharacteristic == null) 
+        if (targetCharacteristic == null)
         {
             SmartDialog.showToast('请先执行探管取数');
             return;
@@ -409,7 +536,7 @@ class _DataTransmissionState extends State<DataTransmission>
     }
 
     @override
-    Widget build(BuildContext context) 
+    Widget build(BuildContext context)
     {
         return Scaffold(
             appBar: const CustomAppBar('数据传输'),
@@ -620,7 +747,7 @@ class EmployeeDataSourceData extends DataGridSource
     List<DataGridRow> get rows => _employeeData;
 
     @override
-    DataGridRowAdapter buildRow(DataGridRow row) 
+    DataGridRowAdapter buildRow(DataGridRow row)
     {
         return DataGridRowAdapter(
             cells: row.getCells().map<Widget>((e)

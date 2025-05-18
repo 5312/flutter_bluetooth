@@ -206,7 +206,6 @@ class UdpService
             List<int> dataToSend1 = utf8.encode(jsonEncode(data1));
             _broadcastSocket!.send(dataToSend1, InternetAddress(BROADCAST_IP), SERVER_PORT);
             debugPrint('发送UDP广播1: ${jsonEncode(data1)}');
-
             // 2秒后再次尝试
             _discoveryTimer = Timer(const Duration(seconds: 2), _sendDiscoveryBroadcast);
         }

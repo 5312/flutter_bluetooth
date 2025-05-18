@@ -71,7 +71,7 @@ class PcCommunicationService {
     }
     
     final String baseUrl = 'http://${_currentServer!.ipAddress}:${_currentServer!.httpPort}';
-    final String apiUrl = '$baseUrl/api/data';
+    final String apiUrl = '$baseUrl/api/status';
     debugPrint('正在测试服务器连接: $apiUrl');
    
     try {
@@ -84,9 +84,9 @@ class PcCommunicationService {
         ]
       };
       
-      final response = await _dio.post(
+      final response = await _dio.get(
         apiUrl,
-        data: jsonEncode(testData),
+        // data: jsonEncode(testData),
         options: Options(
           headers: {'Content-Type': 'application/json'},
           receiveTimeout: 5000,
