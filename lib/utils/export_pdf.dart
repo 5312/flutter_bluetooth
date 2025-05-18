@@ -401,6 +401,47 @@ class ExportPdfPage {
                     ),
                   ],
                 ),
+                // 新增一行，显示检测名称、设计俯仰角、设计方位角、钻杆长度
+                pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text('检测名称', style: pw.TextStyle(font: ttf)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(repoModelItem.name, style: pw.TextStyle(font: ttf)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text('钻杆长度', style: pw.TextStyle(font: ttf)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(repoModelItem.len.toString(), style: pw.TextStyle(font: ttf)),
+                    ),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text('设计俯仰角', style: pw.TextStyle(font: ttf)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(list[0].designPitch?.toStringAsFixed(2) ?? '', style: pw.TextStyle(font: ttf)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text('设计方位角', style: pw.TextStyle(font: ttf)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(list[0].designHeading?.toStringAsFixed(2) ?? '', style: pw.TextStyle(font: ttf)),
+                    ),
+                  ],
+                ),
               ],
             ),
             
@@ -416,6 +457,7 @@ class ExportPdfPage {
                 2: const pw.FlexColumnWidth(1),
                 3: const pw.FlexColumnWidth(1.5),
                 4: const pw.FlexColumnWidth(1.5),
+                5: const pw.FlexColumnWidth(1.5),
               },
               children: [
                 // 表头
@@ -423,6 +465,7 @@ class ExportPdfPage {
                   decoration: const pw.BoxDecoration(color: PdfColors.grey300),
                   children: [
                     pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('序号', style: pw.TextStyle(font: ttf))),
+                    pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('检测名称', style: pw.TextStyle(font: ttf))),
                     pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('时间', style: pw.TextStyle(font: ttf))),
                     pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('深度', style: pw.TextStyle(font: ttf))),
                     pw.Padding(padding: const pw.EdgeInsets.all(5), child: pw.Text('俯仰角（°）', style: pw.TextStyle(font: ttf))),
@@ -434,6 +477,7 @@ class ExportPdfPage {
                   return pw.TableRow(
                     children: [
                       pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('${index + 1}', style: pw.TextStyle(font: ttf))),
+                      pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text(repoModelItem.name, style: pw.TextStyle(font: ttf))),
                       pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('${list[index].time}', style: pw.TextStyle(font: ttf))),
                       pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('${list[index].depth}', style: pw.TextStyle(font: ttf))),
                       pw.Padding(padding: const pw.EdgeInsets.all(3), child: pw.Text('${list[index].pitch}', style: pw.TextStyle(font: ttf))),

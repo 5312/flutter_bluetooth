@@ -8,154 +8,166 @@ import 'package:bluetooth_mini/db/database_helper.dart';
 import 'package:bluetooth_mini/pages/repo_detail.dart';
 import 'package:bluetooth_mini/pages/repo_original.dart';
 
-class Repo extends StatefulWidget {
-  const Repo({Key? key}) : super(key: key);
+class Repo extends StatefulWidget
+{
+    const Repo({Key? key}) : super(key: key);
 
-  @override
-  State<Repo> createState() => _RepoState();
+    @override
+    State<Repo> createState() => _RepoState();
 }
 
-class _RepoState extends State<Repo> {
-  List<RepoModel> employees = <RepoModel>[];
-  late RepoDataSource employeeDataSource = RepoDataSource(
-      employeeData: [],
-      onDelete: showDeleteConfirmDialog1,
-      onDetail: onDetail,
-      onOrigin: onOrigin);
+class _RepoState extends State<Repo>
+{
+    List<RepoModel> employees = <RepoModel>[];
+    late RepoDataSource employeeDataSource = RepoDataSource(
+        employeeData: [],
+        onDelete: showDeleteConfirmDialog1,
+        onDetail: onDetail,
+        onOrigin: onOrigin);
 
-  @override
-  void initState() {
-    super.initState();
-    getList();
-  }
+    @override
+    void initState() 
+    {
+        super.initState();
+        getList();
+    }
 
-  Future<void> getList() async {
-    List<RepoModel> list = await DatabaseHelper().getRepos();
-    setState(() {
-      employees = list;
-      employeeDataSource = RepoDataSource(
-          employeeData: employees,
-          onDelete: showDeleteConfirmDialog1,
-          onDetail: onDetail,
-          onOrigin: onOrigin);
-    });
-  }
-
-  Future<void> onDetail(RepoModel row) async {
-    // 导航至详细页面
-    MaterialPageRoute route = MaterialPageRoute(
-        builder: (context) => RepoDetail(row: row),
-        settings: const RouteSettings(name: '/RepoDetail'));
-    Navigator.of(context).push(route);
-  }
-
-  Future<void> onOrigin(RepoModel row) async {
-    // 导航至详细页面
-    MaterialPageRoute route = MaterialPageRoute(
-        builder: (context) => RepoOriginal(row: row),
-        settings: const RouteSettings(name: '/RepoOriginal'));
-    Navigator.of(context).push(route);
-  }
-
-// 弹出对话框
-  Future<bool?> showDeleteConfirmDialog1(int id) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("提示"),
-          content: const Text("您确定要删除当前文件吗?"),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("取消"),
-              onPressed: () => Navigator.of(context).pop(), // 关闭对话框
-            ),
-            TextButton(
-              child: const Text("删除"),
-              onPressed: () async {
-                await DatabaseHelper().deleteRepo(id);
-                getList();
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
+    Future<void> getList() async
+    {
+        List<RepoModel> list = await DatabaseHelper().getRepos();
+        setState(()
+            {
+                employees = list;
+                employeeDataSource = RepoDataSource(
+                    employeeData: employees,
+                    onDelete: showDeleteConfirmDialog1,
+                    onDetail: onDetail,
+                    onOrigin: onOrigin);
+            }
         );
-      },
-    );
-  }
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar('数据报表'),
-      body: Container(
-        color: const Color.fromRGBO(238, 239, 241, 0.8),
-        child: Container(
-          color: Colors.white,
-          margin: const EdgeInsets.only(
-            left: 10,
-            bottom: 10,
-            right: 10,
-            top: 10,
-          ),
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              Expanded(
-                  flex: 1,
-                  child: SfDataGrid(
-                    source: employeeDataSource,
-                    headerRowHeight: 40,
-                    columnWidthMode: ColumnWidthMode.fill,
-                    columns: <GridColumn>[
-                      GridColumn(
-                          columnName: 'id',
-                          width: 50,
-                          label: Container(
-                              padding: const EdgeInsets.all(0.0),
-                              color: Colors.black12,
-                              // const Color.fromRGBO( 234, 236, 255, 1),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                '序号',
-                              ))),
-                      GridColumn(
-                          columnName: 'name',
-                          width: 100,
-                          label: Container(
-                              padding: const EdgeInsets.all(8.0),
-                              color: Colors.black12,
-                              // const Color.fromRGBO( 234, 236, 255, 1),
-                              alignment: Alignment.center,
-                              child: const Text('名称'))),
-                      GridColumn(
-                          columnName: 'mnTime',
-                          label: Container(
-                              padding: const EdgeInsets.all(8.0),
-                              alignment: Alignment.center,
-                              color: Colors.black12,
-                              // const Color.fromRGBO( 234, 236, 255, 1),
-                              child: const Text(
-                                '时间',
-                                overflow: TextOverflow.ellipsis,
-                              ))),
-                      GridColumn(
-                        columnName: 'actions',
-                        width: 350,
-                        label: Container(
-                          padding: const EdgeInsets.all(0),
-                          color: Colors.black12,
-                          // const Color.fromRGBO( 234, 236, 255, 1),
-                          alignment: Alignment.center,
-                          child: const Text('操作'),
+    Future<void> onDetail(RepoModel row) async
+    {
+        // 导航至详细页面
+        MaterialPageRoute route = MaterialPageRoute(
+            builder: (context) => RepoDetail(row: row),
+            settings: const RouteSettings(name: '/RepoDetail'));
+        Navigator.of(context).push(route);
+    }
+
+    Future<void> onOrigin(RepoModel row) async
+    {
+        // 导航至详细页面
+        MaterialPageRoute route = MaterialPageRoute(
+            builder: (context) => RepoOriginal(row: row),
+            settings: const RouteSettings(name: '/RepoOriginal'));
+        Navigator.of(context).push(route);
+    }
+
+    // 弹出对话框
+    Future<bool?> showDeleteConfirmDialog1(int id) 
+    {
+        return showDialog<bool>(
+            context: context,
+            builder: (context)
+            {
+                return AlertDialog(
+                    title: const Text("提示"),
+                    content: const Text("您确定要删除当前文件吗?"),
+                    actions: <Widget>[
+                        TextButton(
+                            child: const Text("取消"),
+                            onPressed: () => Navigator.of(context).pop() // 关闭对话框
                         ),
-                      ),
-                    ],
-                  ))
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+                        TextButton(
+                            child: const Text("删除"),
+                            onPressed: () async
+                            {
+                                await DatabaseHelper().deleteRepo(id);
+                                getList();
+                                Navigator.of(context).pop(true);
+                            }
+                        )
+                    ]
+                );
+            }
+        );
+    }
+
+    @override
+    Widget build(BuildContext context) 
+    {
+        return Scaffold(
+            appBar: const CustomAppBar('数据报表'),
+            body: Container(
+                color: const Color.fromRGBO(238, 239, 241, 0.8),
+                child: Container(
+                    color: Colors.white,
+                    margin: const EdgeInsets.only(
+                        left: 10,
+                        bottom: 10,
+                        right: 10,
+                        top: 10
+                    ),
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                        children: [
+                            Expanded(
+                                flex: 1,
+                                child: SfDataGrid(
+                                    source: employeeDataSource,
+                                    headerRowHeight: 40,
+                                    columnWidthMode: ColumnWidthMode.fill,
+                                    columns: <GridColumn>[
+                                        GridColumn(
+                                            columnName: 'id',
+                                            width: 50,
+                                            label: Container(
+                                                padding: const EdgeInsets.all(0.0),
+                                                color: Colors.black12,
+                                                // const Color.fromRGBO( 234, 236, 255, 1),
+                                                alignment: Alignment.center,
+                                                child: const Text(
+                                                    '序号'
+                                                ))),
+                                        GridColumn(
+                                            columnName: 'name',
+                                            width: 100,
+                                            label: Container(
+                                                padding: const EdgeInsets.all(8.0),
+                                                color: Colors.black12,
+                                                // const Color.fromRGBO( 234, 236, 255, 1),
+                                                alignment: Alignment.center,
+                                                child: const Text('名称'))),
+                                        GridColumn(
+                                            columnName: 'mnTime',
+                                            label: Container(
+                                                padding: const EdgeInsets.all(8.0),
+                                                alignment: Alignment.center,
+                                                color: Colors.black12,
+                                                // const Color.fromRGBO( 234, 236, 255, 1),
+                                                child: const Text(
+                                                    '时间',
+                                                    overflow: TextOverflow.ellipsis
+                                                ))),
+                                        GridColumn(
+                                            columnName: 'actions',
+                                            width: 350,
+                                            label: Container(
+                                                padding: const EdgeInsets.all(0),
+                                                color: Colors.black12,
+                                                // const Color.fromRGBO( 234, 236, 255, 1),
+                                                alignment: Alignment.center,
+                                                child: const Text('操作')
+                                            )
+                                        )
+                                    ]
+                                ))
+                        ]
+                    )
+                )
+            )
+        );
+    }
 }
